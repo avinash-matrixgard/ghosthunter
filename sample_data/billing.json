@@ -1,0 +1,53 @@
+{
+  "period": {
+    "start": "2026-03-01",
+    "end": "2026-03-31"
+  },
+  "services": [
+    {
+      "name": "Cloud DNS",
+      "current_cost": 117000.00,
+      "previous_cost": 12000.00,
+      "change_percent": 875.0,
+      "absolute_change": 105000.00,
+      "daily_breakdown": [
+        {"day": "2026-03-20", "cost": 412.50},
+        {"day": "2026-03-21", "cost": 398.10},
+        {"day": "2026-03-22", "cost": 405.20},
+        {"day": "2026-03-23", "cost": 411.80},
+        {"day": "2026-03-24", "cost": 420.30},
+        {"day": "2026-03-25", "cost": 425.00},
+        {"day": "2026-03-26", "cost": 437.20},
+        {"day": "2026-03-27", "cost": 8920.40},
+        {"day": "2026-03-28", "cost": 12340.10},
+        {"day": "2026-03-29", "cost": 14120.80},
+        {"day": "2026-03-30", "cost": 15890.20},
+        {"day": "2026-03-31", "cost": 17220.50}
+      ]
+    },
+    {
+      "name": "Compute Engine",
+      "current_cost": 45000.00,
+      "previous_cost": 36500.00,
+      "change_percent": 23.3,
+      "absolute_change": 8500.00,
+      "daily_breakdown": []
+    },
+    {
+      "name": "Cloud NAT",
+      "current_cost": 8200.00,
+      "previous_cost": 3200.00,
+      "change_percent": 156.3,
+      "absolute_change": 5000.00,
+      "daily_breakdown": []
+    },
+    {
+      "name": "Cloud Storage",
+      "current_cost": 4100.00,
+      "previous_cost": 3950.00,
+      "change_percent": 3.8,
+      "absolute_change": 150.00,
+      "daily_breakdown": []
+    }
+  ]
+}

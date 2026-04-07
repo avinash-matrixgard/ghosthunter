@@ -1,0 +1,348 @@
+{
+  "scenarios": [
+    {
+      "id": "dns_cache_bypass",
+      "metadata": {
+        "description": "DNS cache bypass attack investigation",
+        "scenario": "Cloud DNS spike +875% ($12K -> $117K)"
+      },
+      "spike": {
+        "service": "Cloud DNS",
+        "current_cost": 117000.00,
+        "previous_cost": 12000.00,
+        "change_percent": 875.0
+      },
+      "steps": [
+        {
+          "step": 1,
+          "delay_seconds": 1.5,
+          "hypotheses": [
+            {"id": "H1", "description": "DNS cache bypass / amplification attack", "confidence": 60, "status": "active", "evidence_for": [], "evidence_against": []},
+            {"id": "H2", "description": "Misconfigured internal resolver creating query storms", "confidence": 25, "status": "active", "evidence_for": [], "evidence_against": []},
+            {"id": "H3", "description": "Legitimate organic traffic growth", "confidence": 15, "status": "active", "evidence_for": [], "evidence_against": []}
+          ],
+          "command": "gcloud logging read 'resource.type=dns_query' --limit=2000 --format=json",
+          "tests_hypothesis": "H1",
+          "rationale": "Sample recent DNS queries to look for amplification patterns",
+          "compressed_evidence": "2000 query sample. Top 2 domains account for 87% of volume. 94% of queries originate from public resolvers (8.8.8.8: 42%, 8.8.4.4: 31%, 1.1.1.1: 21%). Random case variations detected (e.g. ExAmPlE.cOm) — classic cache-bypass technique. Internal resolver traffic only 6%."
+        },
+        {
+          "step": 2,
+          "delay_seconds": 1.5,
+          "hypotheses": [
+            {"id": "H1", "description": "DNS cache bypass / amplification attack", "confidence": 78, "status": "active", "evidence_for": ["E1"], "evidence_against": []},
+            {"id": "H2", "description": "Misconfigured internal resolver creating query storms", "confidence": 12, "status": "active", "evidence_for": [], "evidence_against": ["E1"]},
+            {"id": "H3", "description": "Legitimate organic traffic growth", "confidence": 5, "status": "eliminated", "evidence_for": [], "evidence_against": ["E1"]}
+          ],
+          "command": "bq query --nouse_legacy_sql 'SELECT DATE(timestamp) AS day, COUNT(*) AS queries FROM dns_logs.queries WHERE timestamp > TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 14 DAY) GROUP BY day ORDER BY day'",
+          "tests_hypothesis": "H1",
+          "rationale": "Confirm the spike start date and volume curve",
+          "compressed_evidence": "Daily query counts: 03-20 to 03-26 averaged 2.0M/day. 03-27: 41M (20x). 03-28: 102M. 03-29: 218M. 03-30: 351M. 03-31: 436M. Spike began precisely on 2026-03-27, matching the cost timeline."
+        },
+        {
+          "step": 3,
+          "delay_seconds": 1.5,
+          "hypotheses": [
+            {"id": "H1", "description": "DNS cache bypass / amplification attack", "confidence": 92, "status": "confirmed", "evidence_for": ["E1", "E2"], "evidence_against": []},
+            {"id": "H2", "description": "Misconfigured internal resolver creating query storms", "confidence": 4, "status": "eliminated", "evidence_for": [], "evidence_against": ["E1", "E2"]}
+          ],
+          "conclude": {
+            "root_cause": "DNS Cache Bypass Attack",
+            "confidence": 92,
+            "evidence_summary": [
+              "Query volume rose from 2M/day baseline to 436M/day (218x) starting 2026-03-27",
+              "94% of queries from public resolvers (8.8.8.8, 8.8.4.4, 1.1.1.1) — only 6% internal",
+              "Random case variations in domain names — textbook cache-bypass technique",
+              "Top 2 domains account for 87% of total volume — narrow attack target"
+            ],
+            "not_verified": [
+              "Identity of the attacker",
+              "Direct flooding vs reflection/amplification via spoofed sources"
+            ],
+            "recommendations": [
+              "Enable Cloud Armor rate limiting on the affected DNS zones immediately",
+              "Front DNS with Cloudflare or another DDoS-mitigation provider",
+              "Add an alerting policy for DNS query volume > 5x baseline"
+            ]
+          }
+        }
+      ]
+    },
+
+    {
+      "id": "nat_egress_runaway",
+      "metadata": {
+        "description": "Cloud NAT egress runaway from Cloud Functions",
+        "scenario": "Cloud NAT spike +312% ($3.2K -> $13.2K)"
+      },
+      "spike": {
+        "service": "Cloud NAT",
+        "current_cost": 13200.00,
+        "previous_cost": 3200.00,
+        "change_percent": 312.5
+      },
+      "steps": [
+        {
+          "step": 1,
+          "delay_seconds": 1.5,
+          "hypotheses": [
+            {"id": "H1", "description": "A Cloud Function is fetching large objects from public APIs in a tight loop", "confidence": 50, "status": "active", "evidence_for": [], "evidence_against": []},
+            {"id": "H2", "description": "GKE pods pulling images through NAT instead of Artifact Registry", "confidence": 30, "status": "active", "evidence_for": [], "evidence_against": []},
+            {"id": "H3", "description": "Legitimate growth in outbound API integrations", "confidence": 20, "status": "active", "evidence_for": [], "evidence_against": []}
+          ],
+          "command": "gcloud compute routers get-nat-mapping-info nat-router-prod --region=us-central1 --format=json",
+          "tests_hypothesis": "H1",
+          "rationale": "Identify which VMs/instances are consuming the most NAT mappings",
+          "compressed_evidence": "Top NAT consumer: serverless VPC connector 'svc-conn-prod' with 18,400 active mappings (94% of total). Second highest: gke-prod-pool-1 at 380 mappings (1.9%). Serverless connector traffic has grown from 200 mappings 14 days ago to 18,400 today."
+        },
+        {
+          "step": 2,
+          "delay_seconds": 1.5,
+          "hypotheses": [
+            {"id": "H1", "description": "A Cloud Function is fetching large objects from public APIs in a tight loop", "confidence": 78, "status": "active", "evidence_for": ["E1"], "evidence_against": []},
+            {"id": "H2", "description": "GKE pods pulling images through NAT instead of Artifact Registry", "confidence": 6, "status": "eliminated", "evidence_for": [], "evidence_against": ["E1"]},
+            {"id": "H3", "description": "Legitimate growth in outbound API integrations", "confidence": 16, "status": "active", "evidence_for": [], "evidence_against": []}
+          ],
+          "command": "gcloud functions list --filter='vpcConnector:svc-conn-prod' --format='table(name,updateTime,runtime)'",
+          "tests_hypothesis": "H1",
+          "rationale": "Find which Cloud Functions are routed through that VPC connector",
+          "compressed_evidence": "3 functions on svc-conn-prod: 'image-thumbnailer' (updated 2026-03-26, 2 days before spike), 'webhook-fanout', 'pdf-renderer'. The image-thumbnailer was last modified the day before the cost increase began."
+        },
+        {
+          "step": 3,
+          "delay_seconds": 1.5,
+          "hypotheses": [
+            {"id": "H1", "description": "image-thumbnailer Cloud Function is downloading images through NAT in a tight loop after a 2026-03-26 deploy", "confidence": 91, "status": "confirmed", "evidence_for": ["E1", "E2"], "evidence_against": []}
+          ],
+          "conclude": {
+            "root_cause": "image-thumbnailer Cloud Function deployed 2026-03-26 is fetching source images from a public CDN through Cloud NAT, with no caching and no concurrency cap",
+            "confidence": 91,
+            "evidence_summary": [
+              "94% of NAT mappings come from a single serverless VPC connector",
+              "Traffic on that connector grew 92x in 14 days",
+              "image-thumbnailer was deployed the day before the spike began",
+              "Other functions on the same connector show normal activity"
+            ],
+            "not_verified": [
+              "Whether the source images could be served from a private GCS bucket instead",
+              "Whether retries are amplifying the volume"
+            ],
+            "recommendations": [
+              "Roll back image-thumbnailer to the pre-2026-03-26 version while investigating",
+              "Cache fetched images in GCS and reference them via private networking",
+              "Add a per-function NAT mapping alert at 1000 active mappings"
+            ]
+          }
+        }
+      ]
+    },
+
+    {
+      "id": "bigquery_full_scan",
+      "metadata": {
+        "description": "BigQuery on-demand spend from a recurring full table scan",
+        "scenario": "BigQuery spike +540% ($1.8K -> $11.5K)"
+      },
+      "spike": {
+        "service": "BigQuery",
+        "current_cost": 11500.00,
+        "previous_cost": 1800.00,
+        "change_percent": 538.9
+      },
+      "steps": [
+        {
+          "step": 1,
+          "delay_seconds": 1.5,
+          "hypotheses": [
+            {"id": "H1", "description": "A scheduled query is doing a full table scan against a partitioned table", "confidence": 55, "status": "active", "evidence_for": [], "evidence_against": []},
+            {"id": "H2", "description": "A new BI dashboard is querying without partition filters", "confidence": 30, "status": "active", "evidence_for": [], "evidence_against": []},
+            {"id": "H3", "description": "Storage growth pushed an existing query above the price tier", "confidence": 15, "status": "active", "evidence_for": [], "evidence_against": []}
+          ],
+          "command": "bq query --nouse_legacy_sql 'SELECT user_email, job_id, total_bytes_billed/POW(1024,4) AS tib_billed, query FROM `region-us.INFORMATION_SCHEMA.JOBS_BY_PROJECT` WHERE creation_time > TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 7 DAY) ORDER BY total_bytes_billed DESC LIMIT 20'",
+          "tests_hypothesis": "H1",
+          "rationale": "Find the highest-spend queries in the last 7 days",
+          "compressed_evidence": "Top query by far: 47.2 TiB billed per run, run by service account 'looker-bi@…iam'. Same query ran 96 times in 7 days (every ~1.75h). Second-highest query: 0.4 TiB. The top query alone billed 4,531 TiB total this week, dwarfing everything else."
+        },
+        {
+          "step": 2,
+          "delay_seconds": 1.5,
+          "hypotheses": [
+            {"id": "H1", "description": "A scheduled query is doing a full table scan against a partitioned table", "confidence": 35, "status": "active", "evidence_for": ["E1"], "evidence_against": []},
+            {"id": "H2", "description": "A Looker dashboard refresh is hitting the warehouse without partition filters", "confidence": 60, "status": "active", "evidence_for": ["E1"], "evidence_against": []},
+            {"id": "H3", "description": "Storage growth pushed an existing query above the price tier", "confidence": 5, "status": "eliminated", "evidence_for": [], "evidence_against": ["E1"]}
+          ],
+          "command": "bq query --nouse_legacy_sql 'SELECT query, COUNT(*) AS runs, AVG(total_bytes_billed)/POW(1024,4) AS avg_tib FROM `region-us.INFORMATION_SCHEMA.JOBS_BY_PROJECT` WHERE user_email = \"looker-bi@example.iam.gserviceaccount.com\" AND creation_time > TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 7 DAY) GROUP BY query ORDER BY runs DESC LIMIT 5'",
+          "tests_hypothesis": "H2",
+          "rationale": "See exactly which Looker query is repeating",
+          "compressed_evidence": "Single query repeats 96 times. Query is `SELECT * FROM analytics.events` with no WHERE clause and no partition pruning. analytics.events is partitioned on event_date but the query reads all 47 TiB every run. Looker schedule: every 105 minutes."
+        },
+        {
+          "step": 3,
+          "delay_seconds": 1.5,
+          "hypotheses": [
+            {"id": "H1", "description": "Looker dashboard query against analytics.events with no partition filter, refreshing every 105 minutes", "confidence": 95, "status": "confirmed", "evidence_for": ["E1", "E2"], "evidence_against": []}
+          ],
+          "conclude": {
+            "root_cause": "A Looker dashboard refresh runs `SELECT * FROM analytics.events` every 105 minutes, scanning the full 47 TiB partitioned table and billing ~4.5 PiB per week",
+            "confidence": 95,
+            "evidence_summary": [
+              "One query/service account accounts for >99% of weekly bytes billed",
+              "Query has no WHERE clause; partitioned table is fully scanned each run",
+              "Refresh cadence is every 105 minutes (96 runs/week)",
+              "All other top queries are <1 TiB"
+            ],
+            "not_verified": [
+              "Which Looker dashboard owns this query (need Looker admin access)",
+              "Whether the dashboard actually needs all columns or could be narrowed"
+            ],
+            "recommendations": [
+              "Pause the offending Looker schedule immediately while you investigate",
+              "Add a `WHERE event_date >= CURRENT_DATE - 7` filter and a column subset",
+              "Set a per-user query bytes-billed quota on the looker-bi service account",
+              "Consider materialized views for recurring dashboard queries"
+            ]
+          }
+        }
+      ]
+    },
+
+    {
+      "id": "orphaned_disks",
+      "metadata": {
+        "description": "Orphaned persistent disks accumulating after CI cleanup broke",
+        "scenario": "Persistent Disk spike +180% ($2.1K -> $5.9K)"
+      },
+      "spike": {
+        "service": "Compute Engine - Persistent Disk",
+        "current_cost": 5900.00,
+        "previous_cost": 2100.00,
+        "change_percent": 180.9
+      },
+      "steps": [
+        {
+          "step": 1,
+          "delay_seconds": 1.5,
+          "hypotheses": [
+            {"id": "H1", "description": "Orphaned disks from terminated VMs are accumulating (CI/teardown broken)", "confidence": 45, "status": "active", "evidence_for": [], "evidence_against": []},
+            {"id": "H2", "description": "A team migrated to larger SSD volumes for a database workload", "confidence": 35, "status": "active", "evidence_for": [], "evidence_against": []},
+            {"id": "H3", "description": "Increased snapshot retention is bloating storage", "confidence": 20, "status": "active", "evidence_for": [], "evidence_against": []}
+          ],
+          "command": "gcloud compute disks list --filter='-users:*' --format='table(name,sizeGb,type,zone,creationTimestamp)'",
+          "tests_hypothesis": "H1",
+          "rationale": "List disks with no attached VM (the `users` field is empty)",
+          "compressed_evidence": "184 unattached disks found. 171 are pd-ssd, sized 100-500 GiB. Naming convention 'ci-runner-<sha>-disk' matches CI runners. Creation dates cluster between 2026-03-15 and today — none older than 23 days. Total unattached capacity: 41.8 TiB."
+        },
+        {
+          "step": 2,
+          "delay_seconds": 1.5,
+          "hypotheses": [
+            {"id": "H1", "description": "CI runner teardown stopped deleting disks around 2026-03-15", "confidence": 80, "status": "active", "evidence_for": ["E1"], "evidence_against": []},
+            {"id": "H2", "description": "A team migrated to larger SSD volumes for a database workload", "confidence": 8, "status": "active", "evidence_for": [], "evidence_against": ["E1"]},
+            {"id": "H3", "description": "Increased snapshot retention is bloating storage", "confidence": 12, "status": "active", "evidence_for": [], "evidence_against": []}
+          ],
+          "command": "gcloud compute snapshots list --format='value(name,creationTimestamp,diskSizeGb)' | wc -l",
+          "tests_hypothesis": "H3",
+          "rationale": "Check whether snapshot count has grown materially",
+          "compressed_evidence": "Snapshot count: 412 (vs 398 last month). Negligible change. Snapshots are not the source of the spike."
+        },
+        {
+          "step": 3,
+          "delay_seconds": 1.5,
+          "hypotheses": [
+            {"id": "H1", "description": "CI runner teardown stopped deleting disks around 2026-03-15, leaving 184 orphaned pd-ssd volumes (41.8 TiB)", "confidence": 93, "status": "confirmed", "evidence_for": ["E1", "E2"], "evidence_against": []},
+            {"id": "H3", "description": "Increased snapshot retention is bloating storage", "confidence": 3, "status": "eliminated", "evidence_for": [], "evidence_against": ["E2"]}
+          ],
+          "conclude": {
+            "root_cause": "CI runner teardown stopped deleting persistent disks on or around 2026-03-15. 184 pd-ssd volumes (41.8 TiB) are now orphaned, all matching the 'ci-runner-*' naming pattern.",
+            "confidence": 93,
+            "evidence_summary": [
+              "184 unattached disks found, all named 'ci-runner-<sha>-disk'",
+              "Creation dates cluster from 2026-03-15 onward — nothing older",
+              "171 are pd-ssd at $0.17/GiB-month, totalling 41.8 TiB",
+              "Snapshot count is unchanged, ruling out alternative causes"
+            ],
+            "not_verified": [
+              "What changed in the CI pipeline on 2026-03-15",
+              "Whether any of these disks contain data worth preserving"
+            ],
+            "recommendations": [
+              "Audit the CI teardown script for changes around 2026-03-15",
+              "Snapshot then delete the orphaned ci-runner-* disks (script-friendly via labels)",
+              "Add a scheduled job to alert on >10 unattached disks older than 24h",
+              "Tag CI disks with TTL labels and run a janitor that enforces them"
+            ]
+          }
+        }
+      ]
+    },
+
+    {
+      "id": "gke_autoscaler_loop",
+      "metadata": {
+        "description": "GKE autoscaler stuck scaling up due to a pod that never schedules",
+        "scenario": "GKE/Compute spike +210% ($8.4K -> $26K)"
+      },
+      "spike": {
+        "service": "Kubernetes Engine",
+        "current_cost": 26000.00,
+        "previous_cost": 8400.00,
+        "change_percent": 209.5
+      },
+      "steps": [
+        {
+          "step": 1,
+          "delay_seconds": 1.5,
+          "hypotheses": [
+            {"id": "H1", "description": "Cluster autoscaler is repeatedly adding nodes for a pod that can never schedule", "confidence": 45, "status": "active", "evidence_for": [], "evidence_against": []},
+            {"id": "H2", "description": "A new high-replica deployment legitimately needs more nodes", "confidence": 30, "status": "active", "evidence_for": [], "evidence_against": []},
+            {"id": "H3", "description": "Node pool moved from spot to on-demand instances", "confidence": 25, "status": "active", "evidence_for": [], "evidence_against": []}
+          ],
+          "command": "gcloud container clusters describe prod-east --region=us-east1 --format='value(currentNodeCount,initialNodeCount,autoscaling)'",
+          "tests_hypothesis": "H1",
+          "rationale": "Compare the current node count to the original target",
+          "compressed_evidence": "currentNodeCount: 142. initialNodeCount: 18. autoscaling enabled, max=200. Cluster is 8x its baseline size and approaching the autoscaler ceiling. Last expansion event: 4 minutes ago."
+        },
+        {
+          "step": 2,
+          "delay_seconds": 1.5,
+          "hypotheses": [
+            {"id": "H1", "description": "Cluster autoscaler is repeatedly adding nodes for a pod that can never schedule", "confidence": 72, "status": "active", "evidence_for": ["E1"], "evidence_against": []},
+            {"id": "H2", "description": "A new high-replica deployment legitimately needs more nodes", "confidence": 23, "status": "active", "evidence_for": ["E1"], "evidence_against": []},
+            {"id": "H3", "description": "Node pool moved from spot to on-demand instances", "confidence": 5, "status": "eliminated", "evidence_for": [], "evidence_against": ["E1"]}
+          ],
+          "command": "gcloud logging read 'resource.type=k8s_cluster AND jsonPayload.reason=TriggeredScaleUp' --limit=20 --format=json",
+          "tests_hypothesis": "H1",
+          "rationale": "Look at recent scale-up triggers — what pod is requesting capacity?",
+          "compressed_evidence": "20 scale-up events in the last hour. ALL 20 cite the same pending pod: 'ml-training-job-7f3a2' in namespace 'data-science'. Each event adds 8 nodes. The pod requests 96 vCPU + 1 nvidia-tesla-v100 GPU. The node pool has no GPU SKUs configured — the pod cannot ever schedule."
+        },
+        {
+          "step": 3,
+          "delay_seconds": 1.5,
+          "hypotheses": [
+            {"id": "H1", "description": "ml-training-job-7f3a2 requests a GPU the node pool doesn't offer; autoscaler keeps adding (unusable) nodes trying to schedule it", "confidence": 96, "status": "confirmed", "evidence_for": ["E1", "E2"], "evidence_against": []}
+          ],
+          "conclude": {
+            "root_cause": "A pending pod 'ml-training-job-7f3a2' in the data-science namespace requests 1x nvidia-tesla-v100 GPU. The prod-east cluster has no GPU node pools, so the pod is unschedulable — but the cluster autoscaler interprets the pending pod as capacity pressure and keeps adding standard nodes (now at 142 of 200 max)",
+            "confidence": 96,
+            "evidence_summary": [
+              "Cluster grew 8x from baseline (18 → 142 nodes), nearing the 200-node ceiling",
+              "Every scale-up event in the last hour cites the same pending pod",
+              "That pod requests a GPU resource the cluster's node pools cannot provide",
+              "All 142 nodes are running but nearly idle — the trigger pod is still pending"
+            ],
+            "not_verified": [
+              "Whether the ml-training-job was supposed to run on a different cluster",
+              "How the GPU pod ended up scheduled to prod-east in the first place"
+            ],
+            "recommendations": [
+              "Delete or evict the ml-training-job-7f3a2 pod immediately to halt further scale-up",
+              "Lower the cluster autoscaler max node count as a safety net",
+              "Add a node selector / taint so GPU workloads cannot land on prod-east",
+              "Alert on cluster size > 2x baseline for more than 30 minutes"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

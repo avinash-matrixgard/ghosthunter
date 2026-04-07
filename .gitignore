@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+*.egg
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+build/
+dist/
+
+# Virtualenvs
+.venv/
+venv/
+env/
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+*.swp
+
+# Ghosthunter local state — never commit
+.ghosthunter/
+*.log
+sa-key*.json
+*.json.key
+
+# Secrets
+.env
+.env.*
+!.env.example
