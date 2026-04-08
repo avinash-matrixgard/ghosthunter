@@ -1,5 +1,322 @@
 # CLAUDE.md — Ghosthunter v1.0
 
+> **READ THIS FIRST.** The section below ("Session state") reflects where
+> the code actually is right now. The rest of this file is the original
+> v1.0 spec — still mostly accurate but pre-dates the Advisor Mode pivot.
+> Where they disagree, "Session state" wins.
+
+---
+
+## Session state — as of 2026-04-08
+
+### What we've built so far
+
+The original spec assumed **Active Mode** (Ghosthunter has GCP credentials
+and runs commands itself). We pivoted to **Advisor Mode** as the default
+because the user's work credentials are org-level admin — zero blast
+radius is required, not just minimized.
+
+**Modes that exist today:**
+
+| Mode | Status | What it does |
+|---|---|---|
+| **Paranoid (advisor)** | ✅ shipped, default | Ghosthunter never touches GCP. User provides billing exports, Ghosthunter proposes read-only commands, user runs them in their own terminal and pastes output back. Zero credentials. |
+| **Active (direct)** | ✅ shipped, opt-in | Original design. Requires `~/.ghosthunter/config.toml` + GCP creds. Only safe on a scoped sandbox project. User currently can't use this. |
+| **Demo** | ✅ shipped | 5 pre-recorded scenarios, no API calls, no GCP. `sample_data/demo_script.json`. |
+| **Audit log** | ✅ shipped | Reads `~/.ghosthunter/audit.log`. |
+| Autonomous | ⏳ v1.1 |
+| AWS provider | ⏳ v1.1 |
+| Azure provider | ⏳ v1.2 |
+
+**Entry point:** running `ghosthunter` with no args shows a **mode picker**
+(`chat.py:_pick_mode`). Picking 1 drops into the chat REPL. `ghosthunter
+chat B*.csv` skips the picker and jumps to paranoid mode pre-loaded.
+
+### Chat REPL architecture
+
+`chat.py` is the orchestrator — a single long-running REPL. State machine:
+
+    IDLE ──/load──▶ READY ──/spike N──▶ INVESTIGATING
+                                              │
+                        ◀── /quit / conclude ─┘
+
+Inside INVESTIGATING state, the `AdvisorProvider` (`providers/advisor.py`)
+owns the user input prompt. Slash commands work at every prompt:
+
+| Command | IDLE/READY | Inside investigation | Inside "Opus is asking you" |
+|---|:---:|:---:|:---:|
+| `/load FILE [FILE...]` (globs work) | ✓ | — | — |
+| `/list` | ✓ | ✓ | ✓ |
+| `/spike N` | ✓ | ✓ (switches mid-flight) | ✓ |
+| `/note <text>` | — | ✓ (injects note, skips cmd) | — |
+| `/hypotheses` | — | ✓ | ✓ |
+| `/paste` | — | ✓ (legacy `###`-terminated) | — |
+| `/skip` | — | ✓ | ✓ (answers "I don't know") |
+| `/quit` | — | ✓ (end investigation) | ✓ |
+| `/exit` | ✓ | — | — |
+| `/help` | ✓ | ✓ | ✓ |
+
+Free text at the various prompts:
+- **IDLE/READY**: prints a hint
+- **INVESTIGATING** (command output prompt): classified by `_looks_like_command_output` — multi-line / long / JSON / tabular → command output; short prose → `AdvisorNote` sent to Opus
+- **Inside "Opus is asking you"**: sent as the answer verbatim
+
+### prompt_toolkit integration
+
+`chat_io.py` owns a process-wide `PromptSession`:
+
+- **Enter** submits
+- **Esc then Enter** (or **Ctrl+J**) inserts newline
+- **Shift+Enter is NOT bound** — terminals don't distinguish it from plain Enter universally
+- **Bracketed paste** captures multi-line content automatically — `###` terminator is no longer required
+- **Persistent history** at `~/.ghosthunter/chat_history`
+- **Ctrl+R** reverse history search
+- **Ctrl+C** cancels current input (not the investigation)
+- **Ctrl+D** EOFs out
+
+All code that needs user input (main REPL, advisor output collection, Opus "need_info" asks, mode picker) funnels through `chat_io.read_line()`.
+
+**Streaming responses are not yet implemented** — currently the whole Opus turn blocks until the tool_use block returns. That's Phase 2.
+
+### Billing parser (multi-file)
+
+`providers/billing_file.py` accepts one OR many Console/BigQuery exports.
+Real user scenario: 3 Console CSVs for the same period — one grouped by
+Service+SKU, one by Project, one by Service totals.
+
+**Grouping priority per file**: service → project → sku → location. A file
+with only Project columns becomes project-level spikes; a file with only
+Service columns becomes service-level spikes. They merge into a combined
+spike list with a `Kind` column in the UI.
+
+**Recognized columns** (case-insensitive, multiple aliases):
+- service: `Service description`, `service.description`, ...
+- cost: `Cost ($)`, `Subtotal ($)`, `amount`, ...
+- date: `Usage start date`, `usage_start_time`, ...
+- sku: `SKU description`, `sku.description`, ...
+- project: `Project ID`, `project.id`, ...
+- location: `Region`, `location.region`, ...
+- **percent change**: `Percent change in subtotal compared to previous period` — Console provides this even without dates, and we back-compute `previous_cost` from `current / (1 + pct/100)`.
+
+### Cross-file inference (`_attach_likely_homes`)
+
+Console exports can't be row-level joined (no file has both Service AND Project columns per row). But totals + percent-changes + names give strong signals. For each (service_spike, project_spike) pair we score:
+
+- **Name match** (curated keywords ≥ 3 chars): +50
+- **Percent match tight (≤5% relative)**: +50
+- **Percent match loose (≤25% relative)**: +25
+- **Magnitude near-equal (ratio ≥ 0.9)**: +40
+- **Top-3 project + large enough**: +20
+
+Score ≥ 30 surfaces as `spike.likely_homes`. Top 3 per spike. The initial Opus prompt includes these under `## Likely project home(s) — INFERRED from billing totals` so Opus doesn't waste turns asking.
+
+Real results on the [COMPANY] data:
+- Cloud DNS → **[PROJECT-DNS]** (score 75, name + percent +752% / +908%)
+- Certificate Authority → **[PROJECT-CA]** (score 100, name + percent -21% / -21%)
+- Apigee → **[PROJECT-APIGEE-1]** / **[PROJECT-APIGEE-2]** (score 75 each)
+- Cloud Monitoring → **[PROJECT-MONITOR]** (score 50, name)
+
+### Reasoner (Opus) system prompt — critical constraints
+
+The prompt in `models/reasoner.py:REASONER_SYSTEM_PROMPT` enforces:
+
+1. **`reasoning` field is Opus's voice in the chat.** Rendered as a magenta panel after every turn. Used to answer user questions and explain next commands.
+2. **Use `next_action.type="need_info"` to ask clarifying questions.** Don't propose `gcloud config get-value project` to find info the user already knows.
+3. **Use the billing context** (services/projects/SKUs/likely_homes) already provided instead of running commands to rediscover it.
+4. **ONE command per turn. No `&& ; ||` chaining.**
+5. **No redirects.** `> >> < 2>&1` are all blocked by Layer 1. Opus is explicitly told not to use them.
+6. **Parens inside quoted `--format` are fine** (`'value(name)'`, `'table(name,region)'`). The validator only flags unquoted `>` `<`.
+7. **Safe format options:** `--format=json`, `--format=yaml`, `--format='value(...)'`, `--format='table(...)'`. Prefer JSON+jq when projecting fields.
+8. **bq query is SELECT only.**
+
+### Investigator event surface
+
+The investigator emits these events via `event_hook` (all rendered by `chat.py:_on_event`):
+
+- `spike_selected` — rendered by the chat's investigation panel, not here
+- `step_started` — prints "thinking…"
+- `hypotheses_updated` — renders hypothesis bars; caches `session.current_hypotheses` for `/hypotheses`
+- `reasoning` — **NEW**, renders Opus's explanation panel in magenta
+- `opus_asks` — fired when `next_action.type="need_info"`; the `AdvisorProvider.ask_user` prints its own cyan panel
+- `command_proposed` — AdvisorProvider prints the yellow command panel itself
+- `command_blocked` — prints "✗ blocked at L1/L4" + reason
+- `command_executed` — prints char count + duration
+- `evidence_added` — prints the green Evidence panel
+- `user_note` — "→ note sent to Opus: ..."
+- `command_rejected_by_user` — "→ command skipped"
+- `concluded` — "✓ Investigation concluded"
+- `aborted` — red Aborted panel
+
+### Exception types (critical for flow control)
+
+All subclass `GCPProviderError`. The investigator has specific handling for each:
+
+- `AdvisorAborted` — user typed `/quit` → investigator returns `"abort"` → chat records history + drops back to chat prompt
+- `AdvisorSkipped` — user typed `/skip` → investigator injects "SKIPPED by user" feedback → next Opus turn
+- `AdvisorNote(text)` — user typed a question or `/note ...` → investigator injects the note as feedback + tells Opus to answer → next Opus turn
+- `AdvisorSpikeSwitch(target_index)` — user typed `/spike N` → **propagates all the way out of the investigator** → `chat.py:_cmd_investigate` catches it, records partial history, starts a fresh investigation on the new spike
+- `CommandRejectedError` / `CommandTimeoutError` — injects "EXECUTION FAILED" feedback
+
+The `CostSpike` dataclass (`providers/gcp.py`) now has:
+- `grouping: str` — one of "service"/"project"/"sku"/"location"
+- `top_contributors: dict[str, list[tuple[str, float]]]` — populated by `_attach_top_contributors`
+- `likely_homes: list[tuple[str, int, str]]` — populated by `_attach_likely_homes`
+
+### User's actual situation (don't forget)
+
+- **User:** Avinash (personal GCP account: `gcpavinash7@gmail.com`, project `forensics-mtech-2025` — safe to experiment with)
+- **Work:** org-level admin on [COMPANY] GCP org. **Cannot use active mode** — blast radius too large even read-only.
+- **Company restriction:** cannot create service accounts or credentials in [COMPANY] org.
+- **Real investigation data:** 3 Console CSVs (gitignored, kept locally only) matching `Billing Account for [COMPANY]_Reports, 2026-01-01 — 2026-04-30*.csv`. Total ~$485K. Biggest spikes: BigQuery $325K, [PROJECT-BQ] project $322K (matches BigQuery almost exactly), VMware Engine $186K, Networking $65K, Cloud Run $63K (-26%).
+- **Confirmed finding from partial investigation:** Cloud Run services live in `[PROJECT-AI]`. 8 services discovered: `[SERVICE-IDP]`, `[SERVICE-AI-ENGINE]`, `[SERVICE-ANALYZE]`, `[SERVICE-STT]`, `[SERVICE-STT-MON]`, `[SERVICE-FRONTEND]`, `[SERVICE-IAM]`, `[SERVICE-SUPERSET]`. Investigation crashed on `QUIT_TOKEN` ref before concluding — fixed.
+
+### Environment setup
+
+- **No Poetry.** User has Python 3.12 at `/usr/local/bin/python3.12`.
+- **venv:** `.venv/` in project root, created with `python3.12 -m venv .venv`
+- **Install deps:** `.venv/bin/pip install rich typer tomli tomli_w anthropic google-cloud-bigquery prompt_toolkit pytest`
+- **Run:** `PYTHONPATH=src .venv/bin/python -m ghosthunter.cli <args>`
+- **Editable install (pending):** `.venv/bin/pip install -e .` would make `ghosthunter` a real command in `.venv/bin/`. Not yet done — user still uses the PYTHONPATH prefix.
+- **API key:** `ANTHROPIC_API_KEY` env var. User previously leaked their key in a screenshot — **rotated**. Always remind to rotate if another leak happens.
+
+### GitHub repo
+
+- Private: **https://github.com/avinash-matrixgard/ghosthunter**
+- Only `avinash-matrixgard` has access. No collaborators.
+- Initial commit pushed. Subsequent changes (advisor mode, chat orchestrator, prompt_toolkit, cross-file inference, mode picker, 2>&1 rules, QUIT_TOKEN fix) **not yet pushed** — user said "ok let's come back to commit later" multiple times. **Ask before pushing.**
+- Main branch has 2 commits: `11e9b51` (GitHub-generated LICENSE/README init) + `2827621` (our initial Ghosthunter code).
+
+### File structure additions since the original spec
+
+```
+src/ghosthunter/
+  chat.py              # NEW — REPL orchestrator + mode picker
+  chat_io.py           # NEW — shared prompt_toolkit PromptSession
+  demo.py              # NEW — replay bundled scenarios (5 scenarios)
+  memory/              # NEW — MemPalace MCP client integration
+    __init__.py        #       public facade: get_palace(), is_available()
+    palace.py          #       PalaceClient — spawns mempalace.mcp_server
+  providers/
+    advisor.py         # NEW — print-and-wait "execution" with slash cmds
+    billing_file.py    # NEW — multi-file CSV/JSON parser + inference
+sample_data/
+  billing.json         # (pre-existing)
+  demo_script.json     # NEW — 5 scenarios for demo mode
+```
+
+### Memory palace (MemPalace integration, OPTIONAL)
+
+**Architecture:** Ghosthunter is an MCP CLIENT; MemPalace runs as an MCP
+SERVER in a child process (`python -m mempalace.mcp_server`). All calls go
+over stdio using the official `mcp` Python SDK. Both deps are OPTIONAL —
+if either is missing at import time, memory features silently no-op and
+Ghosthunter works exactly as before.
+
+**Storage:** `~/.ghosthunter/palace/` (NOT MemPalace's default
+`~/.mempalace/palace/`), pinned via `MEMPALACE_PATH` env var on subprocess
+spawn. Keeps Ghosthunter self-contained.
+
+**Install (user hasn't done this yet):**
+```bash
+.venv/bin/pip install mempalace mcp
+ghosthunter palace install-check   # verify both present
+ghosthunter palace tools            # list the 19 MCP tools from the server
+ghosthunter palace status           # probe connection
+```
+
+**Spatial mapping:**
+- **Wing** = billing account (parsed from filenames like
+  `Billing Account for [COMPANY]_Reports` → `[COMPANY]`). Fallback: `default`.
+  Parser is `memory.palace.parse_wing_from_filename`.
+- **Room** = service or project name of the spike
+- **Hall** = memory type: `facts`, `corrections`, `conclusions`, `user_notes`
+
+**Chat integration points** (all in `chat.py`):
+1. **On `/load`**: picks the wing via `default_wing_for_files`, stores on
+   `session.wing`, flips `session.memory_enabled = palace_is_available()`.
+2. **On `/spike N`**: `_build_billing_context` now queries the palace with
+   3 different phrasings of the spike (service + root cause, service +
+   project, service + wing), dedupes, and injects the top 8 hits as
+   `## Prior knowledge from memory palace` in the initial Opus prompt.
+   Opus is told to treat these as ground truth unless billing contradicts.
+3. **On conclude**: `_save_conclusion_to_palace` writes a multi-line memory
+   to hall=`conclusions`, room=service name. Content: root cause, confidence,
+   up to 5 evidence items, up to 5 recommendations.
+4. **`/recall <query>`**: direct palace search, current wing, n=10, renders
+   a cyan panel of hits.
+5. **`/remember <text>`**: saves to hall=`facts`, current wing. Source
+   tagged as `"chat /remember"`.
+6. **`/palace`**: status panel showing availability, wing, storage path,
+   and install hint if the deps are missing.
+
+**CLI subcommand** `ghosthunter palace [status|tools|install-check]` for
+debugging outside the chat REPL.
+
+**Tool name resolution (runtime discovery):** MemPalace's 19 MCP tool names
+haven't been empirically verified. `memory/palace.py` contains a
+`_TOOL_NAME_CANDIDATES` dict with likely names per logical operation
+(search / remember / status). On first contact with the server the code
+calls `list_tools()` and maps each logical op to whichever candidate is
+actually present. Cached in `_RESOLVED_TOOL_NAMES`.
+
+**If discovery fails** (no candidate matches), the operation no-ops.
+Running `ghosthunter palace tools` prints the real names so they can be
+added to the candidate list.
+
+**Concurrency model:** Each palace call opens a FRESH stdio session, runs
+the operation, and closes. No shared state between the sync chat REPL and
+the async MCP client. ~500ms per call overhead — acceptable for the v1
+use cases (recall at `/spike`, save on conclude, occasional slash cmds).
+If this becomes a bottleneck, later optimization would hold a long-lived
+session on a daemon thread.
+
+**Known gaps / TODOs for memory:**
+1. **Empirical tool name verification** — install MemPalace and run
+   `ghosthunter palace tools`, then update `_TOOL_NAME_CANDIDATES` with the
+   actual names (or hard-code the winners). Without this, `remember` and
+   `recall` return empty even when the palace is alive.
+2. **No rate limiting** on auto-recall — every `/spike` does 3 queries.
+3. **User-note auto-save not wired** — when user types a `/note`,
+   we inject it into Opus's conversation but don't save to the palace.
+   Intentional: notes are often conversational, not durable facts. User
+   uses `/remember` when they want persistence.
+4. **Hit schema is speculative** — `_parse_hits` tries JSON-in-text and
+   falls back to raw text. May need tweaking once we see real responses.
+
+### Known rough edges to watch for
+
+1. **Opus sometimes re-proposes the same command after it's blocked** even with the strict rules. If it loops twice, user can `/skip` or `/note` to force a pivot.
+2. **The `_looks_like_command_output` heuristic can misfire** on very short single-line output or on long prose. Currently 9/9 unit tests pass but real-world edge cases exist.
+3. **Streaming is not implemented.** `thinking…` blocks for ~5-10 sec per Opus turn. Phase 2 work: `client.messages.stream()` + make the loop async.
+4. **Budget caps** (15 commands / $1 / 10 min) apply per investigation. When exhausted, investigation aborts and drops to chat prompt. History is recorded.
+5. **History is in-memory per session.** `~/.ghosthunter/audit.log` is the persistent record (used by `ghosthunter audit` and mode 4).
+6. **When running real investigations, prefer file-path output pasting.** Big gcloud JSON outputs are painful to paste inline and bracketed-paste-mangled output has happened before. Tell user: save to `/tmp/foo.json` then type the path.
+
+### Next unresolved things (in rough priority order)
+
+1. **Verify MemPalace tool names.** Install `mempalace` and `mcp`
+   (`.venv/bin/pip install mempalace mcp`), run `ghosthunter palace tools`,
+   then update `src/ghosthunter/memory/palace.py:_TOOL_NAME_CANDIDATES`
+   with the real names. Without this, recall/remember silently no-op.
+2. Finish the Cloud Run -26% investigation in `[PROJECT-AI]`.
+   Partial evidence: 8 services discovered but not yet examined for GPU
+   config, min-instance counts, or recent revision changes.
+   Once memory is live, the fact "Cloud Run in [COMPANY] lives in
+   [PROJECT-AI]" should be `/remember`ed so next session
+   auto-recalls it.
+3. Investigate BigQuery $325K — clearest single target, [PROJECT-BQ]
+   is the project home.
+4. Commit and push everything to GitHub (user hasn't asked yet, check first).
+5. `.venv/bin/pip install -e .` / editable install so the `ghosthunter`
+   command is on PATH.
+6. Phase 2: streaming responses (`client.messages.stream()`, make loop async).
+7. Expand security test suite to cover `billing_file.py` parser and the
+   inference scorer.
+8. Memory optimization: long-lived stdio session on a daemon thread if
+   ~500ms per call becomes painful.
+
+---
+
 ## What This Is
 
 Ghosthunter is a CLI tool that investigates *why* cloud costs spiked, not just *what* changed. It uses Claude Opus to form hypotheses about cost anomalies and Claude Sonnet to execute read-only cloud commands that test those hypotheses.

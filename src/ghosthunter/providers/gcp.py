@@ -35,12 +35,25 @@ except ImportError:
 # ---------------------------------------------------------------------------
 @dataclass
 class CostSpike:
-    """A service whose cost changed materially over the lookback window."""
+    """A service whose cost changed materially over the lookback window.
+
+    `top_contributors` is an optional map of dimension -> list of
+    (name, cost) tuples capturing where the spike came from. e.g.
+        {"sku":     [("Internet Egress NA", 8120.40), ...],
+         "project": [("prod-web", 6200.00), ...]}
+    Populated by the billing-file provider when extra columns are present;
+    empty in pure single-file mode.
+    """
     service: str
     current_cost: float
     previous_cost: float
     change_percent: float
     daily_breakdown: list[dict[str, Any]] = field(default_factory=list)
+    top_contributors: dict[str, list[tuple[str, float]]] = field(default_factory=dict)
+    grouping: str = "service"  # how the spike is keyed: service / project / sku / location
+    # Cross-file inference: when this is a service-level spike, which projects
+    # most likely host it (and vice versa). Each entry is (name, score, reason).
+    likely_homes: list[tuple[str, int, str]] = field(default_factory=list)
 
     @property
     def absolute_change(self) -> float:

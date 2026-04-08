@@ -30,3 +30,6 @@ sa-key*.json
 .env
 .env.*
 !.env.example
+
+# Billing exports (sensitive)
+Billing Account for*.csv

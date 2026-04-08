@@ -40,6 +40,18 @@ from ghosthunter.providers.gcp import (
     CostSpike,
     GCPProvider,
 )
+
+# Optional advisor-mode exceptions; imported lazily so a missing rich
+# install doesn't break active mode. All subclass GCPProviderError so
+# we can catch them generically below.
+try:
+    from ghosthunter.providers.advisor import (
+        AdvisorAborted,
+        AdvisorNote,
+        AdvisorSkipped,
+    )
+except ImportError:  # pragma: no cover
+    AdvisorAborted = AdvisorNote = AdvisorSkipped = None  # type: ignore
 from ghosthunter.security.validator import SecurityValidator, ValidationResult
 
 
@@ -80,6 +92,11 @@ class Budget:
 ApprovalDecision = Literal["approve", "reject", "abort"]
 ApprovalHook = Callable[["PendingCommand"], Awaitable[ApprovalDecision]]
 EventHook = Callable[["InvestigationEvent"], Awaitable[None]]
+
+# Memory hook signature: called synchronously when a durable fact arrives
+# mid-investigation. kind is "need_info_answer" or "user_note". The chat
+# session implementation wires this to the palace.
+MemoryHook = Callable[[str, str], None]  # (kind, text) → None
 
 
 @dataclass
@@ -143,6 +160,7 @@ class Investigator:
         approval_hook: ApprovalHook | None = None,
         event_hook: EventHook | None = None,
         budget: Budget | None = None,
+        memory_hook: MemoryHook | None = None,
     ) -> None:
         self.provider = provider
         self.reasoner = reasoner
@@ -151,6 +169,10 @@ class Investigator:
         self.approval_hook = approval_hook or _default_auto_reject
         self.event_hook = event_hook
         self.budget = budget or Budget()
+        # Called synchronously with (kind, text) when a durable fact should
+        # be persisted to memory. kind ∈ {"need_info_answer", "user_note"}.
+        # None = memory disabled.
+        self.memory_hook = memory_hook
 
         self.hypotheses = HypothesisManager()
         self.evidence = EvidenceChain()
@@ -160,11 +182,24 @@ class Investigator:
     # ------------------------------------------------------------------
     # Public entrypoint
     # ------------------------------------------------------------------
-    async def investigate(self, spike: CostSpike) -> InvestigationResult:
+    async def investigate(
+        self,
+        spike: CostSpike,
+        additional_context: str | None = None,
+    ) -> InvestigationResult:
+        """Run an investigation.
+
+        `additional_context` is appended to the initial user message and
+        gives Opus information the chat session knows but the spike object
+        doesn't (e.g. which billing files were loaded, joinability caveats).
+        """
         await self._emit("spike_selected", {"spike": spike})
 
         self._messages = [
-            {"role": "user", "content": _build_initial_prompt(spike)}
+            {
+                "role": "user",
+                "content": _build_initial_prompt(spike, additional_context),
+            }
         ]
 
         conclusion: dict[str, Any] | None = None
@@ -184,6 +219,8 @@ class Investigator:
                 "hypotheses_updated",
                 {"hypotheses": [h.__dict__ for h in self.hypotheses.all()]},
             )
+            if step.reasoning:
+                await self._emit("reasoning", {"text": step.reasoning})
 
             action = step.next_action
 
@@ -193,10 +230,47 @@ class Investigator:
                 break
 
             if action.type == "need_info":
-                # v1.0 has no out-of-band info channel — treat as abort.
-                aborted_reason = "reasoner needs info we cannot provide"
-                await self._emit("aborted", {"reason": aborted_reason})
-                break
+                # Opus is asking the user a clarifying question. The
+                # question is in step.reasoning. If the provider supports
+                # interactive prompting (advisor mode), ask and inject
+                # the answer. Otherwise abort.
+                question = step.reasoning or "Opus needs more information."
+                if hasattr(self.provider, "ask_user"):
+                    await self._emit("opus_asks", {"question": question})
+                    try:
+                        answer = await self.provider.ask_user(question)  # type: ignore[attr-defined]
+                    except Exception as exc:
+                        if AdvisorAborted is not None and isinstance(exc, AdvisorAborted):
+                            aborted_reason = "user aborted"
+                            await self._emit("aborted", {"reason": aborted_reason})
+                            break
+                        raise
+                    self._messages.append(
+                        {
+                            "role": "user",
+                            "content": (
+                                f"My answer: {answer}\n\n"
+                                "Use this to update your hypotheses and "
+                                "propose your next step."
+                            ),
+                        }
+                    )
+                    # Persist the answer as a durable fact if memory is wired.
+                    # Skip the "I don't know" sentinel from /skip.
+                    if (
+                        self.memory_hook is not None
+                        and answer
+                        and "declined to answer" not in answer
+                    ):
+                        try:
+                            self.memory_hook("need_info_answer", answer)
+                        except Exception:
+                            pass
+                    continue
+                else:
+                    aborted_reason = "reasoner needs info we cannot provide"
+                    await self._emit("aborted", {"reason": aborted_reason})
+                    break
 
             if action.type != "command" or not action.command:
                 aborted_reason = f"unexpected next_action: {action.type}"
@@ -298,7 +372,7 @@ class Investigator:
 
         await self._emit("command_approved", {"command": command})
 
-        # Layer 7: sandboxed execution
+        # Layer 7: sandboxed execution (or advisor-mode print-and-wait)
         try:
             result = await self.provider.execute_command(command)
         except (CommandRejectedError, CommandTimeoutError) as exc:
@@ -308,6 +382,37 @@ class Investigator:
             )
             self._append_tool_feedback(command, f"EXECUTION FAILED: {exc}")
             return "continue"
+        except Exception as exc:
+            # Advisor mode signals user intent via custom exceptions.
+            if AdvisorAborted is not None and isinstance(exc, AdvisorAborted):
+                return "abort"
+            if AdvisorSkipped is not None and isinstance(exc, AdvisorSkipped):
+                await self._emit(
+                    "command_rejected_by_user", {"command": command}
+                )
+                self._append_tool_feedback(
+                    command,
+                    "SKIPPED by user — propose a different command",
+                )
+                return "continue"
+            if AdvisorNote is not None and isinstance(exc, AdvisorNote):
+                await self._emit(
+                    "user_note", {"command": command, "note": exc.note}
+                )
+                self._append_tool_feedback(
+                    command,
+                    f"SKIPPED by user. The user added this note:\n\n"
+                    f"{exc.note}\n\n"
+                    "Update your hypotheses with this new information and "
+                    "propose your next command (or conclude if appropriate).",
+                )
+                if self.memory_hook is not None:
+                    try:
+                        self.memory_hook("user_note", exc.note)
+                    except Exception:
+                        pass
+                return "continue"
+            raise
 
         self.budget.commands_used += 1
         self.budget.seconds_used += result.duration_seconds
@@ -392,20 +497,85 @@ class Investigator:
 # ---------------------------------------------------------------------------
 # Pure helpers
 # ---------------------------------------------------------------------------
-def _build_initial_prompt(spike: CostSpike) -> str:
-    daily = json.dumps(spike.daily_breakdown[-14:], indent=2) if spike.daily_breakdown else "(none)"
+def _build_initial_prompt(
+    spike: CostSpike, additional_context: str | None = None
+) -> str:
+    daily = (
+        json.dumps(spike.daily_breakdown[-14:], indent=2)
+        if spike.daily_breakdown
+        else "(none)"
+    )
+
+    contributors_block = ""
+    if spike.top_contributors:
+        lines: list[str] = []
+        for dim, items in spike.top_contributors.items():
+            if not items:
+                continue
+            lines.append(f"\nTop {dim}s in current period (driving the spike):")
+            for name, cost in items:
+                lines.append(f"  - {name}: ${cost:,.2f}")
+        contributors_block = "\n".join(lines)
+
+    inference_block = ""
+    likely_homes = getattr(spike, "likely_homes", None) or []
+    if likely_homes:
+        grp = getattr(spike, "grouping", "service")
+        if grp == "service":
+            header = (
+                "\n## Likely project home(s) — INFERRED from billing totals\n"
+                "These projects most likely host this service. The Console "
+                "exports cannot be joined directly, but name matches, "
+                "percent-change correlations, and total magnitudes give "
+                "strong signals. USE THIS INFERENCE before asking the user "
+                "where the spike is."
+            )
+        else:
+            header = (
+                "\n## Likely service contents — INFERRED from billing totals\n"
+                "These services most likely run inside this project. Use this "
+                "to focus your hypotheses."
+            )
+        lines = [header]
+        for name, score, reason in likely_homes:
+            lines.append(f"  - {name}  (confidence score {score})")
+            lines.append(f"      reason: {reason}")
+        inference_block = "\n".join(lines)
+
+    grouping = getattr(spike, "grouping", "service")
+    grouping_label = {
+        "service": "Service",
+        "project": "Project",
+        "sku": "SKU",
+        "location": "Location",
+    }.get(grouping, "Spike")
+
+    context_block = ""
+    if additional_context:
+        context_block = f"\n## Context provided up front\n{additional_context}\n"
+
     return (
-        "A cost spike has been detected on this GCP project. "
-        "Investigate the root cause.\n\n"
-        f"Service: {spike.service}\n"
+        "A cost spike has been detected. Investigate the root cause.\n"
+        f"{context_block}\n"
+        f"## Spike details\n"
+        f"{grouping_label}: {spike.service}\n"
         f"Current period cost: ${spike.current_cost:,.2f}\n"
         f"Previous period cost: ${spike.previous_cost:,.2f}\n"
         f"Change: {spike.change_percent:+.1f}% "
         f"(${spike.absolute_change:+,.2f})\n\n"
-        f"Recent daily breakdown:\n{daily}\n\n"
-        "Form 2–4 competing hypotheses with confidence scores, then propose "
-        "the first read-only command that would best discriminate between them. "
-        "Respond via the `investigation_step` tool."
+        f"Recent daily breakdown:\n{daily}"
+        f"{contributors_block}"
+        f"{inference_block}\n\n"
+        "## What to do now\n"
+        "Use the breakdown above to form your initial hypotheses — it tells "
+        "you exactly where the cost moved. If you need information that's "
+        "NOT in the data above (like which project a service is in, or what "
+        "changed recently), ASK THE USER via next_action.type=need_info — "
+        "do not run a command to find it.\n\n"
+        "Form 2–4 competing hypotheses with confidence scores, then either "
+        "ask a clarifying question OR propose the first read-only command "
+        "that would best discriminate between them. Respond via the "
+        "`investigation_step` tool."
     )
 
 
