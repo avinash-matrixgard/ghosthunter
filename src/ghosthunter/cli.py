@@ -11,6 +11,7 @@ from __future__ import annotations
 import asyncio
 import json
 import os
+import time
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
@@ -19,6 +20,7 @@ import typer
 from rich.console import Console
 from rich.panel import Panel
 from rich.prompt import Confirm, Prompt
+from rich.status import Status
 from rich.table import Table
 
 from ghosthunter.config import (
@@ -828,7 +830,7 @@ def _build_active_investigator(
         executor=Executor(provider=provider),
         validator=SecurityValidator(provider=provider),
         approval_hook=_interactive_approval,
-        event_hook=_print_event,
+        event_hook=_InvestigationRenderer(console),
         budget=budget,
     )
 
@@ -851,7 +853,7 @@ def _build_advisor_investigator(provider: str = "gcp") -> Investigator:
         executor=Executor(provider=provider),
         validator=validator,
         approval_hook=_auto_approve,  # AdvisorProvider handles user interaction
-        event_hook=_print_event,
+        event_hook=_InvestigationRenderer(console),
         budget=Budget(),
     )
 
@@ -873,37 +875,122 @@ async def _interactive_approval(pending: PendingCommand) -> str:
     return {"y": "approve", "n": "reject", "a": "abort"}[answer]
 
 
-async def _print_event(event: InvestigationEvent) -> None:
-    """Minimal event printer. Rich UI gets a richer renderer later."""
-    kind = event.kind
-    if kind == "hypotheses_updated":
-        console.print("\n[bold]Hypotheses:[/bold]")
-        for h in event.payload["hypotheses"]:
-            bar = "█" * (h["confidence"] // 5)
-            console.print(
-                f"  {h['id']} [{h['status']:>10}] {h['confidence']:3}% "
-                f"{bar:20} {h['description']}"
+class _InvestigationRenderer:
+    """Event → console renderer with animated spinner phases.
+
+    Mirrors the Claude Code UX: a ``✻``-style spinner runs whenever the
+    backend is doing work the user can't see (Opus reasoning, Sonnet
+    Layer-6 validation, Sonnet compression) and stops around anything
+    the user needs to read or respond to (hypothesis bars, reasoning
+    panel, proposed command, need_info question).
+
+    One instance per investigation — the spinner state is per-run and
+    must not leak across calls.
+    """
+
+    # Label for each "thinking" phase the spinner covers.
+    _PHASE_LABELS = {
+        "step_started":       "Opus is reasoning",
+        "command_approved":   "Sonnet is validating the command",
+        "command_executed":   "Sonnet is compressing command output",
+    }
+
+    def __init__(self, console: Console) -> None:
+        self.console = console
+        self._status: Status | None = None
+        self._start_ts: float = 0.0
+
+    async def __call__(self, event: InvestigationEvent) -> None:
+        kind = event.kind
+
+        # --- "thinking" phases: start/replace the spinner ---
+        if kind in self._PHASE_LABELS:
+            self._spin(self._PHASE_LABELS[kind])
+            return
+
+        # Every other event terminates whatever was spinning before it.
+        self._stop_spin()
+
+        if kind == "hypotheses_updated":
+            self.console.print("\n[bold]Hypotheses:[/bold]")
+            for h in event.payload["hypotheses"]:
+                bar = "█" * (h["confidence"] // 5)
+                self.console.print(
+                    f"  {h['id']} [{h['status']:>10}] {h['confidence']:3}% "
+                    f"{bar:20} {h['description']}"
+                )
+            return
+
+        if kind == "reasoning":
+            text = (event.payload.get("text") or "").strip()
+            if text:
+                self.console.print()
+                self.console.print(
+                    Panel(
+                        text,
+                        title="[bold magenta]Opus[/bold magenta]",
+                        border_style="magenta",
+                        expand=False,
+                    )
+                )
+            return
+
+        if kind == "command_blocked":
+            self.console.print(
+                f"[red]✗ blocked ({event.payload['layer']}):[/red] "
+                f"{event.payload['reason']}"
             )
-    elif kind == "command_blocked":
-        console.print(
-            f"[red]✗ blocked ({event.payload['layer']}):[/red] "
-            f"{event.payload['reason']}"
+            return
+
+        if kind == "command_rejected_by_user":
+            self.console.print("[dim]→ command skipped[/dim]")
+            return
+
+        if kind == "evidence_added":
+            e = event.payload["evidence"]
+            summary = (e.summary or "").split("\n", 1)[0][:120]
+            self.console.print(f"[green]+ {e.id}[/green] {summary}")
+            return
+
+        if kind == "concluded":
+            self.console.print(
+                "\n[bold green]✓ Investigation concluded[/bold green]"
+            )
+            return
+
+        if kind == "aborted":
+            self.console.print(
+                f"\n[bold red]✗ Aborted:[/bold red] {event.payload['reason']}"
+            )
+            return
+
+        # command_proposed / opus_asks / spike_selected / command_approved
+        # results / user_note: the AdvisorProvider (or spike-selection
+        # phase) handles the visible output for these. Nothing extra for
+        # the renderer to do.
+
+    # ------------------------------------------------------------------
+    def _spin(self, text: str) -> None:
+        """Start (or replace) the spinner with a new phase label."""
+        self._stop_spin()
+        self._status = self.console.status(
+            f"[cyan]✻ {text}…[/cyan]",
+            spinner="dots12",
         )
-    elif kind == "command_executed":
-        result = event.payload["result"]
-        console.print(
-            f"[dim]ran in {result.duration_seconds:.1f}s, "
-            f"exit={result.exit_code}[/dim]"
-        )
-    elif kind == "evidence_added":
-        e = event.payload["evidence"]
-        console.print(f"[green]+ {e.id}[/green] {e.summary[:120]}...")
-    elif kind == "concluded":
-        console.print("\n[bold green]✓ Investigation concluded[/bold green]")
-    elif kind == "aborted":
-        console.print(
-            f"\n[bold red]✗ Aborted:[/bold red] {event.payload['reason']}"
-        )
+        self._status.start()
+        self._start_ts = time.monotonic()
+
+    def _stop_spin(self) -> None:
+        """Stop the spinner if running; print a dim elapsed-time footer."""
+        if self._status is None:
+            return
+        elapsed = time.monotonic() - self._start_ts
+        self._status.stop()
+        self._status = None
+        if elapsed >= 0.5:
+            # A faint "(3.2s)" line under the spinner so the user sees
+            # how long each backend phase actually took.
+            self.console.print(f"[dim]  ({elapsed:.1f}s)[/dim]")
 
 
 def _render_spike_table(spikes) -> None:

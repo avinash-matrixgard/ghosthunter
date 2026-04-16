@@ -35,6 +35,71 @@ The scenario baked into `aws-sandbox-billing.csv` is:
 
 ---
 
+## Cost Explorer drill-down: EC2 - Other by USAGE_TYPE
+
+**Likely command:** `aws ce get-cost-and-usage ... --filter
+'{"Dimensions":{"Key":"SERVICE","Values":["EC2 - Other"]}}' --group-by
+Type=DIMENSION,Key=USAGE_TYPE --output json | jq '...'`
+
+Opus tends to ask this as the very first drill-down when EC2 - Other is
+the top spike. The jq pipeline in its command projects the raw CE
+response into a sorted `[{type, total}]` array, so the paste-back is the
+projected output:
+
+```json
+[
+  {"type": "NatGateway-Bytes", "total": 10850.00},
+  {"type": "PublicIPv4:InUseAddress", "total": 2340.00},
+  {"type": "NatGateway-Hours", "total": 1680.00},
+  {"type": "EBS:VolumeUsage.gp3", "total": 1125.00},
+  {"type": "DataTransfer-Regional-Bytes", "total": 620.00},
+  {"type": "EBS:SnapshotUsage", "total": 210.00},
+  {"type": "VpcEndpoint-Hours", "total": 125.00},
+  {"type": "EBS:VolumeIOUsage", "total": 85.00},
+  {"type": "EBS:VolumeP-IOPS.io2", "total": 20.00}
+]
+```
+
+That tells Opus: **NAT Gateway bytes + hours dominate the spike**
+(~$12.5k of the $14.7k delta). It should eliminate the EBS hypotheses
+and pivot to NAT investigation, proposing `aws ec2 describe-nat-gateways`
+next.
+
+---
+
+## Cost Explorer drill-down: Amazon CloudWatch or AWS Lambda by USAGE_TYPE
+
+If Opus runs a similar CE query against CloudWatch or Lambda, here are
+the paste-backs that fit the baked-in scenario:
+
+**For `CloudWatch`:**
+```json
+[
+  {"type": "DataProcessing-Bytes", "total": 1120.00},
+  {"type": "TimedStorage-ByteHrs", "total": 380.00},
+  {"type": "CW:Requests", "total": 95.00},
+  {"type": "CW:MetricMonitorUsage", "total": 45.00},
+  {"type": "CW:AlarmMonitorUsage", "total": 3.00}
+]
+```
+(tells Opus: CloudWatch Logs data ingestion dominates — consistent with
+DEBUG logging from the payload-enricher Lambda)
+
+**For `AWS Lambda`:**
+```json
+[
+  {"type": "Lambda-GB-Second", "total": 4180.00},
+  {"type": "Request", "total": 85.00},
+  {"type": "Lambda-Provisioned-Concurrency", "total": 42.00},
+  {"type": "Lambda-Edge-GB-Second", "total": 5.00}
+]
+```
+(tells Opus: GB-seconds — i.e. memory × duration × invocations — drives
+the Lambda cost. Steers toward `lambda list-functions` + `get-function`
+to find the 3008 MB / 48s / 1440-inv/day payload-enricher.)
+
+---
+
 ## Lambda investigation
 
 ### `aws lambda list-functions --output json`
