@@ -8,8 +8,8 @@
       },
       "spike": {
         "service": "Cloud DNS",
-        "current_cost": 117000.00,
-        "previous_cost": 12000.00,
+        "current_cost": 117000.0,
+        "previous_cost": 12000.0,
         "change_percent": 875.0
       },
       "steps": [
@@ -17,22 +17,70 @@
           "step": 1,
           "delay_seconds": 1.5,
           "hypotheses": [
-            {"id": "H1", "description": "DNS cache bypass / amplification attack", "confidence": 60, "status": "active", "evidence_for": [], "evidence_against": []},
-            {"id": "H2", "description": "Misconfigured internal resolver creating query storms", "confidence": 25, "status": "active", "evidence_for": [], "evidence_against": []},
-            {"id": "H3", "description": "Legitimate organic traffic growth", "confidence": 15, "status": "active", "evidence_for": [], "evidence_against": []}
+            {
+              "id": "H1",
+              "description": "DNS cache bypass / amplification attack",
+              "confidence": 60,
+              "status": "active",
+              "evidence_for": [],
+              "evidence_against": []
+            },
+            {
+              "id": "H2",
+              "description": "Misconfigured internal resolver creating query storms",
+              "confidence": 25,
+              "status": "active",
+              "evidence_for": [],
+              "evidence_against": []
+            },
+            {
+              "id": "H3",
+              "description": "Legitimate organic traffic growth",
+              "confidence": 15,
+              "status": "active",
+              "evidence_for": [],
+              "evidence_against": []
+            }
           ],
           "command": "gcloud logging read 'resource.type=dns_query' --limit=2000 --format=json",
           "tests_hypothesis": "H1",
           "rationale": "Sample recent DNS queries to look for amplification patterns",
-          "compressed_evidence": "2000 query sample. Top 2 domains account for 87% of volume. 94% of queries originate from public resolvers (8.8.8.8: 42%, 8.8.4.4: 31%, 1.1.1.1: 21%). Random case variations detected (e.g. ExAmPlE.cOm) — classic cache-bypass technique. Internal resolver traffic only 6%."
+          "compressed_evidence": "2000 query sample. Top 2 domains account for 87% of volume. 94% of queries originate from public resolvers (8.8.8.8: 42%, 8.8.4.4: 31%, 1.1.1.1: 21%). Random case variations detected (e.g. ExAmPlE.cOm) \u2014 classic cache-bypass technique. Internal resolver traffic only 6%."
         },
         {
           "step": 2,
           "delay_seconds": 1.5,
           "hypotheses": [
-            {"id": "H1", "description": "DNS cache bypass / amplification attack", "confidence": 78, "status": "active", "evidence_for": ["E1"], "evidence_against": []},
-            {"id": "H2", "description": "Misconfigured internal resolver creating query storms", "confidence": 12, "status": "active", "evidence_for": [], "evidence_against": ["E1"]},
-            {"id": "H3", "description": "Legitimate organic traffic growth", "confidence": 5, "status": "eliminated", "evidence_for": [], "evidence_against": ["E1"]}
+            {
+              "id": "H1",
+              "description": "DNS cache bypass / amplification attack",
+              "confidence": 78,
+              "status": "active",
+              "evidence_for": [
+                "E1"
+              ],
+              "evidence_against": []
+            },
+            {
+              "id": "H2",
+              "description": "Misconfigured internal resolver creating query storms",
+              "confidence": 12,
+              "status": "active",
+              "evidence_for": [],
+              "evidence_against": [
+                "E1"
+              ]
+            },
+            {
+              "id": "H3",
+              "description": "Legitimate organic traffic growth",
+              "confidence": 5,
+              "status": "eliminated",
+              "evidence_for": [],
+              "evidence_against": [
+                "E1"
+              ]
+            }
           ],
           "command": "bq query --nouse_legacy_sql 'SELECT DATE(timestamp) AS day, COUNT(*) AS queries FROM dns_logs.queries WHERE timestamp > TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 14 DAY) GROUP BY day ORDER BY day'",
           "tests_hypothesis": "H1",
@@ -43,17 +91,37 @@
           "step": 3,
           "delay_seconds": 1.5,
           "hypotheses": [
-            {"id": "H1", "description": "DNS cache bypass / amplification attack", "confidence": 92, "status": "confirmed", "evidence_for": ["E1", "E2"], "evidence_against": []},
-            {"id": "H2", "description": "Misconfigured internal resolver creating query storms", "confidence": 4, "status": "eliminated", "evidence_for": [], "evidence_against": ["E1", "E2"]}
+            {
+              "id": "H1",
+              "description": "DNS cache bypass / amplification attack",
+              "confidence": 92,
+              "status": "confirmed",
+              "evidence_for": [
+                "E1",
+                "E2"
+              ],
+              "evidence_against": []
+            },
+            {
+              "id": "H2",
+              "description": "Misconfigured internal resolver creating query storms",
+              "confidence": 4,
+              "status": "eliminated",
+              "evidence_for": [],
+              "evidence_against": [
+                "E1",
+                "E2"
+              ]
+            }
           ],
           "conclude": {
             "root_cause": "DNS Cache Bypass Attack",
             "confidence": 92,
             "evidence_summary": [
               "Query volume rose from 2M/day baseline to 436M/day (218x) starting 2026-03-27",
-              "94% of queries from public resolvers (8.8.8.8, 8.8.4.4, 1.1.1.1) — only 6% internal",
-              "Random case variations in domain names — textbook cache-bypass technique",
-              "Top 2 domains account for 87% of total volume — narrow attack target"
+              "94% of queries from public resolvers (8.8.8.8, 8.8.4.4, 1.1.1.1) \u2014 only 6% internal",
+              "Random case variations in domain names \u2014 textbook cache-bypass technique",
+              "Top 2 domains account for 87% of total volume \u2014 narrow attack target"
             ],
             "not_verified": [
               "Identity of the attacker",
@@ -66,9 +134,9 @@
             ]
           }
         }
-      ]
+      ],
+      "provider": "gcp"
     },
-
     {
       "id": "nat_egress_runaway",
       "metadata": {
@@ -77,8 +145,8 @@
       },
       "spike": {
         "service": "Cloud NAT",
-        "current_cost": 13200.00,
-        "previous_cost": 3200.00,
+        "current_cost": 13200.0,
+        "previous_cost": 3200.0,
         "change_percent": 312.5
       },
       "steps": [
@@ -86,9 +154,30 @@
           "step": 1,
           "delay_seconds": 1.5,
           "hypotheses": [
-            {"id": "H1", "description": "A Cloud Function is fetching large objects from public APIs in a tight loop", "confidence": 50, "status": "active", "evidence_for": [], "evidence_against": []},
-            {"id": "H2", "description": "GKE pods pulling images through NAT instead of Artifact Registry", "confidence": 30, "status": "active", "evidence_for": [], "evidence_against": []},
-            {"id": "H3", "description": "Legitimate growth in outbound API integrations", "confidence": 20, "status": "active", "evidence_for": [], "evidence_against": []}
+            {
+              "id": "H1",
+              "description": "A Cloud Function is fetching large objects from public APIs in a tight loop",
+              "confidence": 50,
+              "status": "active",
+              "evidence_for": [],
+              "evidence_against": []
+            },
+            {
+              "id": "H2",
+              "description": "GKE pods pulling images through NAT instead of Artifact Registry",
+              "confidence": 30,
+              "status": "active",
+              "evidence_for": [],
+              "evidence_against": []
+            },
+            {
+              "id": "H3",
+              "description": "Legitimate growth in outbound API integrations",
+              "confidence": 20,
+              "status": "active",
+              "evidence_for": [],
+              "evidence_against": []
+            }
           ],
           "command": "gcloud compute routers get-nat-mapping-info nat-router-prod --region=us-central1 --format=json",
           "tests_hypothesis": "H1",
@@ -99,9 +188,34 @@
           "step": 2,
           "delay_seconds": 1.5,
           "hypotheses": [
-            {"id": "H1", "description": "A Cloud Function is fetching large objects from public APIs in a tight loop", "confidence": 78, "status": "active", "evidence_for": ["E1"], "evidence_against": []},
-            {"id": "H2", "description": "GKE pods pulling images through NAT instead of Artifact Registry", "confidence": 6, "status": "eliminated", "evidence_for": [], "evidence_against": ["E1"]},
-            {"id": "H3", "description": "Legitimate growth in outbound API integrations", "confidence": 16, "status": "active", "evidence_for": [], "evidence_against": []}
+            {
+              "id": "H1",
+              "description": "A Cloud Function is fetching large objects from public APIs in a tight loop",
+              "confidence": 78,
+              "status": "active",
+              "evidence_for": [
+                "E1"
+              ],
+              "evidence_against": []
+            },
+            {
+              "id": "H2",
+              "description": "GKE pods pulling images through NAT instead of Artifact Registry",
+              "confidence": 6,
+              "status": "eliminated",
+              "evidence_for": [],
+              "evidence_against": [
+                "E1"
+              ]
+            },
+            {
+              "id": "H3",
+              "description": "Legitimate growth in outbound API integrations",
+              "confidence": 16,
+              "status": "active",
+              "evidence_for": [],
+              "evidence_against": []
+            }
           ],
           "command": "gcloud functions list --filter='vpcConnector:svc-conn-prod' --format='table(name,updateTime,runtime)'",
           "tests_hypothesis": "H1",
@@ -112,7 +226,17 @@
           "step": 3,
           "delay_seconds": 1.5,
           "hypotheses": [
-            {"id": "H1", "description": "image-thumbnailer Cloud Function is downloading images through NAT in a tight loop after a 2026-03-26 deploy", "confidence": 91, "status": "confirmed", "evidence_for": ["E1", "E2"], "evidence_against": []}
+            {
+              "id": "H1",
+              "description": "image-thumbnailer Cloud Function is downloading images through NAT in a tight loop after a 2026-03-26 deploy",
+              "confidence": 91,
+              "status": "confirmed",
+              "evidence_for": [
+                "E1",
+                "E2"
+              ],
+              "evidence_against": []
+            }
           ],
           "conclude": {
             "root_cause": "image-thumbnailer Cloud Function deployed 2026-03-26 is fetching source images from a public CDN through Cloud NAT, with no caching and no concurrency cap",
@@ -134,9 +258,9 @@
             ]
           }
         }
-      ]
+      ],
+      "provider": "gcp"
     },
-
     {
       "id": "bigquery_full_scan",
       "metadata": {
@@ -145,8 +269,8 @@
       },
       "spike": {
         "service": "BigQuery",
-        "current_cost": 11500.00,
-        "previous_cost": 1800.00,
+        "current_cost": 11500.0,
+        "previous_cost": 1800.0,
         "change_percent": 538.9
       },
       "steps": [
@@ -154,22 +278,70 @@
           "step": 1,
           "delay_seconds": 1.5,
           "hypotheses": [
-            {"id": "H1", "description": "A scheduled query is doing a full table scan against a partitioned table", "confidence": 55, "status": "active", "evidence_for": [], "evidence_against": []},
-            {"id": "H2", "description": "A new BI dashboard is querying without partition filters", "confidence": 30, "status": "active", "evidence_for": [], "evidence_against": []},
-            {"id": "H3", "description": "Storage growth pushed an existing query above the price tier", "confidence": 15, "status": "active", "evidence_for": [], "evidence_against": []}
+            {
+              "id": "H1",
+              "description": "A scheduled query is doing a full table scan against a partitioned table",
+              "confidence": 55,
+              "status": "active",
+              "evidence_for": [],
+              "evidence_against": []
+            },
+            {
+              "id": "H2",
+              "description": "A new BI dashboard is querying without partition filters",
+              "confidence": 30,
+              "status": "active",
+              "evidence_for": [],
+              "evidence_against": []
+            },
+            {
+              "id": "H3",
+              "description": "Storage growth pushed an existing query above the price tier",
+              "confidence": 15,
+              "status": "active",
+              "evidence_for": [],
+              "evidence_against": []
+            }
           ],
           "command": "bq query --nouse_legacy_sql 'SELECT user_email, job_id, total_bytes_billed/POW(1024,4) AS tib_billed, query FROM `region-us.INFORMATION_SCHEMA.JOBS_BY_PROJECT` WHERE creation_time > TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 7 DAY) ORDER BY total_bytes_billed DESC LIMIT 20'",
           "tests_hypothesis": "H1",
           "rationale": "Find the highest-spend queries in the last 7 days",
-          "compressed_evidence": "Top query by far: 47.2 TiB billed per run, run by service account 'looker-bi@…iam'. Same query ran 96 times in 7 days (every ~1.75h). Second-highest query: 0.4 TiB. The top query alone billed 4,531 TiB total this week, dwarfing everything else."
+          "compressed_evidence": "Top query by far: 47.2 TiB billed per run, run by service account 'looker-bi@\u2026iam'. Same query ran 96 times in 7 days (every ~1.75h). Second-highest query: 0.4 TiB. The top query alone billed 4,531 TiB total this week, dwarfing everything else."
         },
         {
           "step": 2,
           "delay_seconds": 1.5,
           "hypotheses": [
-            {"id": "H1", "description": "A scheduled query is doing a full table scan against a partitioned table", "confidence": 35, "status": "active", "evidence_for": ["E1"], "evidence_against": []},
-            {"id": "H2", "description": "A Looker dashboard refresh is hitting the warehouse without partition filters", "confidence": 60, "status": "active", "evidence_for": ["E1"], "evidence_against": []},
-            {"id": "H3", "description": "Storage growth pushed an existing query above the price tier", "confidence": 5, "status": "eliminated", "evidence_for": [], "evidence_against": ["E1"]}
+            {
+              "id": "H1",
+              "description": "A scheduled query is doing a full table scan against a partitioned table",
+              "confidence": 35,
+              "status": "active",
+              "evidence_for": [
+                "E1"
+              ],
+              "evidence_against": []
+            },
+            {
+              "id": "H2",
+              "description": "A Looker dashboard refresh is hitting the warehouse without partition filters",
+              "confidence": 60,
+              "status": "active",
+              "evidence_for": [
+                "E1"
+              ],
+              "evidence_against": []
+            },
+            {
+              "id": "H3",
+              "description": "Storage growth pushed an existing query above the price tier",
+              "confidence": 5,
+              "status": "eliminated",
+              "evidence_for": [],
+              "evidence_against": [
+                "E1"
+              ]
+            }
           ],
           "command": "bq query --nouse_legacy_sql 'SELECT query, COUNT(*) AS runs, AVG(total_bytes_billed)/POW(1024,4) AS avg_tib FROM `region-us.INFORMATION_SCHEMA.JOBS_BY_PROJECT` WHERE user_email = \"looker-bi@example.iam.gserviceaccount.com\" AND creation_time > TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 7 DAY) GROUP BY query ORDER BY runs DESC LIMIT 5'",
           "tests_hypothesis": "H2",
@@ -180,7 +352,17 @@
           "step": 3,
           "delay_seconds": 1.5,
           "hypotheses": [
-            {"id": "H1", "description": "Looker dashboard query against analytics.events with no partition filter, refreshing every 105 minutes", "confidence": 95, "status": "confirmed", "evidence_for": ["E1", "E2"], "evidence_against": []}
+            {
+              "id": "H1",
+              "description": "Looker dashboard query against analytics.events with no partition filter, refreshing every 105 minutes",
+              "confidence": 95,
+              "status": "confirmed",
+              "evidence_for": [
+                "E1",
+                "E2"
+              ],
+              "evidence_against": []
+            }
           ],
           "conclude": {
             "root_cause": "A Looker dashboard refresh runs `SELECT * FROM analytics.events` every 105 minutes, scanning the full 47 TiB partitioned table and billing ~4.5 PiB per week",
@@ -203,9 +385,9 @@
             ]
           }
         }
-      ]
+      ],
+      "provider": "gcp"
     },
-
     {
       "id": "orphaned_disks",
       "metadata": {
@@ -214,8 +396,8 @@
       },
       "spike": {
         "service": "Compute Engine - Persistent Disk",
-        "current_cost": 5900.00,
-        "previous_cost": 2100.00,
+        "current_cost": 5900.0,
+        "previous_cost": 2100.0,
         "change_percent": 180.9
       },
       "steps": [
@@ -223,22 +405,68 @@
           "step": 1,
           "delay_seconds": 1.5,
           "hypotheses": [
-            {"id": "H1", "description": "Orphaned disks from terminated VMs are accumulating (CI/teardown broken)", "confidence": 45, "status": "active", "evidence_for": [], "evidence_against": []},
-            {"id": "H2", "description": "A team migrated to larger SSD volumes for a database workload", "confidence": 35, "status": "active", "evidence_for": [], "evidence_against": []},
-            {"id": "H3", "description": "Increased snapshot retention is bloating storage", "confidence": 20, "status": "active", "evidence_for": [], "evidence_against": []}
+            {
+              "id": "H1",
+              "description": "Orphaned disks from terminated VMs are accumulating (CI/teardown broken)",
+              "confidence": 45,
+              "status": "active",
+              "evidence_for": [],
+              "evidence_against": []
+            },
+            {
+              "id": "H2",
+              "description": "A team migrated to larger SSD volumes for a database workload",
+              "confidence": 35,
+              "status": "active",
+              "evidence_for": [],
+              "evidence_against": []
+            },
+            {
+              "id": "H3",
+              "description": "Increased snapshot retention is bloating storage",
+              "confidence": 20,
+              "status": "active",
+              "evidence_for": [],
+              "evidence_against": []
+            }
           ],
           "command": "gcloud compute disks list --filter='-users:*' --format='table(name,sizeGb,type,zone,creationTimestamp)'",
           "tests_hypothesis": "H1",
           "rationale": "List disks with no attached VM (the `users` field is empty)",
-          "compressed_evidence": "184 unattached disks found. 171 are pd-ssd, sized 100-500 GiB. Naming convention 'ci-runner-<sha>-disk' matches CI runners. Creation dates cluster between 2026-03-15 and today — none older than 23 days. Total unattached capacity: 41.8 TiB."
+          "compressed_evidence": "184 unattached disks found. 171 are pd-ssd, sized 100-500 GiB. Naming convention 'ci-runner-<sha>-disk' matches CI runners. Creation dates cluster between 2026-03-15 and today \u2014 none older than 23 days. Total unattached capacity: 41.8 TiB."
         },
         {
           "step": 2,
           "delay_seconds": 1.5,
           "hypotheses": [
-            {"id": "H1", "description": "CI runner teardown stopped deleting disks around 2026-03-15", "confidence": 80, "status": "active", "evidence_for": ["E1"], "evidence_against": []},
-            {"id": "H2", "description": "A team migrated to larger SSD volumes for a database workload", "confidence": 8, "status": "active", "evidence_for": [], "evidence_against": ["E1"]},
-            {"id": "H3", "description": "Increased snapshot retention is bloating storage", "confidence": 12, "status": "active", "evidence_for": [], "evidence_against": []}
+            {
+              "id": "H1",
+              "description": "CI runner teardown stopped deleting disks around 2026-03-15",
+              "confidence": 80,
+              "status": "active",
+              "evidence_for": [
+                "E1"
+              ],
+              "evidence_against": []
+            },
+            {
+              "id": "H2",
+              "description": "A team migrated to larger SSD volumes for a database workload",
+              "confidence": 8,
+              "status": "active",
+              "evidence_for": [],
+              "evidence_against": [
+                "E1"
+              ]
+            },
+            {
+              "id": "H3",
+              "description": "Increased snapshot retention is bloating storage",
+              "confidence": 12,
+              "status": "active",
+              "evidence_for": [],
+              "evidence_against": []
+            }
           ],
           "command": "gcloud compute snapshots list --format='value(name,creationTimestamp,diskSizeGb)' | wc -l",
           "tests_hypothesis": "H3",
@@ -249,15 +477,34 @@
           "step": 3,
           "delay_seconds": 1.5,
           "hypotheses": [
-            {"id": "H1", "description": "CI runner teardown stopped deleting disks around 2026-03-15, leaving 184 orphaned pd-ssd volumes (41.8 TiB)", "confidence": 93, "status": "confirmed", "evidence_for": ["E1", "E2"], "evidence_against": []},
-            {"id": "H3", "description": "Increased snapshot retention is bloating storage", "confidence": 3, "status": "eliminated", "evidence_for": [], "evidence_against": ["E2"]}
+            {
+              "id": "H1",
+              "description": "CI runner teardown stopped deleting disks around 2026-03-15, leaving 184 orphaned pd-ssd volumes (41.8 TiB)",
+              "confidence": 93,
+              "status": "confirmed",
+              "evidence_for": [
+                "E1",
+                "E2"
+              ],
+              "evidence_against": []
+            },
+            {
+              "id": "H3",
+              "description": "Increased snapshot retention is bloating storage",
+              "confidence": 3,
+              "status": "eliminated",
+              "evidence_for": [],
+              "evidence_against": [
+                "E2"
+              ]
+            }
           ],
           "conclude": {
             "root_cause": "CI runner teardown stopped deleting persistent disks on or around 2026-03-15. 184 pd-ssd volumes (41.8 TiB) are now orphaned, all matching the 'ci-runner-*' naming pattern.",
             "confidence": 93,
             "evidence_summary": [
               "184 unattached disks found, all named 'ci-runner-<sha>-disk'",
-              "Creation dates cluster from 2026-03-15 onward — nothing older",
+              "Creation dates cluster from 2026-03-15 onward \u2014 nothing older",
               "171 are pd-ssd at $0.17/GiB-month, totalling 41.8 TiB",
               "Snapshot count is unchanged, ruling out alternative causes"
             ],
@@ -273,9 +520,9 @@
             ]
           }
         }
-      ]
+      ],
+      "provider": "gcp"
     },
-
     {
       "id": "gke_autoscaler_loop",
       "metadata": {
@@ -284,8 +531,8 @@
       },
       "spike": {
         "service": "Kubernetes Engine",
-        "current_cost": 26000.00,
-        "previous_cost": 8400.00,
+        "current_cost": 26000.0,
+        "previous_cost": 8400.0,
         "change_percent": 209.5
       },
       "steps": [
@@ -293,9 +540,30 @@
           "step": 1,
           "delay_seconds": 1.5,
           "hypotheses": [
-            {"id": "H1", "description": "Cluster autoscaler is repeatedly adding nodes for a pod that can never schedule", "confidence": 45, "status": "active", "evidence_for": [], "evidence_against": []},
-            {"id": "H2", "description": "A new high-replica deployment legitimately needs more nodes", "confidence": 30, "status": "active", "evidence_for": [], "evidence_against": []},
-            {"id": "H3", "description": "Node pool moved from spot to on-demand instances", "confidence": 25, "status": "active", "evidence_for": [], "evidence_against": []}
+            {
+              "id": "H1",
+              "description": "Cluster autoscaler is repeatedly adding nodes for a pod that can never schedule",
+              "confidence": 45,
+              "status": "active",
+              "evidence_for": [],
+              "evidence_against": []
+            },
+            {
+              "id": "H2",
+              "description": "A new high-replica deployment legitimately needs more nodes",
+              "confidence": 30,
+              "status": "active",
+              "evidence_for": [],
+              "evidence_against": []
+            },
+            {
+              "id": "H3",
+              "description": "Node pool moved from spot to on-demand instances",
+              "confidence": 25,
+              "status": "active",
+              "evidence_for": [],
+              "evidence_against": []
+            }
           ],
           "command": "gcloud container clusters describe prod-east --region=us-east1 --format='value(currentNodeCount,initialNodeCount,autoscaling)'",
           "tests_hypothesis": "H1",
@@ -306,29 +574,66 @@
           "step": 2,
           "delay_seconds": 1.5,
           "hypotheses": [
-            {"id": "H1", "description": "Cluster autoscaler is repeatedly adding nodes for a pod that can never schedule", "confidence": 72, "status": "active", "evidence_for": ["E1"], "evidence_against": []},
-            {"id": "H2", "description": "A new high-replica deployment legitimately needs more nodes", "confidence": 23, "status": "active", "evidence_for": ["E1"], "evidence_against": []},
-            {"id": "H3", "description": "Node pool moved from spot to on-demand instances", "confidence": 5, "status": "eliminated", "evidence_for": [], "evidence_against": ["E1"]}
+            {
+              "id": "H1",
+              "description": "Cluster autoscaler is repeatedly adding nodes for a pod that can never schedule",
+              "confidence": 72,
+              "status": "active",
+              "evidence_for": [
+                "E1"
+              ],
+              "evidence_against": []
+            },
+            {
+              "id": "H2",
+              "description": "A new high-replica deployment legitimately needs more nodes",
+              "confidence": 23,
+              "status": "active",
+              "evidence_for": [
+                "E1"
+              ],
+              "evidence_against": []
+            },
+            {
+              "id": "H3",
+              "description": "Node pool moved from spot to on-demand instances",
+              "confidence": 5,
+              "status": "eliminated",
+              "evidence_for": [],
+              "evidence_against": [
+                "E1"
+              ]
+            }
           ],
           "command": "gcloud logging read 'resource.type=k8s_cluster AND jsonPayload.reason=TriggeredScaleUp' --limit=20 --format=json",
           "tests_hypothesis": "H1",
-          "rationale": "Look at recent scale-up triggers — what pod is requesting capacity?",
-          "compressed_evidence": "20 scale-up events in the last hour. ALL 20 cite the same pending pod: 'ml-training-job-7f3a2' in namespace 'data-science'. Each event adds 8 nodes. The pod requests 96 vCPU + 1 nvidia-tesla-v100 GPU. The node pool has no GPU SKUs configured — the pod cannot ever schedule."
+          "rationale": "Look at recent scale-up triggers \u2014 what pod is requesting capacity?",
+          "compressed_evidence": "20 scale-up events in the last hour. ALL 20 cite the same pending pod: 'ml-training-job-7f3a2' in namespace 'data-science'. Each event adds 8 nodes. The pod requests 96 vCPU + 1 nvidia-tesla-v100 GPU. The node pool has no GPU SKUs configured \u2014 the pod cannot ever schedule."
         },
         {
           "step": 3,
           "delay_seconds": 1.5,
           "hypotheses": [
-            {"id": "H1", "description": "ml-training-job-7f3a2 requests a GPU the node pool doesn't offer; autoscaler keeps adding (unusable) nodes trying to schedule it", "confidence": 96, "status": "confirmed", "evidence_for": ["E1", "E2"], "evidence_against": []}
+            {
+              "id": "H1",
+              "description": "ml-training-job-7f3a2 requests a GPU the node pool doesn't offer; autoscaler keeps adding (unusable) nodes trying to schedule it",
+              "confidence": 96,
+              "status": "confirmed",
+              "evidence_for": [
+                "E1",
+                "E2"
+              ],
+              "evidence_against": []
+            }
           ],
           "conclude": {
-            "root_cause": "A pending pod 'ml-training-job-7f3a2' in the data-science namespace requests 1x nvidia-tesla-v100 GPU. The prod-east cluster has no GPU node pools, so the pod is unschedulable — but the cluster autoscaler interprets the pending pod as capacity pressure and keeps adding standard nodes (now at 142 of 200 max)",
+            "root_cause": "A pending pod 'ml-training-job-7f3a2' in the data-science namespace requests 1x nvidia-tesla-v100 GPU. The prod-east cluster has no GPU node pools, so the pod is unschedulable \u2014 but the cluster autoscaler interprets the pending pod as capacity pressure and keeps adding standard nodes (now at 142 of 200 max)",
             "confidence": 96,
             "evidence_summary": [
-              "Cluster grew 8x from baseline (18 → 142 nodes), nearing the 200-node ceiling",
+              "Cluster grew 8x from baseline (18 \u2192 142 nodes), nearing the 200-node ceiling",
               "Every scale-up event in the last hour cites the same pending pod",
               "That pod requests a GPU resource the cluster's node pools cannot provide",
-              "All 142 nodes are running but nearly idle — the trigger pod is still pending"
+              "All 142 nodes are running but nearly idle \u2014 the trigger pod is still pending"
             ],
             "not_verified": [
               "Whether the ml-training-job was supposed to run on a different cluster",
@@ -339,6 +644,302 @@
               "Lower the cluster autoscaler max node count as a safety net",
               "Add a node selector / taint so GPU workloads cannot land on prod-east",
               "Alert on cluster size > 2x baseline for more than 30 minutes"
+            ]
+          }
+        }
+      ],
+      "provider": "gcp"
+    },
+    {
+      "id": "aws_nat_gateway_runaway",
+      "provider": "aws",
+      "metadata": {
+        "description": "NAT Gateway data-transfer cost blowup from missing S3 VPC endpoint",
+        "scenario": "EC2 - Other (NAT) spike +312% ($3.2K -> $13.2K)"
+      },
+      "spike": {
+        "service": "EC2 - Other",
+        "current_cost": 13200.0,
+        "previous_cost": 3200.0,
+        "change_percent": 312.5
+      },
+      "steps": [
+        {
+          "step": 1,
+          "delay_seconds": 1.5,
+          "hypotheses": [
+            {
+              "id": "H1",
+              "description": "NAT Gateway data-transfer spike from a workload pushing large S3 traffic through NAT instead of a VPC endpoint",
+              "confidence": 55,
+              "status": "active",
+              "evidence_for": [],
+              "evidence_against": []
+            },
+            {
+              "id": "H2",
+              "description": "New compute workload with unrelated inter-AZ / internet egress traffic",
+              "confidence": 25,
+              "status": "active",
+              "evidence_for": [],
+              "evidence_against": []
+            },
+            {
+              "id": "H3",
+              "description": "Cross-region replication or large dataset download driving legitimate NAT growth",
+              "confidence": 20,
+              "status": "active",
+              "evidence_for": [],
+              "evidence_against": []
+            }
+          ],
+          "command": "aws ec2 describe-nat-gateways --region us-east-1 --output json",
+          "tests_hypothesis": "H1",
+          "rationale": "Inventory NAT gateways and their VPC attachments. EC2 - Other groups NAT charges under the EC2 service; we need the gateway list to scope CloudWatch metrics and VPC endpoints next.",
+          "compressed_evidence": "3 NAT gateways in vpc-0a1b2c (prod-east). Gateway nat-prod-a owns 78% of VPC traffic by subnet routing. Created 2026-01-15, no tags change recently."
+        },
+        {
+          "step": 2,
+          "delay_seconds": 1.5,
+          "hypotheses": [
+            {
+              "id": "H1",
+              "description": "NAT Gateway data-transfer spike from a workload pushing large S3 traffic through NAT instead of a VPC endpoint",
+              "confidence": 78,
+              "status": "active",
+              "evidence_for": [
+                "E1"
+              ],
+              "evidence_against": []
+            },
+            {
+              "id": "H2",
+              "description": "New compute workload with unrelated inter-AZ / internet egress traffic",
+              "confidence": 12,
+              "status": "active",
+              "evidence_for": [],
+              "evidence_against": [
+                "E1"
+              ]
+            },
+            {
+              "id": "H3",
+              "description": "Cross-region replication or large dataset download driving legitimate NAT growth",
+              "confidence": 10,
+              "status": "active",
+              "evidence_for": [],
+              "evidence_against": []
+            }
+          ],
+          "command": "aws cloudwatch get-metric-statistics --namespace AWS/NATGateway --metric-name BytesOutToDestination --dimensions Name=NatGatewayId,Value=nat-prod-a --start-time 2026-02-01T00:00:00Z --end-time 2026-04-01T00:00:00Z --period 86400 --statistics Sum",
+          "tests_hypothesis": "H1",
+          "rationale": "Get the egress-byte trend for the dominant NAT. A sharp step (vs. gradual growth) points at a single workload being misrouted; gradual growth points at organic traffic.",
+          "compressed_evidence": "BytesOutToDestination for nat-prod-a: stable ~180 GB/day through 2026-02-14, then jumps to ~2.4 TB/day on 2026-02-15 and stays there. 13x step-change, no ramp. Date matches the spike onset in billing."
+        },
+        {
+          "step": 3,
+          "delay_seconds": 1.5,
+          "hypotheses": [
+            {
+              "id": "H1",
+              "description": "NAT Gateway data-transfer spike from a workload pushing large S3 traffic through NAT instead of a VPC endpoint",
+              "confidence": 94,
+              "status": "confirmed",
+              "evidence_for": [
+                "E1",
+                "E2",
+                "E3"
+              ],
+              "evidence_against": []
+            },
+            {
+              "id": "H2",
+              "description": "New compute workload with unrelated inter-AZ / internet egress traffic",
+              "confidence": 3,
+              "status": "eliminated",
+              "evidence_for": [],
+              "evidence_against": [
+                "E1",
+                "E2"
+              ]
+            },
+            {
+              "id": "H3",
+              "description": "Cross-region replication or large dataset download driving legitimate NAT growth",
+              "confidence": 3,
+              "status": "eliminated",
+              "evidence_for": [],
+              "evidence_against": [
+                "E2",
+                "E3"
+              ]
+            }
+          ],
+          "conclude": {
+            "root_cause": "A workload in the prod-east VPC (subnet-0f3a2) started reading ~2.4 TB/day from S3 on 2026-02-15, but the VPC has no S3 gateway endpoint. All traffic is routed through NAT Gateway nat-prod-a, billed at ~$0.045/GB processing + $0.09/GB inter-AZ. A free S3 gateway endpoint would remove both charges entirely.",
+            "confidence": 94,
+            "evidence_summary": [
+              "EC2 - Other (NAT) line item jumped 312% ($3.2K -> $13.2K) starting 2026-02-15",
+              "nat-prod-a carries 78% of VPC traffic; its BytesOutToDestination went from 180 GB/day to 2.4 TB/day on the same date (step-change, no ramp)",
+              "aws ec2 describe-vpc-endpoints in vpc-0a1b2c returns zero gateway endpoints (no S3, no DynamoDB)",
+              "S3 buckets receiving the traffic are in the same region (us-east-1) as the workload \u2014 a gateway endpoint would fully eliminate NAT routing for this traffic"
+            ],
+            "not_verified": [
+              "Which specific EC2 instance or service started the S3 traffic on 2026-02-15",
+              "Whether the workload is still needed or was a one-off data migration"
+            ],
+            "recommendations": [
+              "Create a gateway-type S3 VPC endpoint in vpc-0a1b2c and associate the prod-east route tables (free; no data-processing or inter-AZ charges)",
+              "If the S3 buckets span multiple regions, also add a DynamoDB gateway endpoint if any DynamoDB traffic uses NAT",
+              "Monitor AWS/NATGateway BytesOutToDestination per gateway; alert on sustained >50% deltas vs. 7-day baseline",
+              "Set a Cost Anomaly Detection monitor on EC2 - Other so the next NAT-traffic regression is caught the same week"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "aws_s3_lifecycle_miss",
+      "provider": "aws",
+      "metadata": {
+        "description": "S3 storage blowup from missing lifecycle policy",
+        "scenario": "Amazon S3 spike +180% ($4.1K -> $11.5K)"
+      },
+      "spike": {
+        "service": "Amazon Simple Storage Service",
+        "current_cost": 11500.0,
+        "previous_cost": 4100.0,
+        "change_percent": 180.5
+      },
+      "steps": [
+        {
+          "step": 1,
+          "delay_seconds": 1.5,
+          "hypotheses": [
+            {
+              "id": "H1",
+              "description": "A bucket with no lifecycle policy is accumulating old data (logs / backups) in STANDARD tier",
+              "confidence": 55,
+              "status": "active",
+              "evidence_for": [],
+              "evidence_against": []
+            },
+            {
+              "id": "H2",
+              "description": "Legitimate new data-product driving storage growth",
+              "confidence": 25,
+              "status": "active",
+              "evidence_for": [],
+              "evidence_against": []
+            },
+            {
+              "id": "H3",
+              "description": "Rogue / test workload uploading unbounded data",
+              "confidence": 20,
+              "status": "active",
+              "evidence_for": [],
+              "evidence_against": []
+            }
+          ],
+          "command": "aws s3api list-buckets --output json | jq '.Buckets | sort_by(.CreationDate) | reverse | .[0:20]'",
+          "tests_hypothesis": "H1",
+          "rationale": "Start with the 20 most recently created or modified buckets. Storage spikes almost always come from a small number of buckets, and the culprit is usually either new or growing faster than the rest.",
+          "compressed_evidence": "41 buckets in the account. Top 5 by recent activity: prod-logs (created 2024), data-lake-raw (2023), ml-features-v2 (2025-11), backup-archive (2022), tmp-analytics (2026-02)."
+        },
+        {
+          "step": 2,
+          "delay_seconds": 1.5,
+          "hypotheses": [
+            {
+              "id": "H1",
+              "description": "A bucket with no lifecycle policy is accumulating old data (logs / backups) in STANDARD tier",
+              "confidence": 75,
+              "status": "active",
+              "evidence_for": [
+                "E1"
+              ],
+              "evidence_against": []
+            },
+            {
+              "id": "H2",
+              "description": "Legitimate new data-product driving storage growth",
+              "confidence": 15,
+              "status": "active",
+              "evidence_for": [],
+              "evidence_against": [
+                "E1"
+              ]
+            },
+            {
+              "id": "H3",
+              "description": "Rogue / test workload uploading unbounded data",
+              "confidence": 10,
+              "status": "active",
+              "evidence_for": [],
+              "evidence_against": []
+            }
+          ],
+          "command": "aws cloudwatch get-metric-statistics --namespace AWS/S3 --metric-name BucketSizeBytes --dimensions Name=BucketName,Value=prod-logs Name=StorageType,Value=StandardStorage --start-time 2026-01-01T00:00:00Z --end-time 2026-04-01T00:00:00Z --period 86400 --statistics Average",
+          "tests_hypothesis": "H1",
+          "rationale": "prod-logs stands out by name. Chart its size over the past 3 months \u2014 a linear-growth curve means no lifecycle / retention is pruning; a flat line would refute this hypothesis.",
+          "compressed_evidence": "prod-logs StandardStorage grew from 48 TB (2026-01-01) to 142 TB (2026-04-01). Linear +1 TB/day. No IntelligentTiering, Glacier, or DeepArchive storage types reported for this bucket."
+        },
+        {
+          "step": 3,
+          "delay_seconds": 1.5,
+          "hypotheses": [
+            {
+              "id": "H1",
+              "description": "A bucket with no lifecycle policy is accumulating old data (logs / backups) in STANDARD tier",
+              "confidence": 93,
+              "status": "confirmed",
+              "evidence_for": [
+                "E1",
+                "E2",
+                "E3"
+              ],
+              "evidence_against": []
+            },
+            {
+              "id": "H2",
+              "description": "Legitimate new data-product driving storage growth",
+              "confidence": 4,
+              "status": "eliminated",
+              "evidence_for": [],
+              "evidence_against": [
+                "E2",
+                "E3"
+              ]
+            },
+            {
+              "id": "H3",
+              "description": "Rogue / test workload uploading unbounded data",
+              "confidence": 3,
+              "status": "eliminated",
+              "evidence_for": [],
+              "evidence_against": [
+                "E3"
+              ]
+            }
+          ],
+          "conclude": {
+            "root_cause": "The prod-logs bucket has no lifecycle configuration. It's growing at ~1 TB/day in STANDARD storage \u2014 application logs that are almost never read after 30 days. 94 TB of growth over 3 months explains the $7.4K month-over-month delta at $0.023/GB-month. A lifecycle policy transitioning objects to IA after 30 days and Glacier after 90 days would cut the marginal storage cost by ~75%.",
+            "confidence": 93,
+            "evidence_summary": [
+              "Amazon S3 line item rose 180% ($4.1K -> $11.5K) month-over-month",
+              "prod-logs StandardStorage grew linearly from 48 TB to 142 TB over 3 months (+1 TB/day)",
+              "aws s3api get-bucket-lifecycle-configuration --bucket prod-logs returned NoSuchLifecycleConfiguration",
+              "Access pattern analysis: 98% of objects older than 30 days have zero GETs in the last 60 days"
+            ],
+            "not_verified": [
+              "Compliance/legal retention requirements for the application logs (may limit how aggressively we can tier)",
+              "Whether downstream analytics pipelines rely on objects being in STANDARD tier"
+            ],
+            "recommendations": [
+              "Add a lifecycle policy on prod-logs: transition to STANDARD_IA at 30 days, GLACIER_IR at 90 days, expire at 365 days (adjust based on compliance)",
+              "Enable S3 Storage Lens at the account level to get ongoing visibility into bucket growth and access patterns",
+              "Consider S3 Intelligent-Tiering for buckets with uncertain access patterns (automatic, no operational overhead)",
+              "Set a Cost Anomaly Detection monitor on Amazon S3 so storage regressions are caught within days, not weeks"
             ]
           }
         }

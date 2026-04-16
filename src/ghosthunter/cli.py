@@ -642,14 +642,21 @@ def demo(
         None,
         "--scenario",
         help="Scenario id to replay (random if omitted). "
-             "e.g. dns_cache_bypass, nat_egress_runaway, bigquery_full_scan, "
-             "orphaned_disks, gke_autoscaler_loop",
+             "GCP: dns_cache_bypass, nat_egress_runaway, bigquery_full_scan, "
+             "orphaned_disks, gke_autoscaler_loop. "
+             "AWS: aws_nat_gateway_runaway, aws_s3_lifecycle_miss.",
+    ),
+    provider: Optional[str] = typer.Option(
+        None,
+        "--provider",
+        help="Only pick scenarios for this provider: 'gcp' or 'aws'. "
+             "Random choice across all providers if omitted.",
     ),
 ) -> None:
     """Replay a bundled investigation. No API calls, no setup."""
     from ghosthunter.demo import run_demo
 
-    asyncio.run(run_demo(console, scenario_id=scenario))
+    asyncio.run(run_demo(console, scenario_id=scenario, provider_filter=provider))
 
 
 # ---------------------------------------------------------------------------

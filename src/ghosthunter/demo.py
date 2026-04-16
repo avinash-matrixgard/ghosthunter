@@ -36,11 +36,15 @@ DEMO_SCRIPT_PATH = SAMPLE_DIR / "demo_script.json"
 
 
 async def run_demo(
-    console: Console, scenario_id: str | None = None
+    console: Console,
+    scenario_id: str | None = None,
+    provider_filter: str | None = None,
 ) -> None:
     """Replay one of the bundled investigations.
 
-    A random scenario is picked unless `scenario_id` is provided.
+    A random scenario is picked unless `scenario_id` is provided. When
+    `provider_filter` is set (``"gcp"`` / ``"aws"``), only scenarios
+    matching that provider are considered.
     """
     if not DEMO_SCRIPT_PATH.exists():
         console.print(f"[red]Demo script not found at {DEMO_SCRIPT_PATH}[/red]")
@@ -50,6 +54,18 @@ async def run_demo(
         bundle: dict[str, Any] = json.load(f)
 
     scenarios = bundle.get("scenarios") or [bundle]  # back-compat with old shape
+    # Back-compat: old scenarios without a provider field are treated as GCP.
+    for s in scenarios:
+        s.setdefault("provider", "gcp")
+
+    if provider_filter in ("gcp", "aws"):
+        scenarios = [s for s in scenarios if s.get("provider") == provider_filter]
+        if not scenarios:
+            console.print(
+                f"[red]No scenarios match provider '{provider_filter}'.[/red]"
+            )
+            return
+
     script = _select_scenario(scenarios, scenario_id)
     if script is None:
         ids = ", ".join(s.get("id", "?") for s in scenarios)
@@ -58,15 +74,18 @@ async def run_demo(
         )
         return
 
+    provider = script.get("provider", "gcp")
     label = script.get("metadata", {}).get("scenario", script.get("id", ""))
     console.print(
         f"[bold magenta][DEMO][/bold magenta] Replaying bundled investigation: "
         f"[bold]{label}[/bold]\n"
-        "[dim]No API calls, no GCP access.[/dim]\n"
+        f"[dim]Provider: {provider}. No API calls, no cloud access.[/dim]\n"
     )
 
     renderer = RichStreamRenderer(console=console, demo=True)
-    validator = SecurityValidator()
+    # Scope the validator to the scenario's provider so AWS scenarios
+    # render as "allowed (L2)" instead of hitting the GCP allowlist.
+    validator = SecurityValidator(provider=provider)
     budget = Budget()
 
     spike = _spike_from_script(script["spike"])

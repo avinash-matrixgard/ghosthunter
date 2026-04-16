@@ -147,9 +147,10 @@ MODES: list[ModeOption] = [
         title="Demo",
         icon="🎭",
         description=(
-            "Replay a bundled investigation (DNS attack, NAT runaway, BigQuery\n"
-            "    full scan, orphaned disks, GKE autoscaler loop). No API calls,\n"
-            "    no GCP, no setup. Best way to see how Ghosthunter works."
+            "Replay a bundled investigation. GCP: DNS attack, NAT runaway,\n"
+            "    BigQuery full scan, orphaned disks, GKE autoscaler loop.\n"
+            "    AWS: NAT gateway runaway, S3 lifecycle miss. No API calls,\n"
+            "    no cloud, no setup — best way to see how Ghosthunter works."
         ),
         available=True,
     ),
