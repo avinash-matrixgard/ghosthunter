@@ -884,36 +884,69 @@ class _InvestigationRenderer:
     the user needs to read or respond to (hypothesis bars, reasoning
     panel, proposed command, need_info question).
 
+    The spinner's label includes a short **what it's working on** preview
+    so the user sees e.g.::
+
+        ✻ Opus is reasoning · turn 4 · 2 hypotheses active…
+        ✻ Sonnet is validating · aws ce get-cost-and-usage --time-period…
+        ✻ Sonnet is compressing · 18.4 KB of command output…
+
     One instance per investigation — the spinner state is per-run and
     must not leak across calls.
     """
-
-    # Label for each "thinking" phase the spinner covers.
-    _PHASE_LABELS = {
-        "step_started":       "Opus is reasoning",
-        "command_approved":   "Sonnet is validating the command",
-        "command_executed":   "Sonnet is compressing command output",
-    }
 
     def __init__(self, console: Console) -> None:
         self.console = console
         self._status: Status | None = None
         self._start_ts: float = 0.0
+        # Running counters for the reasoning spinner's detail line.
+        self._turn: int = 0
+        self._active_hypotheses: int = 0
 
     async def __call__(self, event: InvestigationEvent) -> None:
         kind = event.kind
 
-        # --- "thinking" phases: start/replace the spinner ---
-        if kind in self._PHASE_LABELS:
-            self._spin(self._PHASE_LABELS[kind])
+        # --- "thinking" phases — start/replace the spinner with a
+        #     context-rich label ---
+        if kind == "step_started":
+            self._turn += 1
+            suffix = f"turn {self._turn}"
+            if self._active_hypotheses:
+                suffix += f" · {self._active_hypotheses} active hypothes{'es' if self._active_hypotheses != 1 else 'is'}"
+            self._spin(f"Opus is reasoning · {suffix}")
+            return
+
+        if kind == "command_proposed":
+            # Sonnet Layer-6 validation happens between command_proposed
+            # and command_approved in the investigator loop. That's the
+            # right moment to spin "Sonnet is validating" — not when
+            # validation already finished (which is command_approved).
+            pending = event.payload.get("pending")
+            cmd = getattr(pending, "command", "") or ""
+            preview = _preview_command(cmd)
+            self._spin(f"Sonnet is validating · {preview}")
+            return
+
+        if kind == "compressing":
+            cmd = event.payload.get("command") or ""
+            byte_count = int(event.payload.get("bytes") or 0)
+            preview = _preview_command(cmd)
+            size = _fmt_bytes(byte_count)
+            self._spin(
+                f"Sonnet is compressing · {size} from '{preview}'"
+            )
             return
 
         # Every other event terminates whatever was spinning before it.
         self._stop_spin()
 
         if kind == "hypotheses_updated":
+            hyps = event.payload["hypotheses"]
+            self._active_hypotheses = sum(
+                1 for h in hyps if h.get("status") == "active"
+            )
             self.console.print("\n[bold]Hypotheses:[/bold]")
-            for h in event.payload["hypotheses"]:
+            for h in hyps:
                 bar = "█" * (h["confidence"] // 5)
                 self.console.print(
                     f"  {h['id']} [{h['status']:>10}] {h['confidence']:3}% "
@@ -935,6 +968,15 @@ class _InvestigationRenderer:
                 )
             return
 
+        if kind == "command_approved":
+            # Sonnet validation passed. The AdvisorProvider is about to
+            # take over and ask the user to paste output. A single dim
+            # line tells the user *why* we're paused.
+            self.console.print(
+                "[dim]  ✓ command passed Layer-6 validation[/dim]"
+            )
+            return
+
         if kind == "command_blocked":
             self.console.print(
                 f"[red]✗ blocked ({event.payload['layer']}):[/red] "
@@ -946,10 +988,30 @@ class _InvestigationRenderer:
             self.console.print("[dim]→ command skipped[/dim]")
             return
 
+        if kind == "command_executed":
+            # Advisor mode: user just pasted output. Print a dim size/duration
+            # line so the user sees we're moving from exec → compress.
+            result = event.payload.get("result")
+            if result is not None:
+                size = _fmt_bytes(len(getattr(result, "stdout", "") or ""))
+                dur = getattr(result, "duration_seconds", 0)
+                self.console.print(
+                    f"[dim]  ← received {size} in {dur:.1f}s[/dim]"
+                )
+            return
+
         if kind == "evidence_added":
             e = event.payload["evidence"]
             summary = (e.summary or "").split("\n", 1)[0][:120]
             self.console.print(f"[green]+ {e.id}[/green] {summary}")
+            return
+
+        if kind == "user_note":
+            note = (event.payload.get("note") or "").strip()
+            if note:
+                self.console.print(
+                    f"[dim]  → note to Opus: {note[:80]}[/dim]"
+                )
             return
 
         if kind == "concluded":
@@ -964,10 +1026,8 @@ class _InvestigationRenderer:
             )
             return
 
-        # command_proposed / opus_asks / spike_selected / command_approved
-        # results / user_note: the AdvisorProvider (or spike-selection
-        # phase) handles the visible output for these. Nothing extra for
-        # the renderer to do.
+        # spike_selected / opus_asks are handled by the AdvisorProvider's
+        # own panels; nothing extra for the renderer to do.
 
     # ------------------------------------------------------------------
     def _spin(self, text: str) -> None:
@@ -991,6 +1051,29 @@ class _InvestigationRenderer:
             # A faint "(3.2s)" line under the spinner so the user sees
             # how long each backend phase actually took.
             self.console.print(f"[dim]  ({elapsed:.1f}s)[/dim]")
+
+
+# ---------------------------------------------------------------------------
+# Spinner detail-line helpers
+# ---------------------------------------------------------------------------
+_MAX_CMD_PREVIEW = 60
+
+
+def _preview_command(command: str) -> str:
+    """Squash a command into one line ≤60 chars with an ellipsis."""
+    single_line = " ".join(command.split())
+    if len(single_line) <= _MAX_CMD_PREVIEW:
+        return single_line
+    return single_line[: _MAX_CMD_PREVIEW - 1] + "…"
+
+
+def _fmt_bytes(n: int) -> str:
+    """Format a byte count as a short human-readable string."""
+    if n < 1024:
+        return f"{n} B"
+    if n < 1024 * 1024:
+        return f"{n / 1024:.1f} KB"
+    return f"{n / (1024 * 1024):.1f} MB"
 
 
 def _render_spike_table(spikes) -> None:

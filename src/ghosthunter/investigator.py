@@ -115,13 +115,17 @@ class InvestigationEvent:
     kind: Literal[
         "spike_selected",
         "step_started",
+        "reasoning",
         "hypotheses_updated",
+        "opus_asks",
         "command_proposed",
         "command_blocked",
         "command_approved",
         "command_rejected_by_user",
         "command_executed",
+        "compressing",            # Sonnet is turning command output into evidence
         "evidence_added",
+        "user_note",
         "concluded",
         "aborted",
     ]
@@ -418,11 +422,18 @@ class Investigator:
         self.budget.seconds_used += result.duration_seconds
         await self._emit("command_executed", {"result": result})
 
-        # Compress and turn into evidence
+        # Compress and turn into evidence. Emit a separate event so the
+        # renderer can swap the spinner from "validating" / "executed" into
+        # "compressing" with a byte-count hint.
+        compress_input = _format_for_compression(result)
+        await self._emit(
+            "compressing",
+            {"command": command, "bytes": len(compress_input)},
+        )
         try:
             summary = await self.executor.compress(
                 command=command,
-                output=_format_for_compression(result),
+                output=compress_input,
                 investigation_target=self._target_summary(),
                 hypotheses=[h.description for h in self.hypotheses.all()],
             )

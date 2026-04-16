@@ -5,10 +5,17 @@ frozen while Opus is thinking". The renderer fires a `rich.status.Status`
 spinner whenever the backend is doing opaque work and stops it around
 anything the user needs to read or respond to.
 
-Spinner phases (covered by `_PHASE_LABELS`):
-  step_started     → "Opus is reasoning"
-  command_approved → "Sonnet is validating the command"
-  command_executed → "Sonnet is compressing command output"
+Spinner phases, with context-rich labels so the user sees WHAT is being
+worked on — not just that something is running:
+  step_started       → "Opus is reasoning · turn N · K active hypotheses"
+  command_proposed   → "Sonnet is validating · <first 60 chars of command>"
+  compressing        → "Sonnet is compressing · <bytes> from '<command>'"
+
+Note: the validation spinner fires at ``command_proposed``, not at
+``command_approved``. In the investigator loop Sonnet's Layer-6 check
+happens BETWEEN those two events, so ``command_approved`` marks
+validation *done*, not *starting*. This was a bug in the first cut of
+the spinner.
 
 Every other event stops the spinner before rendering its own output.
 """
@@ -19,7 +26,11 @@ import asyncio
 import pytest
 from rich.console import Console
 
-from ghosthunter.cli import _InvestigationRenderer
+from ghosthunter.cli import (
+    _InvestigationRenderer,
+    _fmt_bytes,
+    _preview_command,
+)
 from ghosthunter.investigator import InvestigationEvent
 
 
@@ -74,25 +85,46 @@ class TestSpinnerLifecycle:
             "hypotheses_updated should stop the spinner before rendering bars"
         )
 
-    def test_every_thinking_phase_has_a_label(self):
-        assert "step_started" in _InvestigationRenderer._PHASE_LABELS
-        assert "command_approved" in _InvestigationRenderer._PHASE_LABELS
-        assert "command_executed" in _InvestigationRenderer._PHASE_LABELS
-        # All labels are non-empty strings — catches typos in constants.
-        for kind, label in _InvestigationRenderer._PHASE_LABELS.items():
-            assert isinstance(label, str) and label, (
-                f"empty label for {kind!r}"
+    def test_command_proposed_starts_validation_spinner(self, renderer_pair):
+        """Validation happens BEFORE command_approved, not after."""
+        renderer, _ = renderer_pair
+
+        class _P:
+            command = "aws ec2 describe-instances --region us-east-1"
+
+        asyncio.run(
+            renderer(InvestigationEvent("command_proposed", {"pending": _P()}))
+        )
+        assert renderer._status is not None
+        renderer._stop_spin()
+
+    def test_compressing_starts_compression_spinner(self, renderer_pair):
+        renderer, _ = renderer_pair
+        asyncio.run(
+            renderer(
+                InvestigationEvent(
+                    "compressing",
+                    {"command": "aws ec2 describe-instances", "bytes": 18400},
+                )
             )
+        )
+        assert renderer._status is not None
+        renderer._stop_spin()
 
     def test_phase_transition_replaces_spinner(self, renderer_pair):
-        """step_started → command_approved should swap the spinner text."""
+        """step_started → command_proposed should swap the spinner text."""
         renderer, _ = renderer_pair
+
+        class _P:
+            command = "aws s3 ls"
 
         async def go():
             await renderer(InvestigationEvent("step_started", {}))
             assert renderer._status is not None
             first_status = renderer._status
-            await renderer(InvestigationEvent("command_approved", {"command": "x"}))
+            await renderer(
+                InvestigationEvent("command_proposed", {"pending": _P()})
+            )
             # A new Status object replaces the old one.
             assert renderer._status is not None
             assert renderer._status is not first_status
@@ -238,9 +270,7 @@ class TestSilentEvents:
         "kind,payload",
         [
             ("spike_selected", {"spike": object()}),
-            ("command_proposed", {"pending": object()}),
             ("opus_asks", {"question": "which project?"}),
-            ("user_note", {"note": "try something different"}),
         ],
     )
     def test_no_output_and_no_spinner(self, renderer_pair, kind, payload):
@@ -250,6 +280,122 @@ class TestSilentEvents:
             f"renderer should be silent on {kind!r}"
         )
         assert renderer._status is None
+
+
+class TestDetailLineHelpers:
+    """Spinner labels are only useful if the detail text is readable."""
+
+    def test_short_command_unchanged(self):
+        assert _preview_command("aws s3 ls") == "aws s3 ls"
+
+    def test_multiline_command_collapses_whitespace(self):
+        cmd = "aws ec2 \\\n    describe-instances \\\n    --region us-east-1"
+        assert "\n" not in _preview_command(cmd)
+
+    def test_long_command_truncated_with_ellipsis(self):
+        cmd = "aws ce get-cost-and-usage --time-period Start=2026-01-01,End=2026-04-01 --granularity DAILY"
+        out = _preview_command(cmd)
+        assert out.endswith("…")
+        assert len(out) == 60
+
+    @pytest.mark.parametrize(
+        "n,expected_suffix",
+        [
+            (0,     "B"),
+            (512,   "B"),
+            (1023,  "B"),
+            (1024,  "KB"),
+            (18400, "KB"),
+            (2 * 1024 * 1024, "MB"),
+        ],
+    )
+    def test_fmt_bytes(self, n, expected_suffix):
+        assert expected_suffix in _fmt_bytes(n)
+
+
+def _spinner_text(renderer) -> str:
+    """Extract the current spinner's display text.
+
+    Rich's Status wraps a Spinner; the display string lives at
+    ``status.renderable.text``. We stringify it to collapse any Rich
+    Text objects so substring assertions work.
+    """
+    status = renderer._status
+    assert status is not None, "spinner not running"
+    return str(status.renderable.text)
+
+
+class TestSpinnerContextEnrichment:
+    """The detail-line text on each spinner should actually be populated."""
+
+    def test_validation_spinner_shows_command_preview(self, renderer_pair):
+        renderer, _ = renderer_pair
+
+        class _P:
+            command = "aws ec2 describe-instances --region us-east-1"
+
+        asyncio.run(
+            renderer(InvestigationEvent("command_proposed", {"pending": _P()}))
+        )
+        text = _spinner_text(renderer)
+        assert "aws ec2 describe-instances" in text
+        assert "validating" in text.lower()
+        renderer._stop_spin()
+
+    def test_compression_spinner_shows_byte_count(self, renderer_pair):
+        renderer, _ = renderer_pair
+        asyncio.run(
+            renderer(
+                InvestigationEvent(
+                    "compressing",
+                    {"command": "aws ec2 describe-instances", "bytes": 18432},
+                )
+            )
+        )
+        text = _spinner_text(renderer)
+        assert "18.0 KB" in text
+        assert "compressing" in text.lower()
+        renderer._stop_spin()
+
+    def test_reasoning_spinner_tracks_turn_count(self, renderer_pair):
+        renderer, _ = renderer_pair
+
+        async def go():
+            await renderer(InvestigationEvent("step_started", {}))
+            text1 = _spinner_text(renderer)
+            renderer._stop_spin()
+            await renderer(InvestigationEvent("step_started", {}))
+            text2 = _spinner_text(renderer)
+            renderer._stop_spin()
+            return text1, text2
+
+        text1, text2 = asyncio.run(go())
+        assert "turn 1" in text1
+        assert "turn 2" in text2
+
+    def test_reasoning_spinner_shows_active_hypothesis_count(self, renderer_pair):
+        renderer, _ = renderer_pair
+
+        async def go():
+            await renderer(
+                InvestigationEvent(
+                    "hypotheses_updated",
+                    {
+                        "hypotheses": [
+                            {"id": "H1", "status": "active", "confidence": 60, "description": "A"},
+                            {"id": "H2", "status": "active", "confidence": 30, "description": "B"},
+                            {"id": "H3", "status": "eliminated", "confidence": 4, "description": "C"},
+                        ]
+                    },
+                )
+            )
+            await renderer(InvestigationEvent("step_started", {}))
+            return _spinner_text(renderer)
+
+        text = asyncio.run(go())
+        # 2 active, 1 eliminated → we say "2 active hypotheses"
+        assert "2" in text and "active" in text
+        renderer._stop_spin()
 
 
 # ---------------------------------------------------------------------------
