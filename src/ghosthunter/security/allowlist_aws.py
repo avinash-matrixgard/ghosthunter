@@ -35,7 +35,7 @@ import re
 # for their service names (e.g. ``ec2``, ``rds``, ``route53resolver``,
 # ``ssm``, ``stepfunctions``).
 # ---------------------------------------------------------------------------
-BASE_READ_RULE = r"^aws\s+[a-z0-9-]+\s+(describe|list|get)-[a-z0-9-]+\b"
+BASE_READ_RULE = r"^aws\s+[a-z0-9-]+\s+(describe|list|get|batch-get)-[a-z0-9-]+\b"
 
 
 # ---------------------------------------------------------------------------
@@ -65,12 +65,70 @@ ALLOWED_PATTERNS: list[str] = [
     r"^aws\s+sts\s+decode-authorization-message\b",
 
     # ---- Read-only verbs that don't fit the describe/list/get pattern ----
+    # (BASE_READ_RULE below catches everything that does.)
+    #
+    # CloudWatch Logs
     r"^aws\s+logs\s+filter-log-events\b",
     r"^aws\s+logs\s+tail\b",
+    # CloudTrail
     r"^aws\s+cloudtrail\s+lookup-events\b",
+    # EC2 routes
     r"^aws\s+ec2\s+search-transit-gateway-routes\b",
     r"^aws\s+ec2\s+search-local-gateway-routes\b",
+    # Resource Groups — lists every tagged resource; hugely useful for cost
     r"^aws\s+resourcegroupstaggingapi\s+get-resources\b",
+    r"^aws\s+resource-groups\s+search-resources\b",
+    # DynamoDB — scan / query / batch-get-item are the primary read paths
+    r"^aws\s+dynamodb\s+scan\b",
+    r"^aws\s+dynamodb\s+query\b",
+    r"^aws\s+dynamodb\s+batch-get-item\b",
+    # IAM policy simulation (read-only, even though named simulate-*)
+    r"^aws\s+iam\s+simulate-principal-policy\b",
+    r"^aws\s+iam\s+simulate-custom-policy\b",
+    # CloudFormation — template validation is read-only
+    r"^aws\s+cloudformation\s+validate-template\b",
+    r"^aws\s+cloudformation\s+detect-stack-drift\b",  # starts an async detection; read-oriented
+    # Route 53 — test DNS resolution
+    r"^aws\s+route53\s+test-dns-answer\b",
+    # Athena — batch read
+    r"^aws\s+athena\s+batch-get-query-execution\b",
+    r"^aws\s+athena\s+batch-get-named-query\b",
+    # Cost Anomaly Detection extras
+    r"^aws\s+ce\s+get-anomaly-detectors\b",
+    r"^aws\s+ce\s+get-cost-categories\b",
+    r"^aws\s+ce\s+get-rightsizing-recommendation\b",
+    r"^aws\s+ce\s+get-reservation-coverage\b",
+    r"^aws\s+ce\s+get-reservation-purchase-recommendation\b",
+    r"^aws\s+ce\s+get-reservation-utilization\b",
+    r"^aws\s+ce\s+get-savings-plans-coverage\b",
+    r"^aws\s+ce\s+get-savings-plans-purchase-recommendation\b",
+    r"^aws\s+ce\s+get-savings-plans-utilization\b",
+    r"^aws\s+ce\s+get-savings-plans-utilization-details\b",
+    # Pricing API — read-only
+    r"^aws\s+pricing\s+get-products\b",
+    r"^aws\s+pricing\s+get-attribute-values\b",
+    r"^aws\s+pricing\s+describe-services\b",  # matches base too, but explicit is fine
+    # CloudWatch Logs Insights — get-query-results reads COMPLETED results.
+    # (start-query is blocked; this only retrieves what's already finished.)
+    r"^aws\s+logs\s+get-query-results\b",
+    # Athena — get-query-results reads completed results
+    r"^aws\s+athena\s+get-query-results\b",
+    # Application Auto Scaling — read-only scheduled actions
+    r"^aws\s+application-autoscaling\s+describe-scalable-targets\b",  # base catches, explicit ok
+    # Organizations — describe-organization / list-accounts caught by base
+    # AWS Config — read-only resource config
+    r"^aws\s+configservice\s+list-discovered-resources\b",
+    r"^aws\s+configservice\s+get-resource-config-history\b",
+    # Compute Optimizer — reads rightsizing recommendations
+    r"^aws\s+compute-optimizer\s+get-ec2-instance-recommendations\b",
+    r"^aws\s+compute-optimizer\s+get-auto-scaling-group-recommendations\b",
+    r"^aws\s+compute-optimizer\s+get-ebs-volume-recommendations\b",
+    r"^aws\s+compute-optimizer\s+get-lambda-function-recommendations\b",
+    r"^aws\s+compute-optimizer\s+get-rds-database-recommendations\b",
+    # Trusted Advisor — reads checks (read-only)
+    r"^aws\s+support\s+describe-trusted-advisor-checks\b",
+    r"^aws\s+support\s+describe-trusted-advisor-check-result\b",
+    r"^aws\s+support\s+describe-trusted-advisor-check-summaries\b",
 
     # ---- The base read rule picks up everything else that fits the
     #      describe-/list-/get- pattern across every service.
@@ -142,11 +200,54 @@ WRITE_DISGUISED_AS_READ: list[str] = [
 
     # ---- Cognito / auth flows that mint tokens ----
     r"^aws\s+cognito-idp\s+initiate-auth\b",
+    r"^aws\s+cognito-idp\s+admin-initiate-auth\b",
     r"^aws\s+cognito-idp\s+get-id\b",   # cognito-identity mints temporary creds
     r"^aws\s+cognito-identity\s+get-id\b",
     r"^aws\s+cognito-identity\s+get-credentials-for-identity\b",
     r"^aws\s+cognito-identity\s+get-open-id-token\b",
     r"^aws\s+cognito-identity\s+get-open-id-token-for-developer-identity\b",
+
+    # ---- Lambda / model invocation (spends money, causes side effects) ----
+    r"^aws\s+bedrock-runtime\s+invoke-model\b",
+    r"^aws\s+bedrock-runtime\s+invoke-model-with-response-stream\b",
+    r"^aws\s+bedrock-runtime\s+converse\b",
+    r"^aws\s+bedrock-runtime\s+converse-stream\b",
+    r"^aws\s+bedrock-agent-runtime\s+invoke-agent\b",
+    r"^aws\s+bedrock-agent-runtime\s+retrieve-and-generate\b",
+    r"^aws\s+sagemaker-runtime\s+invoke-endpoint\b",
+    r"^aws\s+sagemaker-runtime\s+invoke-endpoint-async\b",
+    r"^aws\s+sagemaker-runtime\s+invoke-endpoint-with-response-stream\b",
+
+    # ---- CloudWatch Synthetics — trigger canaries (costs money, can hit user URLs) ----
+    r"^aws\s+synthetics\s+start-canary\b",
+
+    # ---- S3 data egress — CAN leak data, but also essential for cost forensics.
+    # We allow these but warn via the reasoner prompt; block only the bulk
+    # presigned-URL path that could be chained into automated exfil.
+    r"^aws\s+s3\s+presign\b",
+    r"^aws\s+s3api\s+get-object-attributes\b",  # metadata only, BUT cheap path to enumerate buckets
+
+    # ---- EC2 VPC endpoint / network side effects ----
+    r"^aws\s+ec2\s+send-diagnostic-interrupt\b",   # reboots instance via NMI
+    r"^aws\s+ec2\s+reset-image-attribute\b",
+
+    # ---- AWS Config — select-resource-config starts an ad-hoc SQL-ish query ----
+    r"^aws\s+configservice\s+select-resource-config\b",
+    r"^aws\s+configservice\s+select-aggregate-resource-config\b",
+
+    # ---- QuickSight — get-dashboard-embed-url mints shareable URLs ----
+    r"^aws\s+quicksight\s+get-dashboard-embed-url\b",
+    r"^aws\s+quicksight\s+generate-embed-url-for-anonymous-user\b",
+    r"^aws\s+quicksight\s+generate-embed-url-for-registered-user\b",
+
+    # ---- Support case creation / comment (user-visible side effects) ----
+    # "create-case" doesn't match BASE_READ_RULE anyway; listed for clarity.
+    # No entry needed — kept in mind for future expansion.
+
+    # ---- AWS CLI v2 stream readers that also run code ----
+    r"^aws\s+rds-data\s+execute-statement\b",   # runs SQL against RDS Data API
+    r"^aws\s+rds-data\s+batch-execute-statement\b",
+    r"^aws\s+timestream-query\s+query\b",        # runs Timestream queries (costs money)
 ]
 
 
