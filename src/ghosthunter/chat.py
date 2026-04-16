@@ -899,7 +899,7 @@ def _build_investigator(
     investigator = Investigator(
         provider=provider,  # type: ignore[arg-type]
         reasoner=Reasoner(provider=provider_key),
-        executor=Executor(),
+        executor=Executor(provider=provider_key),
         validator=validator,
         approval_hook=auto_approve,
         event_hook=event_hook,

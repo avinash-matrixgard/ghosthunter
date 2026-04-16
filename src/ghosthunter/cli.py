@@ -825,7 +825,7 @@ def _build_active_investigator(
     return Investigator(
         provider=provider_obj,
         reasoner=Reasoner(provider=provider),
-        executor=Executor(),
+        executor=Executor(provider=provider),
         validator=SecurityValidator(provider=provider),
         approval_hook=_interactive_approval,
         event_hook=_print_event,
@@ -848,7 +848,7 @@ def _build_advisor_investigator(provider: str = "gcp") -> Investigator:
     return Investigator(
         provider=advisor,  # type: ignore[arg-type]
         reasoner=Reasoner(provider=provider),
-        executor=Executor(),
+        executor=Executor(provider=provider),
         validator=validator,
         approval_hook=_auto_approve,  # AdvisorProvider handles user interaction
         event_hook=_print_event,
