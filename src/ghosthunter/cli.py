@@ -392,10 +392,31 @@ def _run_active_mode(
 
     if provider == "aws":
         aws_cfg = cfg.aws or AWSConfig()
+        # Cost Explorer API is metered (~$0.01 per request). Warn once per
+        # machine and persist the ack so scripted runs aren't interrupted.
+        if not aws_cfg.ce_api_cost_ack:
+            console.print(
+                "[yellow]Cost Explorer API calls are billed at ~$0.01 each.[/yellow]\n"
+                "[dim]A typical investigation makes 2-6 calls. This notice is "
+                "shown once; Ghosthunter persists your acknowledgment in "
+                "~/.ghosthunter/config.toml.[/dim]"
+            )
+            if not Confirm.ask("Proceed?", default=True):
+                raise typer.Exit(0)
+            aws_cfg.ce_api_cost_ack = True
+            cfg.aws = aws_cfg
+            cfg.save()
+
+        ce_calls: list[dict] = []
+
+        def _record_ce_call(op: str, params: dict) -> None:
+            ce_calls.append({"operation": op, "params": params})
+
         prov = AWSProvider(
             profile=aws_cfg.profile,
             region=aws_cfg.region,
             account_id=aws_cfg.account_id,
+            on_ce_call=_record_ce_call,
         )
         label = (
             f"{aws_cfg.account_id or 'default'} "
@@ -430,7 +451,10 @@ def _run_active_mode(
     investigator = _build_active_investigator(prov, cfg, provider=provider)
     result = asyncio.run(investigator.investigate(spike))
     _render_result(result)
-    _append_audit_log(result)
+    extra: dict = {"provider": provider}
+    if provider == "aws":
+        extra["ce_api_calls"] = len(ce_calls)
+    _append_audit_log(result, extra=extra)
 
 
 def _run_advisor_mode(
@@ -479,7 +503,7 @@ def _run_advisor_mode(
     investigator = _build_advisor_investigator(provider=provider)
     result = asyncio.run(investigator.investigate(spike))
     _render_result(result)
-    _append_audit_log(result)
+    _append_audit_log(result, extra={"provider": provider})
 
 
 # ---------------------------------------------------------------------------
@@ -926,7 +950,7 @@ def _render_result(result) -> None:
     )
 
 
-def _append_audit_log(result) -> None:
+def _append_audit_log(result, extra: dict | None = None) -> None:
     AUDIT_LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
     entry = {
         "timestamp": datetime.now().isoformat(timespec="seconds"),
@@ -936,6 +960,8 @@ def _append_audit_log(result) -> None:
         "conclusion": result.conclusion,
         "aborted_reason": result.aborted_reason,
     }
+    if extra:
+        entry.update(extra)
     with AUDIT_LOG_PATH.open("a") as f:
         f.write(json.dumps(entry) + "\n")
 

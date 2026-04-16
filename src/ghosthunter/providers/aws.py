@@ -19,7 +19,8 @@ from __future__ import annotations
 
 import asyncio
 import shlex
-from typing import ClassVar
+from datetime import date, timedelta
+from typing import Any, ClassVar
 
 from ghosthunter.providers.base import (
     BaseProvider,
@@ -30,6 +31,14 @@ from ghosthunter.providers.base import (
     ProviderError,
 )
 from ghosthunter.security.validator import SecurityValidator
+
+# Optional import: boto3 is only needed for active mode. Advisor-mode
+# AWS users should be able to run Ghosthunter without boto3 installed.
+try:
+    import boto3  # type: ignore
+    _BOTO3_AVAILABLE = True
+except ImportError:
+    _BOTO3_AVAILABLE = False
 
 
 # ---------------------------------------------------------------------------
@@ -73,6 +82,8 @@ class AWSProvider(BaseProvider):
         validator: SecurityValidator | None = None,
         command_timeout: int = 120,
         max_output_bytes: int = 1_000_000,  # 1 MB
+        ce_client: Any | None = None,
+        on_ce_call: Any | None = None,
     ) -> None:
         self.profile = profile
         self.region = region
@@ -80,22 +91,219 @@ class AWSProvider(BaseProvider):
         self.validator = validator or SecurityValidator(provider="aws")
         self.command_timeout = command_timeout
         self.max_output_bytes = max_output_bytes
+        # Injected boto3 client for tests. Production path lazily constructs
+        # one inside fetch_billing_spikes so boto3 import stays optional.
+        self._ce_client = ce_client
+        # Optional callback fired before each CE API call. Used by the CLI
+        # to render the cost banner and bump an audit counter. Callback
+        # signature: (operation_name: str, params: dict) -> None
+        self.on_ce_call = on_ce_call
 
     # ------------------------------------------------------------------
-    # Billing fetch — Phase 4 populates this with boto3 Cost Explorer.
+    # Billing fetch — boto3 Cost Explorer.
     # ------------------------------------------------------------------
     def fetch_billing_spikes(
         self,
         lookback_days: int = 30,
         min_change_percent: float = 20.0,
         min_absolute_change: float = 100.0,
+        followup_usage_type: bool = True,
     ) -> list[CostSpike]:
-        raise AWSProviderError(
-            "AWS active-mode billing fetch lands in Phase 4. "
-            "For now, export a Cost Explorer CSV (or run "
-            "`aws ce get-cost-and-usage`) and pass it with -f. "
-            "See `ghosthunter billing-template --provider=aws`."
+        """Query Cost Explorer for SERVICE-level spikes over a window.
+
+        Compares the most recent ``lookback_days`` against the prior
+        equal-length window and returns services whose cost moved
+        materially by either percent or absolute-dollar thresholds.
+
+        When ``followup_usage_type`` is True, for each spike whose
+        ``previous_cost`` exceeds ``min_absolute_change`` we make a
+        second CE call scoped to that service grouped by USAGE_TYPE,
+        and attach the results as ``top_contributors["usage_type"]``.
+
+        Cost note: each CE call is billed at ~$0.01. A typical run
+        makes 2 + (small-N) calls. The CLI prints a one-line banner
+        on first use and persists the acknowledgment in config so the
+        prompt doesn't show again.
+        """
+        ce = self._get_ce_client()
+        today = date.today()
+        current_end = today
+        current_start = today - timedelta(days=lookback_days)
+        previous_end = current_start
+        previous_start = previous_end - timedelta(days=lookback_days)
+
+        # CE expects YYYY-MM-DD strings, and End is *exclusive*.
+        current = self._ce_service_totals(ce, current_start, current_end)
+        previous = self._ce_service_totals(ce, previous_start, previous_end)
+
+        spikes: list[CostSpike] = []
+        for service in sorted(set(current) | set(previous)):
+            cur = current.get(service, 0.0)
+            prev = previous.get(service, 0.0)
+            if prev > 0:
+                pct = ((cur - prev) / prev) * 100.0
+            else:
+                pct = float("inf") if cur > 0 else 0.0
+            absolute = cur - prev
+            material = (
+                abs(pct) >= min_change_percent
+                or abs(absolute) >= min_absolute_change
+            )
+            if not material:
+                continue
+            spikes.append(
+                CostSpike(
+                    service=service,
+                    current_cost=cur,
+                    previous_cost=prev,
+                    change_percent=pct,
+                    grouping="service",
+                    daily_breakdown=[],
+                )
+            )
+
+        spikes.sort(key=lambda s: abs(s.absolute_change), reverse=True)
+
+        # Optional: for each material spike, break down by USAGE_TYPE for
+        # the CURRENT window. Skipped for tiny spikes so we don't burn CE
+        # calls ($0.01 each) on noise.
+        if followup_usage_type:
+            for spike in spikes:
+                if spike.previous_cost < min_absolute_change and spike.current_cost < min_absolute_change * 2:
+                    continue
+                try:
+                    breakdown = self._ce_usage_type_for_service(
+                        ce, spike.service, current_start, current_end
+                    )
+                except Exception:
+                    # Follow-up failures are non-fatal — we already have
+                    # the primary spike data. Keep the primary; drop the
+                    # contributor detail.
+                    continue
+                if breakdown:
+                    spike.top_contributors["usage_type"] = breakdown
+
+        return spikes
+
+    # ------------------------------------------------------------------
+    def _get_ce_client(self) -> Any:
+        """Return the boto3 CE client, constructing one lazily if needed."""
+        if self._ce_client is not None:
+            return self._ce_client
+        if not _BOTO3_AVAILABLE:
+            raise AWSProviderError(
+                "boto3 is not installed; install it to use AWS active mode:\n"
+                "  pip install 'ghosthunter[aws]'   # or: pip install boto3\n"
+                "Advisor mode (a billing-file CSV / JSON) works without boto3 —\n"
+                "see `ghosthunter billing-template --provider=aws`."
+            )
+        session_kwargs: dict[str, Any] = {}
+        if self.profile:
+            session_kwargs["profile_name"] = self.profile
+        if self.region:
+            session_kwargs["region_name"] = self.region
+        session = boto3.Session(**session_kwargs)
+        # Cost Explorer lives in us-east-1 regardless of where the
+        # account's resources are. Pin it so callers can pass a different
+        # default region (us-west-2 etc.) without confusing CE.
+        return session.client("ce", region_name="us-east-1")
+
+    def _ce_service_totals(
+        self, ce: Any, start: date, end: date
+    ) -> dict[str, float]:
+        """Return {service_name: unblended_cost} aggregated over the window."""
+        self._notify_ce_call(
+            "get_cost_and_usage_by_service",
+            {"start": start.isoformat(), "end": end.isoformat()},
         )
+        totals: dict[str, float] = {}
+        params: dict[str, Any] = {
+            "TimePeriod": {"Start": start.isoformat(), "End": end.isoformat()},
+            "Granularity": "MONTHLY",
+            "Metrics": ["UnblendedCost"],
+            "GroupBy": [{"Type": "DIMENSION", "Key": "SERVICE"}],
+        }
+        response = ce.get_cost_and_usage(**params)
+        while True:
+            for bucket in response.get("ResultsByTime") or []:
+                for group in bucket.get("Groups") or []:
+                    keys = group.get("Keys") or []
+                    if not keys:
+                        continue
+                    service = keys[0]
+                    metrics = group.get("Metrics") or {}
+                    amt_str = (
+                        metrics.get("UnblendedCost", {}).get("Amount") or "0"
+                    )
+                    try:
+                        amt = float(amt_str)
+                    except (TypeError, ValueError):
+                        amt = 0.0
+                    totals[service] = totals.get(service, 0.0) + amt
+            next_token = response.get("NextPageToken")
+            if not next_token:
+                break
+            response = ce.get_cost_and_usage(
+                **{**params, "NextPageToken": next_token}
+            )
+        return totals
+
+    def _ce_usage_type_for_service(
+        self, ce: Any, service: str, start: date, end: date, limit: int = 8
+    ) -> list[tuple[str, float]]:
+        """Return top-N (UsageType, cost) pairs for a service over a window."""
+        self._notify_ce_call(
+            "get_cost_and_usage_usage_type",
+            {
+                "service": service,
+                "start": start.isoformat(),
+                "end": end.isoformat(),
+            },
+        )
+        params: dict[str, Any] = {
+            "TimePeriod": {"Start": start.isoformat(), "End": end.isoformat()},
+            "Granularity": "MONTHLY",
+            "Metrics": ["UnblendedCost"],
+            "GroupBy": [{"Type": "DIMENSION", "Key": "USAGE_TYPE"}],
+            "Filter": {
+                "Dimensions": {"Key": "SERVICE", "Values": [service]},
+            },
+        }
+        response = ce.get_cost_and_usage(**params)
+        totals: dict[str, float] = {}
+        while True:
+            for bucket in response.get("ResultsByTime") or []:
+                for group in bucket.get("Groups") or []:
+                    keys = group.get("Keys") or []
+                    if not keys:
+                        continue
+                    usage = keys[0]
+                    metrics = group.get("Metrics") or {}
+                    amt_str = (
+                        metrics.get("UnblendedCost", {}).get("Amount") or "0"
+                    )
+                    try:
+                        amt = float(amt_str)
+                    except (TypeError, ValueError):
+                        amt = 0.0
+                    totals[usage] = totals.get(usage, 0.0) + amt
+            next_token = response.get("NextPageToken")
+            if not next_token:
+                break
+            response = ce.get_cost_and_usage(
+                **{**params, "NextPageToken": next_token}
+            )
+        ranked = sorted(totals.items(), key=lambda kv: kv[1], reverse=True)
+        return ranked[:limit]
+
+    def _notify_ce_call(self, operation: str, params: dict[str, Any]) -> None:
+        """Fire the on_ce_call hook if one is registered."""
+        if self.on_ce_call is not None:
+            try:
+                self.on_ce_call(operation, params)
+            except Exception:
+                # Hook errors must never mask billing-fetch errors.
+                pass
 
     # ------------------------------------------------------------------
     # Command execution — mirrors GCPProvider.execute_command exactly,
