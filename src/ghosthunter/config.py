@@ -87,3 +87,28 @@ class Config:
             payload.pop("aws", None)
         with path.open("wb") as f:
             tomli_w.dump(payload, f)
+
+
+def migrate_config_in_place(path: Path = CONFIG_PATH) -> bool:
+    """Rewrite ``config.toml`` with the current schema if it's from before
+    the ``provider`` field was introduced.
+
+    Idempotent: if the file already has a ``provider`` key, nothing is
+    written and the function returns ``False``. If the file is missing
+    ``provider`` (a pre-Phase-1 config), it's loaded, re-saved with
+    ``provider="gcp"`` (defaulting preserves the old GCP-only semantics)
+    and the function returns ``True``. Missing-file is a no-op (returns
+    ``False``) — callers that need a config should handle that elsewhere.
+
+    This is intentionally side-effecting on disk so first-run users of
+    an AWS-capable Ghosthunter don't have to re-run ``ghosthunter init``.
+    """
+    if not path.exists():
+        return False
+    with path.open("rb") as f:
+        data = tomli.load(f)
+    if "provider" in data:
+        return False
+    cfg = Config.load(path)
+    cfg.save(path)
+    return True

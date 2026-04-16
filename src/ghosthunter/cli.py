@@ -27,6 +27,7 @@ from ghosthunter.config import (
     AWSConfig,
     BudgetConfig,
     Config,
+    migrate_config_in_place,
 )
 from ghosthunter.investigator import (
     Budget,
@@ -341,6 +342,61 @@ def _run_active_mode_interactive(console_arg: Console) -> None:
     _run_active_mode(spike_index=0, list_only=False, provider=cfg.provider or "gcp")
 
 
+_AUDIT_PROVIDER_STYLES = {
+    "gcp": "[blue]gcp[/blue]",
+    "aws": "[yellow]aws[/yellow]",
+}
+
+
+def _build_audit_table(lines: list[str]) -> Table:
+    """Render the audit log as a Rich table. Shared between `audit` CLI
+    command and the chat mode-picker audit view.
+
+    Columns: Time, Provider, Service, Result, Commands, Root cause/reason.
+    For AWS rows the Commands column also shows the Cost Explorer API
+    call count written by the active-mode runner (e.g. ``7 · ce:3``).
+    """
+    table = Table(title=f"Audit log ({AUDIT_LOG_PATH})")
+    table.add_column("Time", style="cyan")
+    table.add_column("Provider")
+    table.add_column("Service")
+    table.add_column("Result")
+    table.add_column("Commands", justify="right")
+    table.add_column("Root cause / reason")
+
+    for line in lines:
+        entry = json.loads(line)
+        provider = entry.get("provider") or "gcp"
+        provider_label = _AUDIT_PROVIDER_STYLES.get(
+            provider, f"[dim]{provider}[/dim]"
+        )
+        result_label = (
+            "[green]concluded[/green]"
+            if entry["succeeded"]
+            else "[red]aborted[/red]"
+        )
+        # `conclusion` can be None for aborted/failed runs, not just absent —
+        # `entry.get("conclusion", {})` would return None and break .get().
+        summary = (
+            (entry.get("conclusion") or {}).get("root_cause")
+            or entry.get("aborted_reason")
+            or "—"
+        )
+        cmd_cell = str(entry["commands_used"])
+        ce_calls = entry.get("ce_api_calls")
+        if isinstance(ce_calls, int) and ce_calls > 0:
+            cmd_cell += f" · ce:{ce_calls}"
+        table.add_row(
+            entry["timestamp"],
+            provider_label,
+            entry["service"],
+            result_label,
+            cmd_cell,
+            summary,
+        )
+    return table
+
+
 def _render_audit_table(console_arg: Console) -> None:
     """Audit log entry from the chat mode picker."""
     if not AUDIT_LOG_PATH.exists():
@@ -349,34 +405,7 @@ def _render_audit_table(console_arg: Console) -> None:
 
     with AUDIT_LOG_PATH.open() as f:
         lines = f.readlines()
-
-    table = Table(title=f"Audit log ({AUDIT_LOG_PATH})")
-    table.add_column("Time", style="cyan")
-    table.add_column("Service")
-    table.add_column("Result")
-    table.add_column("Commands", justify="right")
-    table.add_column("Root cause / reason")
-
-    for line in lines[-50:]:
-        entry = json.loads(line)
-        result_label = (
-            "[green]concluded[/green]"
-            if entry["succeeded"]
-            else "[red]aborted[/red]"
-        )
-        summary = (
-            entry.get("conclusion", {}).get("root_cause")
-            or entry.get("aborted_reason")
-            or "—"
-        )
-        table.add_row(
-            entry["timestamp"],
-            entry["service"],
-            result_label,
-            str(entry["commands_used"]),
-            summary,
-        )
-    console_arg.print(table)
+    console_arg.print(_build_audit_table(lines[-50:]))
 
 
 def _run_active_mode(
@@ -760,34 +789,7 @@ def audit(
 
     with AUDIT_LOG_PATH.open() as f:
         lines = f.readlines()
-
-    table = Table(title=f"Audit log ({AUDIT_LOG_PATH})")
-    table.add_column("Time", style="cyan")
-    table.add_column("Service")
-    table.add_column("Result")
-    table.add_column("Commands", justify="right")
-    table.add_column("Root cause / reason")
-
-    for line in lines[-limit:]:
-        entry = json.loads(line)
-        result_label = (
-            "[green]concluded[/green]"
-            if entry["succeeded"]
-            else "[red]aborted[/red]"
-        )
-        summary = (
-            entry.get("conclusion", {}).get("root_cause")
-            or entry.get("aborted_reason")
-            or "—"
-        )
-        table.add_row(
-            entry["timestamp"],
-            entry["service"],
-            result_label,
-            str(entry["commands_used"]),
-            summary,
-        )
-    console.print(table)
+    console.print(_build_audit_table(lines[-limit:]))
 
 
 # ---------------------------------------------------------------------------
@@ -795,6 +797,9 @@ def audit(
 # ---------------------------------------------------------------------------
 def _require_config() -> Config:
     try:
+        # Silently upgrade old configs that predate the `provider` field.
+        # No-op when the file already carries the new shape or is missing.
+        migrate_config_in_place()
         return Config.load()
     except FileNotFoundError as exc:
         console.print(f"[red]{exc}[/red]")
