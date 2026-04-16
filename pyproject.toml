@@ -8,9 +8,14 @@ packages = [{include = "ghosthunter", from = "src"}]
 
 [tool.poetry.dependencies]
 python = "^3.11"
-anthropic = "^0.40.0"
-typer = {extras = ["all"], version = "^0.12.0"}
-rich = "^13.7.0"
+# Lower bounds reflect what the code was developed against; upper bounds
+# left open so editable installs don't downgrade newer versions already
+# in the venv. Typer <0.15 + Click >=8.3 is a broken pairing (Click 8.3
+# dropped the positional `ctx` arg from Parameter.make_metavar which
+# Typer 0.12 still assumed) — pin typer >=0.15 to pick up the fix.
+anthropic = ">=0.40.0"
+typer = {extras = ["all"], version = ">=0.15.0"}
+rich = ">=13.7.0"
 # GCP is the default active-mode provider. Optional in practice — advisor
 # mode (the default) doesn't import google-cloud-* so installs without
 # them work for paranoid-mode users.
