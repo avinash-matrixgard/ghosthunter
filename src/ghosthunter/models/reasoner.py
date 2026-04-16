@@ -13,7 +13,8 @@ if TYPE_CHECKING:
 
 REASONER_MODEL = "claude-opus-4-6"
 
-REASONER_SYSTEM_PROMPT = """You are Ghosthunter, an expert cloud cost investigator
+# Shared core — identity, voice, hypothesis rules. Provider-agnostic.
+REASONER_CORE_PROMPT = """You are Ghosthunter, an expert cloud cost investigator
 running in advisor mode. The user is working alongside you in a chat. They
 provided their billing data up front and they will run commands you propose
 in their own terminal and paste back the output.
@@ -39,29 +40,8 @@ it just to keep running commands.
 If you need context only the user can give you — which project to look at,
 which environment, what changed recently, what the team was doing — set
 `next_action.type = "need_info"` and put your question in `reasoning`.
-DO NOT propose a `gcloud config get-value` or similar command to find
-information the user already knows. Just ask them.
-
-## COMMAND RULES (NON-NEGOTIABLE — security layers will block violations)
-
-1. ONE command per turn. NEVER chain with `&&`, `;`, or `||`.
-2. Only safe pipes: `head`, `tail`, `wc`, `sort`, `uniq`, `grep`, `cut`,
-   `awk`, `tr`, `jq`. Anything else gets blocked.
-3. Read-only only: gcloud, bq, gsutil. No `delete`, `create`, `update`,
-   `set-iam-policy`, etc. The security layer will reject destructive verbs.
-4. `bq query` must be SELECT only.
-5. Always pin a specific project with `--project=PROJECT_ID` when the user
-   has told you the project, or use `need_info` to ask.
-6. NO REDIRECTS OR STDERR MERGING. Do NOT use `>`, `>>`, `<`, or `2>&1`.
-   Any unquoted `>` or `<` is blocked as a redirect. gcloud errors surface
-   in the command result anyway — you don't need to merge streams.
-7. Parentheses inside quoted `--format` strings ARE fine
-   (e.g. `--format='value(name)'` and `--format='table(name,region)'`).
-   The validator only flags unquoted `< >`. If a command with parens gets
-   blocked, the real issue is a redirect character somewhere — look for
-   `>` or `<` outside the quotes.
-8. Safe format options: `--format=json`, `--format=yaml`, `--format=value(...)`,
-   `--format='table(...)'`. Prefer JSON + `jq` when you need a specific field.
+DO NOT propose a command that rediscovers information the user already
+knows. Just ask them.
 
 ## USE THE BILLING CONTEXT YOU WERE GIVEN
 
@@ -85,6 +65,51 @@ just rediscover what's already in the billing breakdown.
    NEVER invent statistics.
 4. Always respond via the `investigation_step` tool. Never reply in plain text.
 """
+
+
+# Provider-specific rule blocks. Keyed by provider string. The GCP block
+# matches the previous monolithic prompt verbatim. AWS is populated in
+# Phase 5; until then it's empty so tests and demo mode keep working.
+_PROVIDER_RULES: dict[str, str] = {
+    "gcp": """## COMMAND RULES (NON-NEGOTIABLE — security layers will block violations)
+
+1. ONE command per turn. NEVER chain with `&&`, `;`, or `||`.
+2. Only safe pipes: `head`, `tail`, `wc`, `sort`, `uniq`, `grep`, `cut`,
+   `awk`, `tr`, `jq`. Anything else gets blocked.
+3. Read-only only: gcloud, bq, gsutil. No `delete`, `create`, `update`,
+   `set-iam-policy`, etc. The security layer will reject destructive verbs.
+4. `bq query` must be SELECT only.
+5. Always pin a specific project with `--project=PROJECT_ID` when the user
+   has told you the project, or use `need_info` to ask.
+6. NO REDIRECTS OR STDERR MERGING. Do NOT use `>`, `>>`, `<`, or `2>&1`.
+   Any unquoted `>` or `<` is blocked as a redirect. gcloud errors surface
+   in the command result anyway — you don't need to merge streams.
+7. Parentheses inside quoted `--format` strings ARE fine
+   (e.g. `--format='value(name)'` and `--format='table(name,region)'`).
+   The validator only flags unquoted `< >`. If a command with parens gets
+   blocked, the real issue is a redirect character somewhere — look for
+   `>` or `<` outside the quotes.
+8. Safe format options: `--format=json`, `--format=yaml`, `--format=value(...)`,
+   `--format='table(...)'`. Prefer JSON + `jq` when you need a specific field.
+""",
+    "aws": "",  # Filled in Phase 5.
+}
+
+
+def build_system_prompt(provider: str = "gcp") -> str:
+    """Compose the full Opus system prompt for a given provider.
+
+    Shared core first, then the provider-specific command-rules block.
+    """
+    rules = _PROVIDER_RULES.get(provider, "")
+    if rules:
+        return REASONER_CORE_PROMPT + "\n" + rules
+    return REASONER_CORE_PROMPT
+
+
+# Back-compat: anything still importing REASONER_SYSTEM_PROMPT gets the
+# GCP-flavored prompt, identical to the pre-split version.
+REASONER_SYSTEM_PROMPT = build_system_prompt("gcp")
 
 # Tool schema Opus uses to return structured investigation steps.
 INVESTIGATION_TOOL: dict[str, Any] = {
@@ -235,6 +260,7 @@ class Reasoner:
         client: "AsyncAnthropic | None" = None,
         model: str = REASONER_MODEL,
         max_tokens: int = 4096,
+        provider: str = "gcp",
     ) -> None:
         if client is None:
             from anthropic import AsyncAnthropic  # lazy import
@@ -242,6 +268,8 @@ class Reasoner:
         self.client = client
         self.model = model
         self.max_tokens = max_tokens
+        self.provider = provider
+        self.system_prompt = build_system_prompt(provider)
 
     async def step(
         self, messages: list[dict[str, Any]]
@@ -250,7 +278,7 @@ class Reasoner:
         response = await self.client.messages.create(
             model=self.model,
             max_tokens=self.max_tokens,
-            system=REASONER_SYSTEM_PROMPT,
+            system=self.system_prompt,
             tools=[INVESTIGATION_TOOL],
             tool_choice={"type": "tool", "name": "investigation_step"},
             messages=messages,

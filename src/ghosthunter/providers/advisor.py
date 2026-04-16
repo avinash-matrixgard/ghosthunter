@@ -94,8 +94,12 @@ class AdvisorProvider:
         max_output_bytes: int = MAX_OUTPUT_BYTES,
         on_show_hypotheses: callable | None = None,
         on_list_spikes: callable | None = None,
+        provider_key: str = "gcp",
     ) -> None:
-        self.validator = validator or SecurityValidator()
+        # When the caller passes an explicit validator we trust its provider;
+        # otherwise we scope the default validator to this advisor's provider.
+        self.validator = validator or SecurityValidator(provider=provider_key)
+        self.provider_key = provider_key
         self.console = console or Console()
         self.max_output_bytes = max_output_bytes
         # Optional hooks wired by the chat session so the user can inspect

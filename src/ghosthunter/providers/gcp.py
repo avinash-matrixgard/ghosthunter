@@ -11,15 +11,27 @@ Two distinct paths:
    proposes during investigation. Every command MUST already be approved
    by `SecurityValidator.is_allowed()` before reaching this function. The
    provider re-validates as defense in depth.
+
+Provider-neutral types (`CostSpike`, `CommandResult`) and errors
+(`CommandRejectedError`, `CommandTimeoutError`) live in `providers.base`
+now. They're re-exported below so existing imports of the form
+``from ghosthunter.providers.gcp import CostSpike`` keep working.
 """
 from __future__ import annotations
 
 import asyncio
 import shlex
-from dataclasses import dataclass, field
 from datetime import date, timedelta
-from typing import Any
+from typing import Any, ClassVar
 
+from ghosthunter.providers.base import (
+    BaseProvider,
+    CommandRejectedError,
+    CommandResult,
+    CommandTimeoutError,
+    CostSpike,
+    ProviderError,
+)
 from ghosthunter.security.validator import SecurityValidator
 
 # Optional import: BigQuery client is heavy and not needed for demo mode.
@@ -31,69 +43,16 @@ except ImportError:
 
 
 # ---------------------------------------------------------------------------
-# Data structures
+# Back-compat alias — code in the wild still raises `GCPProviderError`.
+# New code should use `ProviderError` from `providers.base`.
 # ---------------------------------------------------------------------------
-@dataclass
-class CostSpike:
-    """A service whose cost changed materially over the lookback window.
-
-    `top_contributors` is an optional map of dimension -> list of
-    (name, cost) tuples capturing where the spike came from. e.g.
-        {"sku":     [("Internet Egress NA", 8120.40), ...],
-         "project": [("prod-web", 6200.00), ...]}
-    Populated by the billing-file provider when extra columns are present;
-    empty in pure single-file mode.
-    """
-    service: str
-    current_cost: float
-    previous_cost: float
-    change_percent: float
-    daily_breakdown: list[dict[str, Any]] = field(default_factory=list)
-    top_contributors: dict[str, list[tuple[str, float]]] = field(default_factory=dict)
-    grouping: str = "service"  # how the spike is keyed: service / project / sku / location
-    # Cross-file inference: when this is a service-level spike, which projects
-    # most likely host it (and vice versa). Each entry is (name, score, reason).
-    likely_homes: list[tuple[str, int, str]] = field(default_factory=list)
-
-    @property
-    def absolute_change(self) -> float:
-        return self.current_cost - self.previous_cost
-
-
-@dataclass
-class CommandResult:
-    """Result of executing a shell command in the sandbox."""
-    command: str
-    stdout: str
-    stderr: str
-    exit_code: int
-    duration_seconds: float
-    truncated: bool = False
-
-    @property
-    def succeeded(self) -> bool:
-        return self.exit_code == 0
-
-
-# ---------------------------------------------------------------------------
-# Errors
-# ---------------------------------------------------------------------------
-class GCPProviderError(Exception):
-    """Base error for the GCP provider."""
-
-
-class CommandRejectedError(GCPProviderError):
-    """Raised when a command fails security validation at execution time."""
-
-
-class CommandTimeoutError(GCPProviderError):
-    """Raised when a command exceeds its timeout."""
+GCPProviderError = ProviderError
 
 
 # ---------------------------------------------------------------------------
 # Provider
 # ---------------------------------------------------------------------------
-class GCPProvider:
+class GCPProvider(BaseProvider):
     """Read-only GCP access for the investigator.
 
     Parameters
@@ -104,13 +63,15 @@ class GCPProvider:
         Fully qualified billing export dataset, e.g. ``my-proj.billing_export``.
         Required for `fetch_billing_spikes` but unused by `execute_command`.
     validator:
-        SecurityValidator instance. Defaults to a fresh one.
+        SecurityValidator instance. Defaults to a fresh GCP-scoped one.
     command_timeout:
         Per-command wall-clock cap in seconds. Default 120.
     max_output_bytes:
         Per-command stdout cap. Output beyond this is truncated and the
         ``truncated`` flag is set.
     """
+
+    provider_key: ClassVar[str] = "gcp"
 
     def __init__(
         self,
@@ -122,7 +83,7 @@ class GCPProvider:
     ) -> None:
         self.project_id = project_id
         self.billing_dataset = billing_dataset
-        self.validator = validator or SecurityValidator()
+        self.validator = validator or SecurityValidator(provider="gcp")
         self.command_timeout = command_timeout
         self.max_output_bytes = max_output_bytes
 
@@ -297,13 +258,11 @@ class GCPProvider:
             truncated=truncated,
         )
 
-    def _sandbox_env(self) -> dict[str, str]:
-        """Minimal env for subprocess. Inherits PATH and gcloud credentials
-        but strips anything else that could leak data or alter behavior.
-        """
-        import os
-
-        keep = {
+    # ------------------------------------------------------------------
+    # BaseProvider metadata
+    # ------------------------------------------------------------------
+    def env_keep_list(self) -> set[str]:
+        return {
             "PATH",
             "HOME",
             "USER",
@@ -315,6 +274,29 @@ class GCPProvider:
             "GOOGLE_APPLICATION_CREDENTIALS",
             "GOOGLE_CLOUD_PROJECT",
         }
+
+    def cli_tools(self) -> tuple[str, ...]:
+        return ("gcloud", "bq", "gsutil")
+
+    def billing_template_help(self) -> str:
+        # CLI surfaces the full multi-line text itself; this is the hook.
+        # Full recipe text is still rendered by `cli.billing_template` today.
+        return (
+            "GCP: export via `bq query` (BigQuery billing export) OR via "
+            "Console Reports CSV downloads. See `ghosthunter billing-template`."
+        )
+
+    def provider_hint_for_reasoner(self) -> str:
+        return GCP_REASONER_RULES
+
+    # ------------------------------------------------------------------
+    def _sandbox_env(self) -> dict[str, str]:
+        """Minimal env for subprocess. Inherits PATH and gcloud credentials
+        but strips anything else that could leak data or alter behavior.
+        """
+        import os
+
+        keep = self.env_keep_list()
         env = {k: v for k, v in os.environ.items() if k in keep}
         # Pin the project so commands without --project still target the right one
         env.setdefault("CLOUDSDK_CORE_PROJECT", self.project_id)
@@ -327,3 +309,42 @@ class GCPProvider:
     def quote_for_shell(value: str) -> str:
         """Convenience for callers building command strings safely."""
         return shlex.quote(value)
+
+
+# ---------------------------------------------------------------------------
+# Reasoner prompt fragment for GCP (imported by models.reasoner)
+# ---------------------------------------------------------------------------
+GCP_REASONER_RULES = """## COMMAND RULES (NON-NEGOTIABLE — security layers will block violations)
+
+1. ONE command per turn. NEVER chain with `&&`, `;`, or `||`.
+2. Only safe pipes: `head`, `tail`, `wc`, `sort`, `uniq`, `grep`, `cut`,
+   `awk`, `tr`, `jq`. Anything else gets blocked.
+3. Read-only only: gcloud, bq, gsutil. No `delete`, `create`, `update`,
+   `set-iam-policy`, etc. The security layer will reject destructive verbs.
+4. `bq query` must be SELECT only.
+5. Always pin a specific project with `--project=PROJECT_ID` when the user
+   has told you the project, or use `need_info` to ask.
+6. NO REDIRECTS OR STDERR MERGING. Do NOT use `>`, `>>`, `<`, or `2>&1`.
+   Any unquoted `>` or `<` is blocked as a redirect. gcloud errors surface
+   in the command result anyway — you don't need to merge streams.
+7. Parentheses inside quoted `--format` strings ARE fine
+   (e.g. `--format='value(name)'` and `--format='table(name,region)'`).
+   The validator only flags unquoted `< >`. If a command with parens gets
+   blocked, the real issue is a redirect character somewhere — look for
+   `>` or `<` outside the quotes.
+8. Safe format options: `--format=json`, `--format=yaml`, `--format=value(...)`,
+   `--format='table(...)'`. Prefer JSON + `jq` when you need a specific field.
+"""
+
+
+__all__ = [
+    # Neutral types re-exported for back-compat
+    "CommandRejectedError",
+    "CommandResult",
+    "CommandTimeoutError",
+    "CostSpike",
+    "GCPProviderError",  # alias for ProviderError
+    # Provider itself
+    "GCPProvider",
+    "GCP_REASONER_RULES",
+]
