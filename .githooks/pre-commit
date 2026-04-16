@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+#
+# Pre-commit hook: enforce CLAUDE.md's 500-line hard cap.
+#
+# Installed by scripts/install-git-hooks.sh via `git config core.hooksPath`.
+# To disable for a single commit: `git commit --no-verify` (use sparingly).
+#
+# See tests/test_claude_md_size.py for the equivalent runtime check.
+
+set -euo pipefail
+
+readonly MAX_LINES=500
+readonly CLAUDE_MD="CLAUDE.md"
+
+# Nothing to check if CLAUDE.md isn't staged in this commit.
+if ! git diff --cached --name-only | grep -qFx "$CLAUDE_MD"; then
+  exit 0
+fi
+
+# Count lines in the *staged* version (not the working tree) so hook
+# decisions reflect what's actually being committed.
+lines=$(git show ":$CLAUDE_MD" | wc -l | tr -d '[:space:]')
+
+if [[ "$lines" -gt "$MAX_LINES" ]]; then
+  echo "" >&2
+  echo "✗ pre-commit: $CLAUDE_MD is $lines lines (cap: $MAX_LINES)." >&2
+  echo "" >&2
+  echo "  Move a section into docs/internal/<topic>.md and add a" >&2
+  echo "  pointer under the Docs section of CLAUDE.md. See" >&2
+  echo "  tests/test_claude_md_size.py for the full policy." >&2
+  echo "" >&2
+  echo "  To skip this check for one commit (use sparingly):" >&2
+  echo "    git commit --no-verify" >&2
+  echo "" >&2
+  exit 1
+fi
+
+# Soft warning at 80%.
+soft_cap=$(( MAX_LINES * 8 / 10 ))
+if [[ "$lines" -gt "$soft_cap" ]]; then
+  echo "⚠  $CLAUDE_MD is $lines lines ($(( 100 * lines / MAX_LINES ))% of the $MAX_LINES cap)." >&2
+  echo "   Consider splitting a section into docs/internal/ soon." >&2
+fi
+
+exit 0
