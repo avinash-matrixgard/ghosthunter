@@ -1,24 +1,15 @@
-"""Enforce the CLAUDE.md size budget.
+"""Enforce the CLAUDE.md size budget — LOCAL DEV ONLY.
 
-Rule: **CLAUDE.md MUST NEVER EXCEED 500 LINES.**
+CLAUDE.md is now `.gitignore`-d and lives only on contributors'
+machines (it holds personal context, not a public spec). This test
+exists so Avinash's local workflow continues to benefit from the
+500-line cap; it **skips gracefully** when the file isn't present
+(fresh public clone, CI, etc.).
 
-Why: it's reloaded on every Claude turn. A big CLAUDE.md eats tokens,
-which costs both money and daily budget. After hitting ~30% of the
-daily limit per turn with the original 1351-line file, we set a hard
-ceiling of 500 lines and split overflow into `docs/internal/*.md`.
-
-If this test fails, you have two options:
-  1. Trim CLAUDE.md — move the least-essential section to a new file
-     under `docs/internal/<topic>.md` and add a one-line pointer under
-     the "Docs" section.
-  2. If the 500 cap is genuinely wrong for your project (e.g. the
-     project grew and needs more per-turn context), raise the constant
-     deliberately with a commit message that documents why, and
-     commit the bigger file in the same change. Do NOT bump the
-     constant silently to make the test pass.
-
-A warning fires at 80% (400 lines) so there's time to trim before
-the cap is hit.
+Rule: when CLAUDE.md exists, it must stay ≤ 500 lines. A big
+CLAUDE.md reloads on every Claude turn and eats daily-budget tokens.
+Overflow lands in `docs/internal/*.md` (also gitignored; use
+`@docs/internal/<name>.md` to pull one on-demand).
 """
 from __future__ import annotations
 
@@ -33,6 +24,14 @@ WARN_AT = int(MAX_LINES * 0.8)  # 400
 
 CLAUDE_MD = Path(__file__).resolve().parent.parent / "CLAUDE.md"
 
+# Skip the whole module if CLAUDE.md isn't there — it's not part of
+# the public repo anymore. Contributors who DO have it locally still
+# get the enforcement.
+pytestmark = pytest.mark.skipif(
+    not CLAUDE_MD.exists(),
+    reason="CLAUDE.md not present (gitignored dev notes); size cap only enforced locally.",
+)
+
 
 def _line_count(path: Path) -> int:
     with path.open("rb") as f:
@@ -40,16 +39,12 @@ def _line_count(path: Path) -> int:
 
 
 class TestClaudeMdSize:
-    def test_claude_md_exists(self):
-        assert CLAUDE_MD.exists(), f"{CLAUDE_MD} must exist"
-
     def test_claude_md_under_hard_cap(self):
         n = _line_count(CLAUDE_MD)
         assert n <= MAX_LINES, (
             f"CLAUDE.md is {n} lines; hard cap is {MAX_LINES}. "
-            "Move a section into docs/internal/<topic>.md and reference "
-            "it under the Docs section of CLAUDE.md. See the module "
-            "docstring of this file for guidance."
+            "Move a section into docs/internal/<topic>.md — see the "
+            "module docstring of this file for guidance."
         )
 
     def test_claude_md_not_near_cap(self):
@@ -64,24 +59,3 @@ class TestClaudeMdSize:
                     "into docs/internal/ before the next addition."
                 )
             )
-
-
-class TestDocsInternalExists:
-    """Keep the overflow-target directory as a stable contract."""
-
-    def test_docs_internal_dir_exists(self):
-        docs = CLAUDE_MD.parent / "docs" / "internal"
-        assert docs.is_dir(), (
-            f"{docs} must exist — it's where overflow from CLAUDE.md "
-            "lands per the 500-line rule."
-        )
-
-    def test_claude_md_references_docs_internal(self):
-        """Rule is only useful if CLAUDE.md itself advertises the escape
-        hatch. Catch accidental removal of the Docs section."""
-        body = CLAUDE_MD.read_text()
-        assert "docs/internal" in body, (
-            "CLAUDE.md must mention docs/internal/ somewhere — it's "
-            "the documented place for overflow. If you rename the "
-            "directory, update this test and the HARD RULE banner."
-        )

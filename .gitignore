@@ -33,3 +33,13 @@ sa-key*.json
 
 # Billing exports (sensitive)
 Billing Account for*.csv
+
+# Internal dev notes — never commit.
+# These files contain personal/work-context that shouldn't live in a
+# public repo. Claude / contributors sync state via git branches, not
+# a shared CLAUDE.md.
+CLAUDE.md
+docs/internal/
+
+# Claude Code local state (worktrees, local settings)
+.claude/
