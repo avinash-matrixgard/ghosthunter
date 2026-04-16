@@ -99,12 +99,16 @@ Pick one of:
 - **Option B**: Console Reports CSV downloads (one per grouping) —
   merge with multiple `-f` flags.
 
-**AWS:** run `ghosthunter billing-template --provider=aws`. Three paths:
+**AWS:** run `ghosthunter billing-template --provider=aws`. Four paths:
 - **Option A** — Cost Explorer UI CSV downloads grouped by Service,
   UsageType, Linked Account. Merge with multiple `-f` flags.
 - **Option B** — `aws ce get-cost-and-usage` JSON piped to a file.
 - **Option C** — CUR (Cost and Usage Report) CSV from S3 (richest; CUR
   Parquet is not supported in v1).
+- **Option D** — FOCUS 1.0 CSV (cross-cloud FinOps Foundation spec).
+  Public samples at
+  [FinOps-Open-Cost-and-Usage-Spec/FOCUS-Sample-Data](https://github.com/FinOps-Open-Cost-and-Usage-Spec/FOCUS-Sample-Data)
+  let you try Ghosthunter with no cloud account at all.
 
 ### 3b. Run an investigation
 

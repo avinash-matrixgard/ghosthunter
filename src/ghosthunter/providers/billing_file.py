@@ -56,6 +56,8 @@ SERVICE_KEYS = (
     "product/ProductName",           # CUR
     "product_productname",           # CUR (some exports)
     "Service name",                  # CE CSV variant
+    # FOCUS (FinOps Open Cost & Usage Specification — cross-cloud)
+    "ServiceName",                   # FOCUS 1.0+
 )
 
 COST_KEYS = (
@@ -77,6 +79,14 @@ COST_KEYS = (
     "lineItem/BlendedCost",          # CUR
     "lineItem/NetUnblendedCost",     # CUR
     "Amount",                        # CE JSON flattened rows
+    # FOCUS. Order matters — we pick the FIRST match against a row's keys.
+    # BilledCost is the primary "what you paid" FOCUS column; EffectiveCost
+    # is after commitment / contract discounts. Prefer BilledCost for
+    # user-facing cost reporting.
+    "BilledCost",                    # FOCUS 1.0+
+    "EffectiveCost",                 # FOCUS 1.0+ — used if BilledCost absent
+    "ListCost",                      # FOCUS 1.0+ — pre-discount reference
+    "ContractedCost",                # FOCUS 1.0+ — post-commitment price
 )
 
 DATE_KEYS = (
@@ -94,6 +104,10 @@ DATE_KEYS = (
     "TimePeriodStart",               # CE raw
     "lineItem/UsageStartDate",       # CUR
     "bill/BillingPeriodStartDate",   # CUR
+    # FOCUS. ChargePeriodStart is per-row usage; BillingPeriodStart groups
+    # the monthly invoice window. Prefer ChargePeriod for spike detection.
+    "ChargePeriodStart",             # FOCUS 1.0+
+    "BillingPeriodStart",            # FOCUS 1.0+ (coarser fallback)
 )
 
 SKU_KEYS = (
@@ -105,6 +119,9 @@ SKU_KEYS = (
     "SKU",
     # AWS has no direct SKU equivalent; UsageType plays that role
     # and is its own dimension below.
+    # FOCUS
+    "SkuId",                         # FOCUS 1.0+ provider SKU id
+    "SkuPriceId",                    # FOCUS 1.0+ specific price variant
 )
 
 # AWS UsageType — AWS's closest equivalent to a GCP SKU. Treated as a
@@ -135,6 +152,13 @@ ACCOUNT_KEYS = (
     "bill/PayerAccountId",           # CUR
     "account",
     "account_id",
+    # FOCUS — SubAccount is the per-tenant account inside a billing org.
+    # BillingAccount is the invoice-level parent. Prefer SubAccount for
+    # cross-file inference.
+    "SubAccountId",                  # FOCUS 1.0+
+    "SubAccountName",                # FOCUS 1.0+
+    "BillingAccountId",              # FOCUS 1.0+ (coarser fallback)
+    "BillingAccountName",            # FOCUS 1.0+
 )
 
 LOCATION_KEYS = (
@@ -150,6 +174,10 @@ LOCATION_KEYS = (
     "product/location",              # CUR (human-readable region)
     "lineItem/AvailabilityZone",     # CUR
     "aws_region",
+    # FOCUS
+    "RegionName",                    # FOCUS 1.0+ (human-readable)
+    "RegionId",                      # FOCUS 1.0+ (provider-canonical id)
+    "AvailabilityZone",              # FOCUS 1.0+ (fallback)
 )
 
 PCT_CHANGE_KEYS = (

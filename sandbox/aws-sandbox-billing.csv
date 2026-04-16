@@ -1,0 +1,73 @@
+Service,Start,End,UnblendedCost
+Amazon Elastic Compute Cloud - Compute,2026-01-01,2026-01-08,1250.00
+Amazon Elastic Compute Cloud - Compute,2026-01-08,2026-01-15,1280.00
+Amazon Elastic Compute Cloud - Compute,2026-01-15,2026-01-22,1245.00
+Amazon Elastic Compute Cloud - Compute,2026-01-22,2026-01-29,1260.00
+Amazon Elastic Compute Cloud - Compute,2026-01-29,2026-02-05,1285.00
+Amazon Elastic Compute Cloud - Compute,2026-02-05,2026-02-12,1270.00
+Amazon Elastic Compute Cloud - Compute,2026-02-12,2026-02-19,1290.00
+Amazon Elastic Compute Cloud - Compute,2026-02-19,2026-02-26,1305.00
+Amazon Elastic Compute Cloud - Compute,2026-02-26,2026-03-05,1295.00
+Amazon Elastic Compute Cloud - Compute,2026-03-05,2026-03-12,1310.00
+Amazon Elastic Compute Cloud - Compute,2026-03-12,2026-03-19,1320.00
+Amazon Elastic Compute Cloud - Compute,2026-03-19,2026-03-26,1315.00
+Amazon Simple Storage Service,2026-01-01,2026-01-08,420.00
+Amazon Simple Storage Service,2026-01-08,2026-01-15,425.00
+Amazon Simple Storage Service,2026-01-15,2026-01-22,422.00
+Amazon Simple Storage Service,2026-01-22,2026-01-29,418.00
+Amazon Simple Storage Service,2026-01-29,2026-02-05,430.00
+Amazon Simple Storage Service,2026-02-05,2026-02-12,428.00
+Amazon Simple Storage Service,2026-02-12,2026-02-19,432.00
+Amazon Simple Storage Service,2026-02-19,2026-02-26,429.00
+Amazon Simple Storage Service,2026-02-26,2026-03-05,431.00
+Amazon Simple Storage Service,2026-03-05,2026-03-12,433.00
+Amazon Simple Storage Service,2026-03-12,2026-03-19,427.00
+Amazon Simple Storage Service,2026-03-19,2026-03-26,434.00
+AWS Lambda,2026-01-01,2026-01-08,42.00
+AWS Lambda,2026-01-08,2026-01-15,45.00
+AWS Lambda,2026-01-15,2026-01-22,43.00
+AWS Lambda,2026-01-22,2026-01-29,44.00
+AWS Lambda,2026-01-29,2026-02-05,46.00
+AWS Lambda,2026-02-05,2026-02-12,47.00
+AWS Lambda,2026-02-12,2026-02-19,52.00
+AWS Lambda,2026-02-19,2026-02-26,285.00
+AWS Lambda,2026-02-26,2026-03-05,620.00
+AWS Lambda,2026-03-05,2026-03-12,895.00
+AWS Lambda,2026-03-12,2026-03-19,1120.00
+AWS Lambda,2026-03-19,2026-03-26,1340.00
+EC2 - Other,2026-01-01,2026-01-08,380.00
+EC2 - Other,2026-01-08,2026-01-15,385.00
+EC2 - Other,2026-01-15,2026-01-22,378.00
+EC2 - Other,2026-01-22,2026-01-29,382.00
+EC2 - Other,2026-01-29,2026-02-05,390.00
+EC2 - Other,2026-02-05,2026-02-12,388.00
+EC2 - Other,2026-02-12,2026-02-19,395.00
+EC2 - Other,2026-02-19,2026-02-26,1420.00
+EC2 - Other,2026-02-26,2026-03-05,2890.00
+EC2 - Other,2026-03-05,2026-03-12,3650.00
+EC2 - Other,2026-03-12,2026-03-19,4120.00
+EC2 - Other,2026-03-19,2026-03-26,4580.00
+Amazon Relational Database Service,2026-01-01,2026-01-08,580.00
+Amazon Relational Database Service,2026-01-08,2026-01-15,585.00
+Amazon Relational Database Service,2026-01-15,2026-01-22,578.00
+Amazon Relational Database Service,2026-01-22,2026-01-29,582.00
+Amazon Relational Database Service,2026-01-29,2026-02-05,588.00
+Amazon Relational Database Service,2026-02-05,2026-02-12,590.00
+Amazon Relational Database Service,2026-02-12,2026-02-19,585.00
+Amazon Relational Database Service,2026-02-19,2026-02-26,592.00
+Amazon Relational Database Service,2026-02-26,2026-03-05,595.00
+Amazon Relational Database Service,2026-03-05,2026-03-12,598.00
+Amazon Relational Database Service,2026-03-12,2026-03-19,591.00
+Amazon Relational Database Service,2026-03-19,2026-03-26,600.00
+Amazon CloudWatch,2026-01-01,2026-01-08,95.00
+Amazon CloudWatch,2026-01-08,2026-01-15,98.00
+Amazon CloudWatch,2026-01-15,2026-01-22,94.00
+Amazon CloudWatch,2026-01-22,2026-01-29,96.00
+Amazon CloudWatch,2026-01-29,2026-02-05,101.00
+Amazon CloudWatch,2026-02-05,2026-02-12,99.00
+Amazon CloudWatch,2026-02-12,2026-02-19,103.00
+Amazon CloudWatch,2026-02-19,2026-02-26,180.00
+Amazon CloudWatch,2026-02-26,2026-03-05,245.00
+Amazon CloudWatch,2026-03-05,2026-03-12,310.00
+Amazon CloudWatch,2026-03-12,2026-03-19,380.00
+Amazon CloudWatch,2026-03-19,2026-03-26,425.00

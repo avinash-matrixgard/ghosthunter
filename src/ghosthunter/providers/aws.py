@@ -465,6 +465,17 @@ Then: [bold]ghosthunter investigate --provider=aws -f cur-export.csv[/bold]
 [dim]CUR Parquet files aren't supported in v1 — ask AWS to also export CSV,
 or convert with a local tool.[/dim]
 
+[bold cyan]Option D — FOCUS (cross-cloud, FinOps Foundation spec)[/bold cyan]
+If your exports are in the [cyan]FinOps Open Cost & Usage Specification[/cyan]
+(FOCUS 1.0+) format — the emerging cross-cloud standard from the FinOps
+Foundation — Ghosthunter recognizes those columns directly
+([cyan]ServiceName[/cyan], [cyan]BilledCost[/cyan], [cyan]ChargePeriodStart[/cyan],
+[cyan]SubAccountId[/cyan], [cyan]RegionName[/cyan], ...). Works with exports from
+AWS, Azure, GCP, and other FOCUS-compliant vendors.
+
+Public sample data you can try today:
+  [cyan]https://github.com/FinOps-Open-Cost-and-Usage-Spec/FOCUS-Sample-Data[/cyan]
+
 [dim]Recognized AWS columns (case-insensitive, multiple aliases per field):[/dim]
   • [bold]service[/bold]     (required) — Service / lineItem/ProductCode /
                                            product/ProductName
