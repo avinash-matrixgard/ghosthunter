@@ -67,33 +67,24 @@ just rediscover what's already in the billing breakdown.
 """
 
 
-# Provider-specific rule blocks. Keyed by provider string. The GCP block
-# matches the previous monolithic prompt verbatim. AWS is populated in
-# Phase 5; until then it's empty so tests and demo mode keep working.
-_PROVIDER_RULES: dict[str, str] = {
-    "gcp": """## COMMAND RULES (NON-NEGOTIABLE — security layers will block violations)
+# Provider-specific rule blocks. Keyed by provider string. Sourced from
+# the concrete provider modules so each provider owns its own rules.
+def _load_provider_rules() -> dict[str, str]:
+    # Deferred import avoids circular-import between models.reasoner and
+    # providers.* at module-load time.
+    from ghosthunter.providers.aws import AWS_REASONER_RULES
+    from ghosthunter.providers.gcp import GCP_REASONER_RULES
+    return {"gcp": GCP_REASONER_RULES, "aws": AWS_REASONER_RULES}
 
-1. ONE command per turn. NEVER chain with `&&`, `;`, or `||`.
-2. Only safe pipes: `head`, `tail`, `wc`, `sort`, `uniq`, `grep`, `cut`,
-   `awk`, `tr`, `jq`. Anything else gets blocked.
-3. Read-only only: gcloud, bq, gsutil. No `delete`, `create`, `update`,
-   `set-iam-policy`, etc. The security layer will reject destructive verbs.
-4. `bq query` must be SELECT only.
-5. Always pin a specific project with `--project=PROJECT_ID` when the user
-   has told you the project, or use `need_info` to ask.
-6. NO REDIRECTS OR STDERR MERGING. Do NOT use `>`, `>>`, `<`, or `2>&1`.
-   Any unquoted `>` or `<` is blocked as a redirect. gcloud errors surface
-   in the command result anyway — you don't need to merge streams.
-7. Parentheses inside quoted `--format` strings ARE fine
-   (e.g. `--format='value(name)'` and `--format='table(name,region)'`).
-   The validator only flags unquoted `< >`. If a command with parens gets
-   blocked, the real issue is a redirect character somewhere — look for
-   `>` or `<` outside the quotes.
-8. Safe format options: `--format=json`, `--format=yaml`, `--format=value(...)`,
-   `--format='table(...)'`. Prefer JSON + `jq` when you need a specific field.
-""",
-    "aws": "",  # Filled in Phase 5.
-}
+
+_PROVIDER_RULES_CACHE: dict[str, str] | None = None
+
+
+def _provider_rules() -> dict[str, str]:
+    global _PROVIDER_RULES_CACHE
+    if _PROVIDER_RULES_CACHE is None:
+        _PROVIDER_RULES_CACHE = _load_provider_rules()
+    return _PROVIDER_RULES_CACHE
 
 
 def build_system_prompt(provider: str = "gcp") -> str:
@@ -101,7 +92,7 @@ def build_system_prompt(provider: str = "gcp") -> str:
 
     Shared core first, then the provider-specific command-rules block.
     """
-    rules = _PROVIDER_RULES.get(provider, "")
+    rules = _provider_rules().get(provider, "")
     if rules:
         return REASONER_CORE_PROMPT + "\n" + rules
     return REASONER_CORE_PROMPT

@@ -1,0 +1,31 @@
+Service,Start,End,UnblendedCost
+Amazon Elastic Compute Cloud - Compute,2026-01-01,2026-01-02,820.00
+Amazon Elastic Compute Cloud - Compute,2026-01-15,2026-01-16,810.00
+Amazon Elastic Compute Cloud - Compute,2026-01-30,2026-01-31,815.00
+Amazon Elastic Compute Cloud - Compute,2026-02-15,2026-02-16,1680.00
+Amazon Elastic Compute Cloud - Compute,2026-03-01,2026-03-02,1720.00
+Amazon Elastic Compute Cloud - Compute,2026-03-15,2026-03-16,1750.00
+Amazon Simple Storage Service,2026-01-01,2026-01-02,125.50
+Amazon Simple Storage Service,2026-01-15,2026-01-16,126.10
+Amazon Simple Storage Service,2026-01-30,2026-01-31,124.80
+Amazon Simple Storage Service,2026-02-15,2026-02-16,124.60
+Amazon Simple Storage Service,2026-03-01,2026-03-02,125.20
+Amazon Simple Storage Service,2026-03-15,2026-03-16,125.90
+AWS Lambda,2026-01-01,2026-01-02,14.20
+AWS Lambda,2026-01-15,2026-01-16,15.00
+AWS Lambda,2026-01-30,2026-01-31,14.90
+AWS Lambda,2026-02-15,2026-02-16,86.00
+AWS Lambda,2026-03-01,2026-03-02,92.00
+AWS Lambda,2026-03-15,2026-03-16,88.50
+EC2 - Other,2026-01-01,2026-01-02,420.00
+EC2 - Other,2026-01-15,2026-01-16,415.00
+EC2 - Other,2026-01-30,2026-01-31,418.00
+EC2 - Other,2026-02-15,2026-02-16,3420.00
+EC2 - Other,2026-03-01,2026-03-02,3510.00
+EC2 - Other,2026-03-15,2026-03-16,3595.00
+Amazon Relational Database Service,2026-01-01,2026-01-02,240.00
+Amazon Relational Database Service,2026-01-15,2026-01-16,242.00
+Amazon Relational Database Service,2026-01-30,2026-01-31,239.00
+Amazon Relational Database Service,2026-02-15,2026-02-16,241.00
+Amazon Relational Database Service,2026-03-01,2026-03-02,240.50
+Amazon Relational Database Service,2026-03-15,2026-03-16,243.00

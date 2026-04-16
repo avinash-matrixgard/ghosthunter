@@ -21,7 +21,13 @@ from rich.panel import Panel
 from rich.prompt import Confirm, Prompt
 from rich.table import Table
 
-from ghosthunter.config import AUDIT_LOG_PATH, CONFIG_PATH, BudgetConfig, Config
+from ghosthunter.config import (
+    AUDIT_LOG_PATH,
+    CONFIG_PATH,
+    AWSConfig,
+    BudgetConfig,
+    Config,
+)
 from ghosthunter.investigator import (
     Budget,
     InvestigationEvent,
@@ -31,6 +37,7 @@ from ghosthunter.investigator import (
 from ghosthunter.models.executor import Executor
 from ghosthunter.models.reasoner import Reasoner
 from ghosthunter.providers.advisor import AdvisorProvider
+from ghosthunter.providers.aws import AWSProvider, AWS_BILLING_TEMPLATE
 from ghosthunter.providers.billing_file import (
     BillingFileError,
     load_spikes_from_files,
@@ -74,18 +81,39 @@ def init() -> None:
             console.print("[yellow]Cancelled.[/yellow]")
             raise typer.Exit(0)
 
-    project_id = Prompt.ask("GCP project ID")
-    billing_dataset = Prompt.ask(
-        "Billing export dataset (e.g. my-proj.billing_export)"
+    provider = Prompt.ask(
+        "Cloud provider", choices=["gcp", "aws"], default="gcp"
     )
     lookback_days = int(Prompt.ask("Lookback days", default="30"))
 
-    cfg = Config(
-        project_id=project_id,
-        billing_dataset=billing_dataset,
-        lookback_days=lookback_days,
-        budget=BudgetConfig(),
-    )
+    if provider == "gcp":
+        project_id = Prompt.ask("GCP project ID")
+        billing_dataset = Prompt.ask(
+            "Billing export dataset (e.g. my-proj.billing_export)"
+        )
+        cfg = Config(
+            provider="gcp",
+            project_id=project_id,
+            billing_dataset=billing_dataset,
+            lookback_days=lookback_days,
+            budget=BudgetConfig(),
+        )
+    else:  # aws
+        aws_profile = Prompt.ask(
+            "AWS named profile (blank = default credential chain)", default=""
+        )
+        aws_region = Prompt.ask("AWS region", default="us-east-1")
+        account_id = Prompt.ask("AWS account ID (12 digits, optional)", default="")
+        cfg = Config(
+            provider="aws",
+            aws=AWSConfig(
+                profile=aws_profile,
+                region=aws_region,
+                account_id=account_id,
+            ),
+            lookback_days=lookback_days,
+            budget=BudgetConfig(),
+        )
     cfg.save()
 
     console.print(f"\n[green]✓[/green] Saved config to {CONFIG_PATH}")
@@ -115,13 +143,20 @@ def investigate(
         help="Path to a billing CSV/JSON you exported yourself. "
              "Pass -f multiple times to merge several breakdowns "
              "(by service + by SKU + by project, etc.). "
-             "Enables advisor mode (no GCP credentials needed).",
+             "Enables advisor mode (no cloud credentials needed).",
     ),
     active: bool = typer.Option(
         False,
         "--active",
-        help="Use active mode: Ghosthunter directly queries GCP and runs "
-             "commands. Requires read-only credentials and ~/.ghosthunter/config.toml.",
+        help="Use active mode: Ghosthunter directly queries the cloud and "
+             "runs commands. Requires read-only credentials and "
+             "~/.ghosthunter/config.toml.",
+    ),
+    provider: str = typer.Option(
+        "auto",
+        "--provider",
+        help="Cloud provider: 'gcp', 'aws', or 'auto' (sniff from billing "
+             "files / config). Default: auto.",
     ),
     spike_index: int = typer.Option(
         0,
@@ -156,8 +191,14 @@ def investigate(
         )
         raise typer.Exit(1)
 
+    resolved_provider = _resolve_provider(provider, all_files, for_active=active)
+
     if active:
-        _run_active_mode(spike_index=spike_index, list_only=list_only)
+        _run_active_mode(
+            spike_index=spike_index,
+            list_only=list_only,
+            provider=resolved_provider,
+        )
         return
 
     if not all_files:
@@ -175,6 +216,7 @@ def investigate(
         billing_files=all_files,
         spike_index=spike_index,
         list_only=list_only,
+        provider=resolved_provider,
     )
 
 
@@ -207,8 +249,24 @@ def chat(
 
 
 @app.command()
-def billing_template() -> None:
+def billing_template(
+    provider: str = typer.Option(
+        "gcp",
+        "--provider",
+        help="Which provider's export recipe to show: 'gcp' or 'aws'.",
+    ),
+) -> None:
     """Show how to export the billing data Ghosthunter advisor mode needs."""
+    if provider == "aws":
+        console.print(
+            Panel(
+                AWS_BILLING_TEMPLATE,
+                title="Export your AWS billing data",
+                border_style="cyan",
+            )
+        )
+        return
+
     console.print(
         Panel(
             (
@@ -280,7 +338,7 @@ def _run_active_mode_interactive(console_arg: Console) -> None:
             )
         )
         return
-    _run_active_mode(spike_index=0, list_only=False)
+    _run_active_mode(spike_index=0, list_only=False, provider=cfg.provider or "gcp")
 
 
 def _render_audit_table(console_arg: Console) -> None:
@@ -321,19 +379,40 @@ def _render_audit_table(console_arg: Console) -> None:
     console_arg.print(table)
 
 
-def _run_active_mode(spike_index: int, list_only: bool) -> None:
-    """Old behavior: Ghosthunter directly queries GCP and runs commands."""
+def _run_active_mode(
+    spike_index: int, list_only: bool, provider: str = "gcp"
+) -> None:
+    """Active mode: Ghosthunter directly queries the cloud and runs commands."""
     cfg = _require_config()
-    provider = GCPProvider(
-        project_id=cfg.project_id,
-        billing_dataset=cfg.billing_dataset,
-    )
+    if cfg.provider and cfg.provider != provider:
+        console.print(
+            f"[yellow]Config has provider={cfg.provider}, command-line "
+            f"picked {provider}. Using {provider}.[/yellow]"
+        )
+
+    if provider == "aws":
+        aws_cfg = cfg.aws or AWSConfig()
+        prov = AWSProvider(
+            profile=aws_cfg.profile,
+            region=aws_cfg.region,
+            account_id=aws_cfg.account_id,
+        )
+        label = (
+            f"{aws_cfg.account_id or 'default'} "
+            f"({aws_cfg.region}, profile={aws_cfg.profile or 'default'})"
+        )
+    else:
+        prov = GCPProvider(
+            project_id=cfg.project_id,
+            billing_dataset=cfg.billing_dataset,
+        )
+        label = cfg.project_id
 
     console.print(
-        f"[cyan]Fetching billing data for {cfg.project_id} "
+        f"[cyan]Fetching billing data for {label} "
         f"(last {cfg.lookback_days} days)...[/cyan]"
     )
-    spikes = provider.fetch_billing_spikes(lookback_days=cfg.lookback_days)
+    spikes = prov.fetch_billing_spikes(lookback_days=cfg.lookback_days)
     if not spikes:
         console.print("[green]No material cost spikes detected.[/green]")
         raise typer.Exit(0)
@@ -348,7 +427,7 @@ def _run_active_mode(spike_index: int, list_only: bool) -> None:
         f"({spike.change_percent:+.1f}%, ${spike.absolute_change:+,.0f})\n"
     )
 
-    investigator = _build_active_investigator(provider, cfg)
+    investigator = _build_active_investigator(prov, cfg, provider=provider)
     result = asyncio.run(investigator.investigate(spike))
     _render_result(result)
     _append_audit_log(result)
@@ -358,13 +437,15 @@ def _run_advisor_mode(
     billing_files: list[Path],
     spike_index: int,
     list_only: bool,
+    provider: str = "gcp",
 ) -> None:
-    """Default behavior: parse billing files, advise commands, never touch GCP."""
+    """Advisor mode: parse billing files, advise commands, never touch cloud."""
     console.print(
         Panel(
-            "[bold]Advisor mode[/bold] — Ghosthunter will [bold]not[/bold] touch "
-            "your cloud.\nIt reads your billing export, proposes read-only "
-            "commands,\nand asks you to run them yourself and paste back the output.",
+            f"[bold]Advisor mode[/bold] ([cyan]{provider}[/cyan]) — "
+            "Ghosthunter will [bold]not[/bold] touch your cloud.\n"
+            "It reads your billing export, proposes read-only commands,\n"
+            "and asks you to run them yourself and paste back the output.",
             border_style="bright_yellow",
         )
     )
@@ -395,10 +476,116 @@ def _run_advisor_mode(
     _render_top_contributors(spike)
     console.print()
 
-    investigator = _build_advisor_investigator()
+    investigator = _build_advisor_investigator(provider=provider)
     result = asyncio.run(investigator.investigate(spike))
     _render_result(result)
     _append_audit_log(result)
+
+
+# ---------------------------------------------------------------------------
+# Provider resolution — sniff from files and/or config
+# ---------------------------------------------------------------------------
+_AWS_COLUMN_SIGNATURES = (
+    "lineitem/",
+    "product/productname",
+    "unblendedcost",
+    "blendedcost",
+    "usageaccountid",
+    "timeperiodstart",
+    "linked account",
+    "usagetype",
+)
+
+
+def _sniff_provider_from_file(path: Path) -> str | None:
+    """Peek at a billing file's header row and guess the provider.
+
+    Returns 'aws', 'gcp', or None if we can't tell.
+    """
+    import csv as _csv
+    import json as _json
+
+    suffix = path.suffix.lower()
+    try:
+        if suffix == ".json":
+            with path.open() as f:
+                data = _json.load(f)
+            # CE get-cost-and-usage response shape is unambiguously AWS.
+            if isinstance(data, dict) and "ResultsByTime" in data:
+                return "aws"
+            # Otherwise look at first row's keys.
+            if isinstance(data, dict):
+                for key in ("rows", "data", "billing", "results"):
+                    if key in data and isinstance(data[key], list):
+                        data = data[key]
+                        break
+            if isinstance(data, list) and data and isinstance(data[0], dict):
+                keys = " ".join(str(k).lower() for k in data[0].keys())
+                if any(sig in keys for sig in _AWS_COLUMN_SIGNATURES):
+                    return "aws"
+                if "service.description" in keys or "project.id" in keys:
+                    return "gcp"
+            return None
+
+        with path.open(newline="") as f:
+            reader = _csv.reader(f)
+            headers = next(reader, [])
+        header_blob = " ".join(h.lower() for h in headers)
+        if any(sig in header_blob for sig in _AWS_COLUMN_SIGNATURES):
+            return "aws"
+        if "service description" in header_blob or "project id" in header_blob:
+            return "gcp"
+        return None
+    except Exception:
+        return None
+
+
+def _resolve_provider(
+    flag_value: str, files: list[Path], for_active: bool
+) -> str:
+    """Pick 'gcp' or 'aws' based on --provider, billing files, and config.
+
+    Precedence:
+      1. Explicit --provider (not 'auto') wins.
+      2. Sniff billing files — if all signal AWS or all signal GCP, use that.
+      3. Config file provider (if present).
+      4. Default to 'gcp'.
+    """
+    value = (flag_value or "auto").lower()
+    if value in ("gcp", "aws"):
+        return value
+
+    if value != "auto":
+        console.print(
+            f"[red]Unknown provider '{flag_value}'. Use 'gcp', 'aws', or 'auto'.[/red]"
+        )
+        raise typer.Exit(1)
+
+    # --- Auto: sniff ---
+    if files:
+        sniffed = {_sniff_provider_from_file(p) for p in files}
+        sniffed.discard(None)
+        if sniffed == {"aws"}:
+            return "aws"
+        if sniffed == {"gcp"}:
+            return "gcp"
+        # Mixed or unknown → fall through to config / default.
+
+    # --- Config ---
+    if CONFIG_PATH.exists():
+        try:
+            cfg = Config.load()
+            if cfg.provider in ("gcp", "aws"):
+                return cfg.provider
+        except Exception:
+            pass
+
+    if for_active and not CONFIG_PATH.exists():
+        console.print(
+            "[yellow]No config and no billing files to sniff. "
+            "Defaulting to --provider=gcp.[/yellow]"
+        )
+    return "gcp"
 
 
 def _render_top_contributors(spike) -> None:
@@ -591,17 +778,19 @@ def _require_api_key() -> None:
         raise typer.Exit(1)
 
 
-def _build_active_investigator(provider: GCPProvider, cfg: Config) -> Investigator:
+def _build_active_investigator(
+    provider_obj, cfg: Config, provider: str = "gcp"
+) -> Investigator:
     budget = Budget(
         max_commands=cfg.budget.max_commands,
         max_cost_usd=cfg.budget.max_cost_usd,
         max_seconds=cfg.budget.max_seconds,
     )
     return Investigator(
-        provider=provider,
-        reasoner=Reasoner(),
+        provider=provider_obj,
+        reasoner=Reasoner(provider=provider),
         executor=Executor(),
-        validator=SecurityValidator(),
+        validator=SecurityValidator(provider=provider),
         approval_hook=_interactive_approval,
         event_hook=_print_event,
         budget=budget,
@@ -614,13 +803,15 @@ async def _auto_approve(_: PendingCommand) -> str:
     return "approve"
 
 
-def _build_advisor_investigator() -> Investigator:
-    """Investigator with AdvisorProvider — never touches GCP."""
-    validator = SecurityValidator()
-    provider = AdvisorProvider(validator=validator, console=console)
+def _build_advisor_investigator(provider: str = "gcp") -> Investigator:
+    """Investigator with AdvisorProvider — never touches the cloud."""
+    validator = SecurityValidator(provider=provider)
+    advisor = AdvisorProvider(
+        validator=validator, console=console, provider_key=provider
+    )
     return Investigator(
-        provider=provider,  # type: ignore[arg-type]
-        reasoner=Reasoner(),
+        provider=advisor,  # type: ignore[arg-type]
+        reasoner=Reasoner(provider=provider),
         executor=Executor(),
         validator=validator,
         approval_hook=_auto_approve,  # AdvisorProvider handles user interaction

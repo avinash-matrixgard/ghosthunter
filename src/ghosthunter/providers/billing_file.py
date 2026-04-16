@@ -44,15 +44,22 @@ from ghosthunter.providers.gcp import CostSpike
 # Column aliases
 # ---------------------------------------------------------------------------
 SERVICE_KEYS = (
+    # GCP
     "service",
     "service.description",
     "service_description",
     "Service description",
     "Service",
     "service_name",
+    # AWS
+    "lineItem/ProductCode",          # CUR
+    "product/ProductName",           # CUR
+    "product_productname",           # CUR (some exports)
+    "Service name",                  # CE CSV variant
 )
 
 COST_KEYS = (
+    # GCP
     "cost",
     "Cost",
     "Cost ($)",
@@ -61,9 +68,19 @@ COST_KEYS = (
     "subtotal",
     "amount",
     "total_cost",
+    # AWS
+    "UnblendedCost",                 # CE
+    "BlendedCost",                   # CE
+    "NetUnblendedCost",              # CE
+    "AmortizedCost",                 # CE
+    "lineItem/UnblendedCost",        # CUR
+    "lineItem/BlendedCost",          # CUR
+    "lineItem/NetUnblendedCost",     # CUR
+    "Amount",                        # CE JSON flattened rows
 )
 
 DATE_KEYS = (
+    # GCP
     "usage_start_time",
     "Usage start date",
     "Usage start time",
@@ -72,14 +89,31 @@ DATE_KEYS = (
     "Date",
     "day",
     "billing_date",
+    # AWS
+    "Start",                         # CE JSON flattened
+    "TimePeriodStart",               # CE raw
+    "lineItem/UsageStartDate",       # CUR
+    "bill/BillingPeriodStartDate",   # CUR
 )
 
 SKU_KEYS = (
+    # GCP
     "sku",
     "sku.description",
     "SKU description",
     "sku_description",
     "SKU",
+    # AWS has no direct SKU equivalent; UsageType plays that role
+    # and is its own dimension below.
+)
+
+# AWS UsageType — AWS's closest equivalent to a GCP SKU. Treated as a
+# separate dimension so it shows up distinctly in top_contributors.
+USAGE_TYPE_KEYS = (
+    "UsageType",
+    "lineItem/UsageType",
+    "usage_type",
+    "Usage Type",
 )
 
 PROJECT_KEYS = (
@@ -91,13 +125,31 @@ PROJECT_KEYS = (
     "project_name",
 )
 
+# AWS account — analogous to a GCP project for our cross-file inference.
+ACCOUNT_KEYS = (
+    "Linked Account",                # CE CSV
+    "Account name",                  # CE CSV variant
+    "AccountId",                     # CE JSON flattened
+    "UsageAccountId",                # CE / CUR
+    "lineItem/UsageAccountId",       # CUR
+    "bill/PayerAccountId",           # CUR
+    "account",
+    "account_id",
+)
+
 LOCATION_KEYS = (
+    # GCP
     "location",
     "location.region",
     "location.location",
     "region",
     "Region",
     "Location",
+    # AWS
+    "product/region",                # CUR
+    "product/location",              # CUR (human-readable region)
+    "lineItem/AvailabilityZone",     # CUR
+    "aws_region",
 )
 
 PCT_CHANGE_KEYS = (
@@ -109,15 +161,19 @@ PCT_CHANGE_KEYS = (
 )
 
 DIMENSION_KEY_GROUPS: dict[str, tuple[str, ...]] = {
-    "service": SERVICE_KEYS,
-    "sku": SKU_KEYS,
-    "project": PROJECT_KEYS,
-    "location": LOCATION_KEYS,
+    "service":    SERVICE_KEYS,
+    "sku":        SKU_KEYS,
+    "usage_type": USAGE_TYPE_KEYS,
+    "project":    PROJECT_KEYS,
+    "account":    ACCOUNT_KEYS,
+    "location":   LOCATION_KEYS,
 }
 
 # Order in which we pick the "primary grouping" column for a file.
-# Service > Project > SKU > Location.
-GROUPING_PRIORITY = ("service", "project", "sku", "location")
+# Service > Project > Account > SKU > UsageType > Location.
+# Account sits next to Project (AWS's equivalent grouping); UsageType
+# next to SKU (AWS's equivalent granularity).
+GROUPING_PRIORITY = ("service", "project", "account", "sku", "usage_type", "location")
 
 # How many top contributors to keep per dimension per spike.
 TOP_CONTRIBUTORS_LIMIT = 8
@@ -204,7 +260,9 @@ class NormalizedRow:
     day: date | None
     service: str | None
     sku: str | None
+    usage_type: str | None   # AWS UsageType — the SKU-equivalent for AWS data
     project: str | None
+    account: str | None      # AWS account id / name — the project-equivalent
     location: str | None
     source: str
     pct_change: float | None = None  # period-over-period % from the file, if present
@@ -216,9 +274,21 @@ class NormalizedRow:
 def _parse_file(path: Path) -> list[dict[str, Any]]:
     suffix = path.suffix.lower()
 
+    if suffix == ".parquet":
+        raise BillingFileError(
+            "Parquet CUR files are not supported in v1. "
+            "Ask AWS to also export CSV, or convert the file with a "
+            "local tool (e.g. `parquet-tools csv`)."
+        )
+
     if suffix == ".json":
         with path.open() as f:
             data = json.load(f)
+
+        # AWS Cost Explorer `get-cost-and-usage` response shape.
+        if isinstance(data, dict) and "ResultsByTime" in data:
+            return _flatten_ce_json(data)
+
         if isinstance(data, dict):
             for key in ("rows", "data", "billing", "results"):
                 if key in data and isinstance(data[key], list):
@@ -226,8 +296,9 @@ def _parse_file(path: Path) -> list[dict[str, Any]]:
                     break
         if not isinstance(data, list):
             raise BillingFileError(
-                "JSON billing file must be a list of rows or contain a "
-                "top-level 'rows'/'data' array"
+                "JSON billing file must be a list of rows, an `aws ce "
+                "get-cost-and-usage` response, or contain a top-level "
+                "'rows'/'data' array"
             )
         return [_flatten(r) for r in data if isinstance(r, dict)]
 
@@ -235,6 +306,89 @@ def _parse_file(path: Path) -> list[dict[str, Any]]:
     with path.open(newline="") as f:
         reader = csv.DictReader(f, delimiter=delimiter)
         return [dict(row) for row in reader]
+
+
+# CE API dimension keys → the column names our alias tuples recognize.
+# Used to project raw CE responses into our normalization pipeline.
+_CE_DIMENSION_TO_COLUMN = {
+    "SERVICE": "Service",
+    "USAGE_TYPE": "UsageType",
+    "USAGE_TYPE_GROUP": "UsageType",
+    "LINKED_ACCOUNT": "Linked Account",
+    "LINKED_ACCOUNT_NAME": "Linked Account",
+    "REGION": "Region",
+    "AZ": "Region",
+    "INSTANCE_TYPE": "UsageType",
+    "INSTANCE_TYPE_FAMILY": "UsageType",
+    "OPERATION": "UsageType",
+    "PURCHASE_TYPE": "UsageType",
+    "RECORD_TYPE": "UsageType",
+}
+
+
+def _flatten_ce_json(data: dict[str, Any]) -> list[dict[str, Any]]:
+    """Flatten `aws ce get-cost-and-usage` output into per-row dicts.
+
+    A single CE response can contain multiple time buckets, each with
+    many groups. We produce one row per (TimePeriod.Start × Group) pair,
+    mapping ``Group.Keys[i]`` to the column implied by
+    ``GroupDefinitions[i]`` and promoting each metric's ``Amount`` to a
+    top-level numeric field using the metric's name.
+
+    Shape of a flattened row::
+
+        {"Start": "2026-03-01", "Service": "Amazon EC2",
+         "UnblendedCost": 123.45}
+    """
+    group_defs = data.get("GroupDefinitions", []) or []
+    columns_by_idx = [
+        _CE_DIMENSION_TO_COLUMN.get(
+            gd.get("Key", "").upper(), gd.get("Key", "") or f"Key{i}"
+        )
+        for i, gd in enumerate(group_defs)
+    ]
+
+    rows: list[dict[str, Any]] = []
+    for period in data.get("ResultsByTime", []) or []:
+        tp = period.get("TimePeriod", {}) or {}
+        start = tp.get("Start")
+        groups = period.get("Groups") or []
+        if groups:
+            for g in groups:
+                row: dict[str, Any] = {"Start": start}
+                keys = g.get("Keys", []) or []
+                for i, k in enumerate(keys):
+                    col = (
+                        columns_by_idx[i]
+                        if i < len(columns_by_idx)
+                        else f"Key{i}"
+                    )
+                    row[col] = k
+                _promote_ce_metrics(row, g.get("Metrics") or {})
+                rows.append(row)
+        else:
+            # No group-by → use the period Total.
+            total = period.get("Total") or {}
+            row = {"Start": start, "Service": "Total"}
+            _promote_ce_metrics(row, total)
+            # Only emit the Total row if we managed to pull a cost field.
+            if any(k in row for k in ("UnblendedCost", "BlendedCost", "Amount")):
+                rows.append(row)
+    return rows
+
+
+def _promote_ce_metrics(row: dict[str, Any], metrics: dict[str, Any]) -> None:
+    """Copy each CE metric's Amount into ``row`` under the metric's name."""
+    for metric_name, metric_data in metrics.items():
+        if not isinstance(metric_data, dict):
+            continue
+        amt = metric_data.get("Amount")
+        if amt is None:
+            continue
+        try:
+            row[metric_name] = float(amt)
+        except (TypeError, ValueError):
+            continue
 
 
 def _flatten(row: dict[str, Any], prefix: str = "") -> dict[str, Any]:
@@ -303,7 +457,9 @@ def _normalize_rows(
                 day=_parse_date(raw.get(date_key)) if date_key else None,
                 service=_clean_str(raw.get(dim_keys["service"])) if dim_keys["service"] else None,
                 sku=_clean_str(raw.get(dim_keys["sku"])) if dim_keys["sku"] else None,
+                usage_type=_clean_str(raw.get(dim_keys["usage_type"])) if dim_keys["usage_type"] else None,
                 project=_clean_str(raw.get(dim_keys["project"])) if dim_keys["project"] else None,
+                account=_clean_str(raw.get(dim_keys["account"])) if dim_keys["account"] else None,
                 location=_clean_str(raw.get(dim_keys["location"])) if dim_keys["location"] else None,
                 source=source,
                 pct_change=_parse_pct(raw.get(pct_key)) if pct_key else None,
@@ -498,7 +654,7 @@ def _spikes_total_only(rows: list[NormalizedRow]) -> list[CostSpike]:
 # Common service-name fragments → keywords to look for in project names.
 # Used by _attach_likely_homes for the name-match heuristic. All keywords
 # are at least 3 chars to avoid false positives from generic substrings.
-SERVICE_KEYWORDS = {
+SERVICE_KEYWORDS_GCP = {
     "Cloud DNS": ["dns"],
     "Cloud Storage": ["storage", "gcs", "bucket"],
     "Cloud SQL": ["sql", "database", "rdbms"],
@@ -532,6 +688,67 @@ SERVICE_KEYWORDS = {
     "Cloud Key Management Service (KMS)": ["kms"],
 }
 
+# AWS service-name fragments → keywords. Canonical names are the CE
+# labels you see in the Cost Explorer UI / `ResultsByTime[].Groups[].Keys`.
+SERVICE_KEYWORDS_AWS = {
+    "Amazon Elastic Compute Cloud - Compute": ["ec2", "compute"],
+    "EC2 - Other": ["ec2"],
+    "Amazon Simple Storage Service": ["s3", "storage", "bucket"],
+    "Amazon Relational Database Service": ["rds", "database"],
+    "Amazon Aurora": ["aurora", "rds"],
+    "Amazon DynamoDB": ["dynamo", "ddb"],
+    "Amazon Redshift": ["redshift", "warehouse", "dwh"],
+    "Amazon OpenSearch Service": ["opensearch", "search"],
+    "Amazon Elasticsearch Service": ["elasticsearch", "search"],
+    "AWS Lambda": ["lambda", "func", "function"],
+    "Amazon CloudFront": ["cloudfront", "cdn"],
+    "Amazon Route 53": ["route53", "dns"],
+    "AWS CloudTrail": ["cloudtrail", "audit"],
+    "Amazon CloudWatch": ["cloudwatch", "metrics", "monitor"],
+    "AmazonCloudWatch": ["cloudwatch", "metrics", "monitor"],
+    "Amazon Virtual Private Cloud": ["vpc", "net", "network"],
+    "Amazon API Gateway": ["apigw", "apigateway", "gateway"],
+    "Amazon Elastic Container Service": ["ecs", "container"],
+    "Amazon Elastic Kubernetes Service": ["eks", "k8s", "kube"],
+    "AWS Fargate": ["fargate", "container"],
+    "Amazon Simple Queue Service": ["sqs", "queue"],
+    "Amazon Simple Notification Service": ["sns", "notification"],
+    "Amazon Kinesis": ["kinesis", "stream"],
+    "Amazon Managed Streaming for Apache Kafka": ["msk", "kafka"],
+    "AWS Glue": ["glue", "etl"],
+    "Amazon Athena": ["athena", "query"],
+    "Amazon EMR": ["emr", "bigdata", "hadoop"],
+    "AWS Database Migration Service": ["dms", "migration"],
+    "Amazon SageMaker": ["sagemaker", "ml"],
+    "Amazon Bedrock": ["bedrock", "genai"],
+    "AWS Step Functions": ["stepfunctions", "sfn", "workflow"],
+    "Amazon EventBridge": ["eventbridge", "events"],
+    "Amazon DocumentDB": ["documentdb", "mongo"],
+    "Amazon Neptune": ["neptune", "graph"],
+    "Amazon ElastiCache": ["elasticache", "redis", "cache"],
+    "Amazon MemoryDB for Redis": ["memorydb", "redis"],
+    "AWS AppSync": ["appsync", "graphql"],
+    "Amazon Elastic File System": ["efs", "file", "storage"],
+    "Amazon FSx": ["fsx", "file", "storage"],
+    "AWS Backup": ["backup"],
+    "AWS CodeBuild": ["codebuild", "build", "cicd"],
+    "AWS Key Management Service": ["kms"],
+    "AWS Secrets Manager": ["secret"],
+    "AWS Certificate Manager": ["acm", "cert", "pki"],
+    "AWS Private Certificate Authority": ["acm", "cert", "pki"],
+    "Amazon GuardDuty": ["guardduty", "sec"],
+    "AWS Security Hub": ["securityhub", "sec"],
+    "AWS WAF": ["waf"],
+    "AWS Shield": ["shield", "ddos"],
+    "AWS Config": ["config", "compliance"],
+    "Amazon VPC Lattice": ["lattice", "net"],
+    "Amazon Elastic Load Balancing": ["elb", "lb", "loadbalancer"],
+}
+
+# Legacy single-dict alias — several tests and external code may still
+# import SERVICE_KEYWORDS. Point it at the GCP dict for back-compat.
+SERVICE_KEYWORDS = SERVICE_KEYWORDS_GCP
+
 # Inference scoring constants — tuned for the kind of evidence we get from
 # Console exports. Total score range ~0..120. Anything >= 30 surfaces.
 SCORE_NAME_MATCH = 50
@@ -557,7 +774,9 @@ def _attach_likely_homes(spikes: list[CostSpike]) -> None:
         return
 
     services = [s for s in spikes if s.grouping == "service"]
-    projects = [s for s in spikes if s.grouping == "project"]
+    # A "home" is a project (GCP) or account (AWS) — both name the tenant
+    # that owns the services. We treat them interchangeably here.
+    projects = [s for s in spikes if s.grouping in ("project", "account")]
     if not services or not projects:
         return
 
@@ -606,15 +825,29 @@ def _score_match(
     reasons: list[str] = []
 
     # ---- 1. Name match ----
-    keywords = SERVICE_KEYWORDS.get(service_spike.service, [])
+    # Pick the right keyword dict by heuristic: AWS service names begin
+    # with "Amazon " / "AWS " / "AmazonCloudWatch" (no-space variant).
+    svc_name = service_spike.service
+    is_aws = (
+        svc_name.startswith("Amazon ")
+        or svc_name.startswith("AWS ")
+        or svc_name.startswith("AmazonCloudWatch")
+        or svc_name == "EC2 - Other"
+    )
+    kw_dict = SERVICE_KEYWORDS_AWS if is_aws else SERVICE_KEYWORDS_GCP
+    keywords = kw_dict.get(svc_name, [])
     if not keywords:
         # Fallback: use words from the service name itself, min 4 chars to
         # avoid noise (3-char curated keywords are OK; auto-extracted ones
-        # need to be slightly longer to be reliable).
+        # need to be slightly longer to be reliable). Drop generic glue
+        # words that show up across many services.
+        stopwords = {
+            "cloud", "service", "engine", "manager", "platform",
+            "amazon", "aws", "elastic", "simple",
+        }
         keywords = [
-            w.lower() for w in service_spike.service.split()
-            if len(w) >= 4
-            and w.lower() not in ("cloud", "service", "engine", "manager", "platform")
+            w.lower() for w in svc_name.split()
+            if len(w) >= 4 and w.lower() not in stopwords
         ]
     # Final guard: every keyword must be at least 3 chars
     keywords = [k for k in keywords if len(k) >= 3]

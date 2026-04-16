@@ -1,0 +1,25 @@
+lineItem/UsageStartDate,lineItem/ProductCode,product/ProductName,lineItem/UsageType,lineItem/UsageAccountId,product/region,lineItem/UnblendedCost
+2026-01-01,AmazonEC2,Amazon Elastic Compute Cloud,BoxUsage:m5.xlarge,111122223333,us-east-1,820.00
+2026-01-15,AmazonEC2,Amazon Elastic Compute Cloud,BoxUsage:m5.xlarge,111122223333,us-east-1,810.00
+2026-01-30,AmazonEC2,Amazon Elastic Compute Cloud,BoxUsage:m5.xlarge,111122223333,us-east-1,815.00
+2026-02-15,AmazonEC2,Amazon Elastic Compute Cloud,BoxUsage:m5.xlarge,111122223333,us-east-1,1680.00
+2026-03-01,AmazonEC2,Amazon Elastic Compute Cloud,BoxUsage:m5.xlarge,111122223333,us-east-1,1720.00
+2026-03-15,AmazonEC2,Amazon Elastic Compute Cloud,BoxUsage:m5.xlarge,111122223333,us-east-1,1750.00
+2026-01-01,AmazonEC2,Amazon Elastic Compute Cloud,NatGateway-Bytes,111122223333,us-east-1,420.00
+2026-01-15,AmazonEC2,Amazon Elastic Compute Cloud,NatGateway-Bytes,111122223333,us-east-1,415.00
+2026-01-30,AmazonEC2,Amazon Elastic Compute Cloud,NatGateway-Bytes,111122223333,us-east-1,418.00
+2026-02-15,AmazonEC2,Amazon Elastic Compute Cloud,NatGateway-Bytes,111122223333,us-east-1,3420.00
+2026-03-01,AmazonEC2,Amazon Elastic Compute Cloud,NatGateway-Bytes,111122223333,us-east-1,3510.00
+2026-03-15,AmazonEC2,Amazon Elastic Compute Cloud,NatGateway-Bytes,111122223333,us-east-1,3595.00
+2026-01-01,AmazonS3,Amazon Simple Storage Service,TimedStorage-ByteHrs,111122223333,us-east-1,125.50
+2026-01-15,AmazonS3,Amazon Simple Storage Service,TimedStorage-ByteHrs,111122223333,us-east-1,126.10
+2026-01-30,AmazonS3,Amazon Simple Storage Service,TimedStorage-ByteHrs,111122223333,us-east-1,124.80
+2026-02-15,AmazonS3,Amazon Simple Storage Service,TimedStorage-ByteHrs,111122223333,us-east-1,124.60
+2026-03-01,AmazonS3,Amazon Simple Storage Service,TimedStorage-ByteHrs,111122223333,us-east-1,125.20
+2026-03-15,AmazonS3,Amazon Simple Storage Service,TimedStorage-ByteHrs,111122223333,us-east-1,125.90
+2026-01-01,AWSLambda,AWS Lambda,Lambda-GB-Second,111122223333,us-east-1,14.20
+2026-01-15,AWSLambda,AWS Lambda,Lambda-GB-Second,111122223333,us-east-1,15.00
+2026-01-30,AWSLambda,AWS Lambda,Lambda-GB-Second,111122223333,us-east-1,14.90
+2026-02-15,AWSLambda,AWS Lambda,Lambda-GB-Second,111122223333,us-east-1,86.00
+2026-03-01,AWSLambda,AWS Lambda,Lambda-GB-Second,111122223333,us-east-1,92.00
+2026-03-15,AWSLambda,AWS Lambda,Lambda-GB-Second,111122223333,us-east-1,88.50

@@ -85,12 +85,14 @@ class TestAllowlistFor:
             "aws ec2 describe-instances", "gcp"
         )
 
-    def test_aws_command_rejected_under_aws_in_phase1(self):
-        # Phase 1: AWS allowlist is empty, so every AWS command is rejected.
-        # Phase 2 will flip this to pass for read-shaped commands.
-        assert AWS_PATTERNS == []
-        assert not matches_allowlist_for(
+    def test_aws_read_command_allowed_under_aws_post_phase2(self):
+        # Phase 2: core allowlist populated. Read-shaped aws commands pass
+        # under provider=aws. Still rejected under provider=gcp (isolation).
+        assert matches_allowlist_for(
             "aws ec2 describe-instances", "aws"
+        )
+        assert not matches_allowlist_for(
+            "aws ec2 describe-instances", "gcp"
         )
 
     def test_unknown_provider_rejects_everything(self):
@@ -159,12 +161,18 @@ class TestValidatorProviderScoping:
         assert not r.allowed
         assert r.layer == "L2"  # blocked at allowlist
 
-    def test_explicit_aws_rejects_aws_in_phase1(self):
-        # AWS allowlist is empty in Phase 1. Every AWS command fails L2.
+    def test_explicit_aws_allows_aws_read_post_phase2(self):
+        # Phase 2: AWS allowlist populated. Read-shaped aws commands pass.
         v = SecurityValidator(provider="aws")
-        r = v.is_allowed("aws ec2 describe-instances")
-        assert not r.allowed
-        assert r.layer == "L2"
+        assert v.is_allowed("aws ec2 describe-instances").allowed
+
+    def test_explicit_aws_rejects_write_disguised_as_read(self):
+        # WRITE_DISGUISED_AS_READ is checked BEFORE the generated read rule.
+        v = SecurityValidator(provider="aws")
+        assert not v.is_allowed("aws lambda invoke --function-name x").allowed
+        assert not v.is_allowed(
+            "aws secretsmanager get-secret-value --secret-id x"
+        ).allowed
 
 
 # ---------------------------------------------------------------------------

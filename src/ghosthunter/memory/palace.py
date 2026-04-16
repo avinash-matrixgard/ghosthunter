@@ -145,19 +145,43 @@ def is_available() -> bool:
 
 
 def parse_wing_from_filename(path: Path | str) -> str:
-    """Parse a billing-account wing name from a Console export filename.
+    """Parse a billing-account wing name from a Console/export filename.
+
+    Handles GCP Console exports (``Billing Account for X_Reports``) and
+    three AWS filename conventions:
+
+    - CUR-style ``<report-name>-<YYYYMMDD>-<YYYYMMDD>.csv``
+    - Account-prefixed ``<12-digit-account>-aws-*``
+    - Cost Explorer downloads ``<anything>-aws-*.csv`` → wing ``aws``
 
     Examples
     --------
     >>> parse_wing_from_filename("Billing Account for example.com_Reports, 2026-01-01.csv")
     'example.com'
+    >>> parse_wing_from_filename("111122223333-aws-billing-detailed-2026-03.csv")
+    '111122223333'
+    >>> parse_wing_from_filename("my-cur-report-20260301-20260401.csv")
+    'my-cur-report'
     >>> parse_wing_from_filename("random.csv")
     'default'
     """
     name = Path(path).name
+
+    # GCP Console export: "Billing Account for <wing>_Reports..."
     m = re.match(r"Billing Account for\s+([^_]+)_Reports", name)
     if m:
         return m.group(1).strip()
+
+    # AWS account-id prefix (12 digits followed by -aws-)
+    m = re.match(r"(\d{12})-aws-", name)
+    if m:
+        return m.group(1)
+
+    # CUR report: "<report-name>-YYYYMMDD-YYYYMMDD.csv"
+    m = re.match(r"([A-Za-z0-9_.-]+?)-\d{8}-\d{8}\.csv", name)
+    if m:
+        return m.group(1)
+
     return "default"
 
 

@@ -92,6 +92,10 @@ class ChatSession:
     current_hypotheses: list[Hypothesis] = field(default_factory=list)
     current_evidence: list[Evidence] = field(default_factory=list)
     in_investigation: bool = False
+    # Cloud provider for this session — "gcp" (default) or "aws". Drives
+    # which allowlist, reasoner prompt, and sandbox env get used during
+    # investigations. Set at mode-picker time and/or sniffed on /load.
+    provider: str = "gcp"
     # Memory palace — persistent cross-session knowledge about this billing
     # account. `wing` is the current wing (e.g. "[COMPANY]"), picked from the
     # loaded files on /load.
@@ -169,11 +173,15 @@ MODES: list[ModeOption] = [
     ),
     ModeOption(
         key="aws",
-        title="AWS provider",
+        title="AWS (paranoid advisor)",
         icon="☁️",
-        description="Cost spike investigations against AWS Cost Explorer.",
-        available=False,
-        badge="coming v1.1",
+        description=(
+            "Same flow as paranoid GCP, but for AWS. You export a Cost Explorer\n"
+            "    CSV / JSON or a CUR file, Ghosthunter proposes read-only `aws`\n"
+            "    commands, you run them and paste the output back. Zero AWS\n"
+            "    credentials in Ghosthunter. Active-mode AWS lands in v1.1."
+        ),
+        available=True,
     ),
     ModeOption(
         key="azure",
@@ -281,6 +289,7 @@ def run_chat(
     console = console or Console()
 
     # Mode picker — only when no files were pre-loaded
+    chosen_mode_key: str | None = None
     if not skip_mode_picker and not initial_files:
         mode = _pick_mode(console)
         if mode is None:
@@ -298,9 +307,13 @@ def run_chat(
             from ghosthunter.cli import _run_active_mode_interactive
             _run_active_mode_interactive(console)
             return
-        # mode.key == "paranoid" → fall through to the chat loop below
+        chosen_mode_key = mode.key
+        # mode.key in ("paranoid", "aws") → fall through to the chat loop.
+        # AWS mode is paranoid-flavored with a different provider key.
 
     session = ChatSession(console=console)
+    if chosen_mode_key == "aws":
+        session.provider = "aws"
 
     _print_welcome(console)
 
@@ -614,6 +627,20 @@ def _cmd_load(session: ChatSession, files: list[Path]) -> None:
     session.loaded_files = list(files)
     session.wing = default_wing_for_files(files)
     session.memory_enabled = palace_is_available()
+
+    # Auto-sniff provider from files (import locally to avoid CLI dependency
+    # cycles in import order). If all files signal AWS, switch the session;
+    # otherwise leave provider as whatever the mode picker set.
+    from ghosthunter.cli import _sniff_provider_from_file
+    sniffed = {_sniff_provider_from_file(f) for f in files}
+    sniffed.discard(None)
+    if sniffed == {"aws"} and session.provider != "aws":
+        session.provider = "aws"
+        session.console.print("[dim]Detected AWS billing data — session set to AWS.[/dim]")
+    elif sniffed == {"gcp"} and session.provider != "gcp":
+        session.provider = "gcp"
+        session.console.print("[dim]Detected GCP billing data — session set to GCP.[/dim]")
+
     session.console.print(
         f"[green]✓[/green] Loaded {len(spikes)} spikes from {len(files)} file(s)."
     )
@@ -837,7 +864,8 @@ def _build_investigator(
     The advisor provider gets a callback that lets the user inspect
     hypothesis state mid-investigation via /hypotheses.
     """
-    validator = SecurityValidator()
+    provider_key = getattr(session, "provider", "gcp") or "gcp"
+    validator = SecurityValidator(provider=provider_key)
 
     def show_hypotheses() -> None:
         if not session.current_hypotheses:
@@ -856,6 +884,7 @@ def _build_investigator(
         console=session.console,
         on_show_hypotheses=show_hypotheses,
         on_list_spikes=show_spike_list,
+        provider_key=provider_key,
     )
 
     async def auto_approve(_: PendingCommand) -> str:
@@ -868,7 +897,7 @@ def _build_investigator(
 
     investigator = Investigator(
         provider=provider,  # type: ignore[arg-type]
-        reasoner=Reasoner(),
+        reasoner=Reasoner(provider=provider_key),
         executor=Executor(),
         validator=validator,
         approval_hook=auto_approve,
