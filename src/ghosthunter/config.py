@@ -60,7 +60,13 @@ class Config:
     budget: BudgetConfig = field(default_factory=BudgetConfig)
 
     @classmethod
-    def load(cls, path: Path = CONFIG_PATH) -> "Config":
+    def load(cls, path: Path | None = None) -> "Config":
+        # Resolve ``CONFIG_PATH`` lazily so tests that monkeypatch the
+        # module-level constant see their patched value. Using a default
+        # arg (``path: Path = CONFIG_PATH``) would bind the path at
+        # function-definition time.
+        if path is None:
+            path = CONFIG_PATH
         if not path.exists():
             raise FileNotFoundError(
                 f"No config at {path}. Run `ghosthunter init` first."
@@ -79,7 +85,9 @@ class Config:
             budget=BudgetConfig(**budget_data),
         )
 
-    def save(self, path: Path = CONFIG_PATH) -> None:
+    def save(self, path: Path | None = None) -> None:
+        if path is None:
+            path = CONFIG_PATH
         path.parent.mkdir(parents=True, exist_ok=True)
         payload: dict[str, Any] = asdict(self)
         # tomli-w doesn't serialize None — drop aws if not configured.
@@ -89,7 +97,7 @@ class Config:
             tomli_w.dump(payload, f)
 
 
-def migrate_config_in_place(path: Path = CONFIG_PATH) -> bool:
+def migrate_config_in_place(path: Path | None = None) -> bool:
     """Rewrite ``config.toml`` with the current schema if it's from before
     the ``provider`` field was introduced.
 
@@ -103,6 +111,8 @@ def migrate_config_in_place(path: Path = CONFIG_PATH) -> bool:
     This is intentionally side-effecting on disk so first-run users of
     an AWS-capable Ghosthunter don't have to re-run ``ghosthunter init``.
     """
+    if path is None:
+        path = CONFIG_PATH
     if not path.exists():
         return False
     with path.open("rb") as f:
