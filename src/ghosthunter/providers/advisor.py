@@ -261,12 +261,10 @@ class AdvisorProvider:
                 )
                 return self._read_paste_block_legacy()
 
-            # ---- Slash commands (only on single-line input) ----
-            if not is_multiline and first_line.startswith("/"):
-                self._handle_slash(first_line)
-                continue
-
             # ---- File path branch (single line pointing at an existing file) ----
+            # Check file-path FIRST so absolute paths like "/tmp/foo.json"
+            # don't get misrouted to the slash-command handler just because
+            # they start with "/".
             if not is_multiline:
                 candidate = Path(first_line).expanduser()
                 if candidate.exists() and candidate.is_file():
@@ -277,6 +275,11 @@ class AdvisorProvider:
                             f"[red]Could not read {candidate}: {exc}[/red]"
                         )
                         continue
+
+            # ---- Slash commands (only on single-line input) ----
+            if not is_multiline and first_line.startswith("/"):
+                self._handle_slash(first_line)
+                continue
 
             # ---- Classify: command output vs. short prose / question ----
             if self._looks_like_command_output(raw):
