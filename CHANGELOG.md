@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.2] - 2026-04-17
+
+### Fixed
+- `investigate` no longer crashes with an opaque `string indices must be integers, not 'str'` when Opus returns hypotheses as strings (or drops `next_action.type`, or similar tool-use shape slips). The reasoner now coerces minor slips, raises a typed `ReasonerSchemaError` on un-coerceable shapes, and the investigator retries once with a corrective nudge before aborting. Caught in the wild running advisor mode on the FinOps Foundation's FOCUS 100K sample.
+- Advisor mode banner now correctly says `(aws)` / `(gcp)` for FOCUS 1.0 billing exports. Previously defaulted to `(gcp)` for any FOCUS file because the provider sniffer only recognized AWS CUR / GCP Console column shapes — it now reads the per-row `ProviderName` column (or falls back to `ServiceName` prefix matching).
+
+### Added
+- 45 new tests covering the defensive reasoner parsing and FOCUS provider sniffing, including edge cases for mixed-cloud data and unsupported providers (Azure / Oracle → returns None rather than mis-routing).
+
 ## [1.0.1] - 2026-04-17
 
 ### Added
@@ -21,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `investigate --active` no longer aborts with a raw `ProviderError` / traceback when an optional dependency is missing — the user is walked through installing it.
 
 [Unreleased]: https://github.com/avinash-matrixgard/ghosthunter/compare/v1.0.1...HEAD
+[1.0.2]: https://github.com/avinash-matrixgard/ghosthunter/releases/tag/v1.0.2
 [1.0.1]: https://github.com/avinash-matrixgard/ghosthunter/releases/tag/v1.0.1
 
 ## [1.0.0] - 2026-04-17

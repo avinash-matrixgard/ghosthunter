@@ -205,30 +205,167 @@ class InvestigationStep:
 
     @classmethod
     def from_tool_input(cls, payload: dict[str, Any]) -> "InvestigationStep":
-        hypotheses = [
-            HypothesisStep(
-                id=h["id"],
-                description=h["description"],
-                confidence=h["confidence"],
-                status=h["status"],
-                evidence_for=h.get("evidence_for", []),
-                evidence_against=h.get("evidence_against", []),
+        """Parse Opus's tool_use input defensively.
+
+        Opus *usually* returns the exact JSON shape we asked for via the
+        ``INVESTIGATION_TOOL`` schema, but under long-context pressure it
+        occasionally slips — returns hypotheses as plain strings instead
+        of objects, drops ``next_action.type``, etc. The pre-v1.0.2
+        version crashed with an opaque ``string indices must be integers``
+        TypeError and aborted the whole investigation.
+
+        We now:
+          1. Coerce minor shape slips (string hypothesis → dict with the
+             string as description; missing confidence → 50; etc.).
+          2. Raise a typed ``ReasonerSchemaError`` for un-coerceable
+             shapes so the investigator can retry once with a nudge.
+        """
+        if not isinstance(payload, dict):
+            raise ReasonerSchemaError(
+                f"payload is not a dict (got {type(payload).__name__})"
             )
-            for h in payload.get("hypotheses", [])
-        ]
-        action_payload = payload["next_action"]
-        action = NextAction(
-            type=action_payload["type"],
-            command=action_payload.get("command"),
-            tests_hypothesis=action_payload.get("tests_hypothesis"),
-            rationale=action_payload.get("rationale"),
-            conclusion=action_payload.get("conclusion"),
+
+        raw_hypotheses = payload.get("hypotheses", [])
+        if not isinstance(raw_hypotheses, list):
+            raise ReasonerSchemaError(
+                f"hypotheses is not a list "
+                f"(got {type(raw_hypotheses).__name__})",
+                raw_payload=payload,
+            )
+
+        hypotheses: list[HypothesisStep] = []
+        for idx, raw in enumerate(raw_hypotheses):
+            coerced = _coerce_hypothesis(raw, idx)
+            if coerced is not None:
+                hypotheses.append(coerced)
+
+        # Distinguish two cases:
+        #   - raw list was empty → legit (e.g. Opus concluding with no
+        #     hypotheses to carry forward); preserve original behaviour.
+        #   - raw list had items but *all* were unsalvageable → real
+        #     schema slip; raise so the investigator can retry.
+        if raw_hypotheses and not hypotheses:
+            raise ReasonerSchemaError(
+                f"no valid hypotheses could be parsed from "
+                f"{len(raw_hypotheses)} items",
+                raw_payload=payload,
+            )
+
+        reasoning_raw = payload.get("reasoning", "")
+        reasoning = reasoning_raw if isinstance(reasoning_raw, str) else str(reasoning_raw or "")
+
+        action = _coerce_next_action(
+            payload.get("next_action"),
+            fallback_reasoning=reasoning,
         )
+
         return cls(
             hypotheses=hypotheses,
             next_action=action,
-            reasoning=payload.get("reasoning", ""),
+            reasoning=reasoning,
         )
+
+
+# ---------------------------------------------------------------------------
+# Shape coercion helpers
+# ---------------------------------------------------------------------------
+def _coerce_hypothesis(raw: Any, idx: int) -> "HypothesisStep | None":
+    """Best-effort parse of one hypothesis entry.
+
+    Accepts:
+      - The canonical dict shape (``id``, ``description``, ``confidence``,
+        ``status``, optional evidence lists).
+      - A bare string — treated as the description; other fields filled
+        with sensible defaults. This is the most common Opus slip-up.
+
+    Returns None for un-salvageable entries (e.g., non-string, non-dict,
+    or a dict without any description text). The caller filters Nones.
+    """
+    if isinstance(raw, str):
+        text = raw.strip()
+        if not text:
+            return None
+        return HypothesisStep(
+            id=f"H{idx + 1}",
+            description=text,
+            confidence=50,
+            status="active",
+            evidence_for=[],
+            evidence_against=[],
+        )
+
+    if not isinstance(raw, dict):
+        return None
+
+    description = raw.get("description")
+    if not isinstance(description, str) or not description.strip():
+        # Description is load-bearing — without it the hypothesis is useless.
+        return None
+
+    hid = raw.get("id") or f"H{idx + 1}"
+    confidence_raw = raw.get("confidence", 50)
+    try:
+        confidence = int(confidence_raw)
+    except (TypeError, ValueError):
+        confidence = 50
+    confidence = max(0, min(100, confidence))
+
+    status = raw.get("status", "active")
+    if status not in ("active", "eliminated", "confirmed"):
+        status = "active"
+
+    evidence_for = raw.get("evidence_for", []) or []
+    evidence_against = raw.get("evidence_against", []) or []
+    if not isinstance(evidence_for, list):
+        evidence_for = []
+    if not isinstance(evidence_against, list):
+        evidence_against = []
+
+    return HypothesisStep(
+        id=str(hid),
+        description=description,
+        confidence=confidence,
+        status=status,  # type: ignore[arg-type]
+        evidence_for=[str(e) for e in evidence_for],
+        evidence_against=[str(e) for e in evidence_against],
+    )
+
+
+def _coerce_next_action(raw: Any, *, fallback_reasoning: str = "") -> NextAction:
+    """Best-effort parse of ``next_action``.
+
+    If Opus dropped or corrupted the field, fall back to a ``need_info``
+    action carrying the reasoning text as rationale — that way the
+    investigator can still surface the model's prose to the user rather
+    than bailing out entirely.
+    """
+    if not isinstance(raw, dict):
+        return NextAction(
+            type="need_info",
+            rationale=fallback_reasoning or "(Opus returned a malformed next_action)",
+        )
+
+    action_type = raw.get("type")
+    if action_type not in ("command", "conclude", "need_info"):
+        return NextAction(
+            type="need_info",
+            rationale=(
+                fallback_reasoning
+                or f"(Opus returned unknown next_action.type={action_type!r})"
+            ),
+        )
+
+    conclusion = raw.get("conclusion")
+    if conclusion is not None and not isinstance(conclusion, dict):
+        conclusion = None
+
+    return NextAction(
+        type=action_type,  # type: ignore[arg-type]
+        command=raw.get("command") if isinstance(raw.get("command"), str) else None,
+        tests_hypothesis=raw.get("tests_hypothesis") if isinstance(raw.get("tests_hypothesis"), str) else None,
+        rationale=raw.get("rationale") if isinstance(raw.get("rationale"), str) else None,
+        conclusion=conclusion,
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -236,6 +373,26 @@ class InvestigationStep:
 # ---------------------------------------------------------------------------
 class ReasonerError(Exception):
     """Raised when Opus returns an unparseable or empty response."""
+
+
+class ReasonerSchemaError(ReasonerError):
+    """Raised when Opus's tool_use payload has the wrong shape.
+
+    Separated from the generic ``ReasonerError`` so the investigator can
+    catch *just* this case and retry with a corrective nudge rather than
+    aborting the whole investigation. See `InvestigationStep.from_tool_input`.
+
+    Attributes:
+        detail: Human-readable description of which shape invariant failed.
+        raw_payload: The offending payload (or None), for diagnostics.
+    """
+
+    def __init__(
+        self, detail: str, raw_payload: dict[str, Any] | None = None
+    ) -> None:
+        super().__init__(detail)
+        self.detail = detail
+        self.raw_payload = raw_payload
 
 
 class Reasoner:

@@ -573,11 +573,32 @@ _AWS_COLUMN_SIGNATURES = (
     "usagetype",
 )
 
+# FOCUS 1.0 has the same column schema across all providers — the only
+# native signal is the per-row ``ProviderName`` value. These are the
+# strings the major clouds write there.
+_FOCUS_PROVIDER_NAME_AWS = ("aws",)
+_FOCUS_PROVIDER_NAME_GCP = ("google cloud", "google")
+# Azure/Oracle/etc. aren't supported providers — we return None for them
+# and let the caller fall through to config / default.
+
+# How many rows to peek at when majority-voting on a FOCUS file's
+# ``ProviderName`` or ``ServiceName`` column.
+_FOCUS_PEEK_ROWS = 200
+
 
 def _sniff_provider_from_file(path: Path) -> str | None:
     """Peek at a billing file's header row and guess the provider.
 
-    Returns 'aws', 'gcp', or None if we can't tell.
+    Returns 'aws', 'gcp', or None if we can't tell. Understands:
+      - AWS CUR columns (``lineItem/*``, ``UsageAccountId``, …)
+      - AWS Cost Explorer JSON (``ResultsByTime``)
+      - GCP Console CSV (``Service description`` / ``Project ID``)
+      - FOCUS 1.0 CSV (uses the per-row ``ProviderName`` column; falls
+        back to majority-voting ``ServiceName`` prefixes if needed)
+
+    For FOCUS data that's majority-Azure/Oracle/etc., returns None so
+    the caller can print a helpful "we don't have a reasoner for that
+    provider, defaulting to …" note rather than silently mis-routing.
     """
     import csv as _csv
     import json as _json
@@ -602,19 +623,102 @@ def _sniff_provider_from_file(path: Path) -> str | None:
                     return "aws"
                 if "service.description" in keys or "project.id" in keys:
                     return "gcp"
+                # FOCUS JSON — same logic as CSV below.
+                if "providername" in keys:
+                    return _sniff_focus_rows(data[:_FOCUS_PEEK_ROWS])
             return None
 
         with path.open(newline="") as f:
-            reader = _csv.reader(f)
-            headers = next(reader, [])
-        header_blob = " ".join(h.lower() for h in headers)
-        if any(sig in header_blob for sig in _AWS_COLUMN_SIGNATURES):
-            return "aws"
-        if "service description" in header_blob or "project id" in header_blob:
-            return "gcp"
+            reader = _csv.DictReader(f)
+            headers = [h.lower() for h in (reader.fieldnames or [])]
+            header_blob = " ".join(headers)
+            if any(sig in header_blob for sig in _AWS_COLUMN_SIGNATURES):
+                return "aws"
+            if "service description" in header_blob or "project id" in header_blob:
+                return "gcp"
+            # FOCUS 1.0: distinguish by peeking at actual data rows.
+            if "providername" in headers or "servicename" in headers:
+                sample: list[dict[str, Any]] = []
+                for row in reader:
+                    sample.append(row)
+                    if len(sample) >= _FOCUS_PEEK_ROWS:
+                        break
+                return _sniff_focus_rows(sample)
         return None
     except Exception:
         return None
+
+
+def _sniff_focus_rows(rows: list[dict[str, Any]]) -> str | None:
+    """Majority-vote a FOCUS row sample into aws / gcp / None.
+
+    Uses ``ProviderName`` when present (it's the canonical FOCUS column
+    for this). Falls back to ``ServiceName`` prefix matching (``Amazon
+    …`` / ``AWS …`` → aws; ``Cloud …``, ``BigQuery``, ``Compute Engine``
+    → gcp).
+
+    Returns None when the sample is dominated by a provider Ghosthunter
+    doesn't support (Azure, Oracle, …) so the caller falls through to
+    config / default rather than silently mis-routing to the wrong
+    reasoner rules.
+    """
+    if not rows:
+        return None
+
+    counts = {"aws": 0, "gcp": 0, "other": 0}
+
+    for row in rows:
+        # Prefer the explicit ProviderName column.
+        provider_name = None
+        for k, v in row.items():
+            if str(k).lower() == "providername" and isinstance(v, str):
+                provider_name = v.strip().lower()
+                break
+
+        if provider_name:
+            if any(m in provider_name for m in _FOCUS_PROVIDER_NAME_AWS):
+                counts["aws"] += 1
+                continue
+            if any(m in provider_name for m in _FOCUS_PROVIDER_NAME_GCP):
+                counts["gcp"] += 1
+                continue
+            counts["other"] += 1
+            continue
+
+        # No ProviderName column — classify by ServiceName prefix.
+        service_name = None
+        for k, v in row.items():
+            if str(k).lower() == "servicename" and isinstance(v, str):
+                service_name = v.strip()
+                break
+        if not service_name:
+            continue
+        if (
+            service_name.startswith("Amazon ")
+            or service_name.startswith("AWS ")
+            or service_name.startswith("AmazonCloudWatch")
+            or service_name == "EC2 - Other"
+        ):
+            counts["aws"] += 1
+        elif (
+            service_name.startswith("Cloud ")
+            or service_name in ("BigQuery", "Compute Engine", "Kubernetes Engine")
+            or service_name.startswith("Vertex ")
+            or service_name.startswith("Gemini ")
+        ):
+            counts["gcp"] += 1
+        else:
+            counts["other"] += 1
+
+    # Require a clear majority and that it's a supported provider.
+    total = sum(counts.values())
+    if total == 0:
+        return None
+    if counts["aws"] >= counts["gcp"] and counts["aws"] > counts["other"]:
+        return "aws"
+    if counts["gcp"] > counts["aws"] and counts["gcp"] > counts["other"]:
+        return "gcp"
+    return None
 
 
 def _resolve_provider(

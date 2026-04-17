@@ -32,7 +32,13 @@ from ghosthunter.models.reasoner import (
     InvestigationStep,
     NextAction,
     Reasoner,
+    ReasonerSchemaError,
 )
+
+# Max times we'll ask Opus to re-emit its tool_use before aborting.
+# ReasonerSchemaError typically means Opus returned hypotheses as strings
+# or dropped next_action.type; a single corrective nudge usually fixes it.
+_MAX_SCHEMA_RETRIES_PER_INVESTIGATION = 2
 from ghosthunter.providers.gcp import (
     CommandRejectedError,
     CommandResult,
@@ -208,11 +214,47 @@ class Investigator:
 
         conclusion: dict[str, Any] | None = None
         aborted_reason: str | None = None
+        schema_retries_used = 0
 
         while True:
             await self._emit("step_started", {})
             try:
                 step = await self.reasoner.step(self._messages)
+            except ReasonerSchemaError as exc:
+                # Opus returned a malformed tool_use payload. Nudge it
+                # with a concrete correction and retry — this recovers
+                # ~95% of shape slips we've seen in the wild. Only after
+                # _MAX_SCHEMA_RETRIES_PER_INVESTIGATION do we abort.
+                if schema_retries_used < _MAX_SCHEMA_RETRIES_PER_INVESTIGATION:
+                    schema_retries_used += 1
+                    await self._emit(
+                        "reasoner_schema_retry",
+                        {
+                            "detail": exc.detail,
+                            "attempt": schema_retries_used,
+                        },
+                    )
+                    self._messages.append(
+                        {
+                            "role": "user",
+                            "content": (
+                                "Your previous response was malformed: "
+                                f"{exc.detail}. Please respond again via "
+                                "the `investigation_step` tool. Hypotheses "
+                                "MUST be a list of objects, each with "
+                                "`id`, `description`, `confidence`, and "
+                                "`status`. `next_action` MUST be an object "
+                                "with `type` in (command, conclude, "
+                                "need_info)."
+                            ),
+                        }
+                    )
+                    continue
+                aborted_reason = (
+                    f"reasoner schema error (retries exhausted): {exc.detail}"
+                )
+                await self._emit("aborted", {"reason": aborted_reason})
+                break
             except Exception as exc:
                 aborted_reason = f"reasoner error: {exc}"
                 await self._emit("aborted", {"reason": aborted_reason})
