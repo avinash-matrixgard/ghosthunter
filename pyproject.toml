@@ -1,13 +1,51 @@
 [tool.poetry]
 name = "ghosthunter"
 version = "1.0.0"
-description = "Investigates why cloud costs spiked, using Claude Opus + Sonnet."
-authors = ["Ghosthunter"]
+description = "Investigate WHY your cloud costs spiked — dual-model (Claude Opus + Sonnet) root-cause analysis for GCP and AWS."
+authors = ["matrixgard-Ghosthunter"]
+maintainers = ["matrixgard-Ghosthunter"]
+license = "MIT"
 readme = "README.md"
+homepage = "https://github.com/matrixgard/ghosthunter"
+repository = "https://github.com/matrixgard/ghosthunter"
+documentation = "https://github.com/matrixgard/ghosthunter#readme"
+keywords = [
+    "finops",
+    "cloud-cost",
+    "cost-optimization",
+    "root-cause-analysis",
+    "gcp",
+    "aws",
+    "anthropic",
+    "claude",
+    "llm",
+    "devops",
+    "sre",
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Console",
+    "Intended Audience :: System Administrators",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: MacOS :: MacOS X",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: System :: Systems Administration",
+    "Topic :: System :: Monitoring",
+    "Topic :: Security",
+]
 packages = [{include = "ghosthunter", from = "src"}]
 
+[tool.poetry.urls]
+"Bug Tracker" = "https://github.com/matrixgard/ghosthunter/issues"
+"Changelog" = "https://github.com/matrixgard/ghosthunter/blob/main/CHANGELOG.md"
+"Security Policy" = "https://github.com/matrixgard/ghosthunter/blob/main/SECURITY.md"
+
 [tool.poetry.dependencies]
-python = "^3.11"
+python = "^3.12"
 # Lower bounds reflect what the code was developed against; upper bounds
 # left open so editable installs don't downgrade newer versions already
 # in the venv. Typer <0.15 + Click >=8.3 is a broken pairing (Click 8.3
