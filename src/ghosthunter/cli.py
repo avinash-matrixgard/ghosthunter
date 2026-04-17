@@ -414,12 +414,25 @@ def _run_active_mode(
     spike_index: int, list_only: bool, provider: str = "gcp"
 ) -> None:
     """Active mode: Ghosthunter directly queries the cloud and runs commands."""
+    from ghosthunter.preflight import run_preflight_aws, run_preflight_gcp
+
     cfg = _require_config()
     if cfg.provider and cfg.provider != provider:
         console.print(
             f"[yellow]Config has provider={cfg.provider}, command-line "
             f"picked {provider}. Using {provider}.[/yellow]"
         )
+
+    # Preflight: catch missing deps / bad creds / missing permissions
+    # BEFORE any cloud call. Turns "crash with a traceback" into
+    # "panel + prompt". See src/ghosthunter/preflight.py for the full
+    # check list per provider.
+    preflight_runner = run_preflight_aws if provider == "aws" else run_preflight_gcp
+    if not preflight_runner(cfg, console):
+        console.print(
+            "[yellow]Preflight aborted — fix the issue above and re-run.[/yellow]"
+        )
+        raise typer.Exit(1)
 
     if provider == "aws":
         aws_cfg = cfg.aws or AWSConfig()
@@ -437,6 +450,15 @@ def _run_active_mode(
             aws_cfg.ce_api_cost_ack = True
             cfg.aws = aws_cfg
             cfg.save()
+
+        # Surface the identity the preflight just verified, so the user
+        # can confirm they're hitting the account they expected.
+        identity = getattr(aws_cfg, "_last_sts_identity", None)
+        if identity:
+            console.print(
+                f"[dim]Verified identity: account {identity.get('Account')} · "
+                f"{identity.get('Arn', 'unknown ARN').rsplit('/', 1)[-1]}[/dim]"
+            )
 
         ce_calls: list[dict] = []
 

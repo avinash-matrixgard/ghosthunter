@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-04-17
+
+### Added
+- Interactive preflight checks for active mode (`--active`): missing `boto3` / `google-cloud-bigquery`, absent CLI tools (`aws`, `gcloud`), unconfigured or expired credentials, and Cost Explorer permission gaps now surface as Rich panels with guided prompts instead of stack traces.
+- Auto-fix hooks for pip-installable dependencies: the preflight can install the right extra (`ghosthunter[aws]` / `ghosthunter[gcp]`) after a confirm, then re-check.
+- `sts:GetCallerIdentity` verification on AWS preflight; the verified account and principal are echoed back before any Cost Explorer call so users can abort if they're pointing at the wrong account.
+
+### Changed
+- Test suite discovery is now pinned to `tests/` via `[tool.pytest.ini_options]` so a second Ghosthunter checkout placed next to the repo no longer causes `import file mismatch` collection errors.
+
+### Fixed
+- `investigate --active` no longer aborts with a raw `ProviderError` / traceback when an optional dependency is missing — the user is walked through installing it.
+
+[Unreleased]: https://github.com/avinash-matrixgard/ghosthunter/compare/v1.0.1...HEAD
+[1.0.1]: https://github.com/avinash-matrixgard/ghosthunter/releases/tag/v1.0.1
+
 ## [1.0.0] - 2026-04-17
 
 Initial public release.
@@ -27,5 +43,4 @@ Initial public release.
 - Read-only shell command enforcement: shell commands must match an explicit allowlist (SDK calls for billing fetch are hardcoded, not user-variable).
 - Two-layer validation (static allowlist + model-side validator) before any command execution.
 
-[Unreleased]: https://github.com/avinash-matrixgard/ghosthunter/compare/v1.0.0...HEAD
 [1.0.0]: https://github.com/avinash-matrixgard/ghosthunter/releases/tag/v1.0.0

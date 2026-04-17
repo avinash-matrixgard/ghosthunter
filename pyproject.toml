@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "ghosthunter"
-version = "1.0.0"
+version = "1.0.1"
 description = "Investigate WHY your cloud costs spiked — dual-model (Claude Opus + Sonnet) root-cause analysis for GCP and AWS."
 authors = ["matrixgard-Ghosthunter"]
 maintainers = ["matrixgard-Ghosthunter"]
@@ -81,6 +81,17 @@ ruff = "^0.4.0"
 
 [tool.poetry.scripts]
 ghosthunter = "ghosthunter.cli:app"
+
+[tool.pytest.ini_options]
+# Confine test discovery to the canonical tests/ directory. Without
+# this, pytest walks subdirectories like ``ghosthunter/`` (which users
+# sometimes create when cloning the repo as a submodule / fresh
+# checkout alongside this one) and fails with "import file mismatch"
+# collection errors for the duplicated test modules.
+testpaths = ["tests"]
+# Keep asyncio explicit so pytest-asyncio doesn't warn on default-mode
+# deprecations between releases.
+asyncio_mode = "strict"
 
 [build-system]
 requires = ["poetry-core"]
