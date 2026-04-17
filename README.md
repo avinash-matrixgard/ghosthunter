@@ -307,6 +307,57 @@ sample_data/
 
 ---
 
+## Known Limitations
+
+These are documented caveats, not bugs. See [SECURITY.md](SECURITY.md)
+for the full threat model.
+
+- **Prompt injection via pasted output.** Content you paste back from
+  your own terminal is compressed by Sonnet before Opus sees it.
+  Ghosthunter wraps every paste in an `<UNTRUSTED_COMMAND_OUTPUT>`
+  envelope and instructs Sonnet to treat the contents as factual data
+  only, but the mitigation is trust-based, not rule-based. **Don't
+  paste output from untrusted sources** (logs from a compromised host,
+  blobs of unknown origin, attacker-supplied data). Every command Opus
+  subsequently proposes still has to pass the 7-layer security
+  validator, so this can waste budget but cannot escalate to
+  arbitrary command execution.
+- **No secret redaction on disk.** If the output you paste contains
+  secrets (env dump, session tokens in log lines, a config file with
+  credentials), those secrets persist to `~/.ghosthunter/chat_history`
+  (every prompt-toolkit line you typed) and may end up in
+  `~/.ghosthunter/audit.log` / `~/.ghosthunter/palace/` if memory
+  palace is enabled. Redact pastes before handing them to Ghosthunter;
+  delete the relevant files if something slips through.
+- **Opus can loop on a blocked command.** If Opus re-proposes the same
+  rejected command twice, use `/skip` or `/note <hint>` to force a
+  pivot. Budget caps keep the blast radius small.
+- **Per-investigation budget caps.** 15 commands / $1 / 10 minutes by
+  default. Hitting any one aborts the investigation. Tune via
+  `~/.ghosthunter/config.toml`. AWS active mode additionally tracks
+  Cost Explorer API calls (~$0.01 each) in the audit log.
+- **Streaming is not implemented.** Each Opus turn blocks 5–15 seconds
+  while the API call completes. A live spinner shows the current phase
+  + elapsed time so the UI doesn't look frozen.
+- **CUR Parquet files not supported.** Advisor mode reads CSV only
+  (GCP Console exports, AWS CUR CSV, FOCUS 1.0 CSV, Cost Explorer CSV
+  / JSON). Convert Parquet to CSV externally.
+- **Multi-account AWS Organizations aggregation** — one account per
+  run. Point Ghosthunter at each account's billing export separately.
+- **Azure / OCI / other providers** — not shipped. The provider
+  abstraction supports them; implementations are welcome as PRs.
+- **AWS active mode requires `boto3`.** Install via
+  `pip install 'ghosthunter[aws]'`. Advisor mode doesn't need it —
+  advisor mode works with a billing file and never calls the AWS API.
+- **macOS / Linux only in v1.** Windows support is untested. The
+  advisor-mode flow should work via WSL; active mode may hit
+  subprocess-environment edge cases.
+- **Layer 6 is judgment, not rules.** The Sonnet-based semantic
+  validator caps damage beyond the regex allowlist but isn't
+  infallible. Layer 2's static allowlist is the primary gate.
+
+---
+
 ## Roadmap
 
 - [x] **GCP provider** (v1.0)
