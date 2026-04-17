@@ -208,18 +208,32 @@ class Executor:
     # Layer 6
     # --------------------------------------------------------------
     async def semantic_validate(self, command: str) -> SemanticResult:
-        response = await self.client.messages.create(
-            model=self.model,
-            max_tokens=self.max_validation_tokens,
-            system=self.semantic_system,
-            tools=[SEMANTIC_CHECK_TOOL],
-            tool_choice={"type": "tool", "name": "semantic_check"},
-            messages=[
-                {
-                    "role": "user",
-                    "content": f"Command to check:\n{command}",
-                }
-            ],
+        """Ask Sonnet whether a command is safe and reasonable to run.
+
+        Transient Anthropic API failures (429 rate limit, 529 overloaded,
+        5xx server, network blips) are retried with exponential backoff
+        via ``call_with_retry``. Terminal failures raise a typed
+        ``ModelAPIError`` subclass with an actionable hint.
+        """
+        from ghosthunter.models._api_retry import call_with_retry
+
+        async def _do_call():
+            return await self.client.messages.create(
+                model=self.model,
+                max_tokens=self.max_validation_tokens,
+                system=self.semantic_system,
+                tools=[SEMANTIC_CHECK_TOOL],
+                tool_choice={"type": "tool", "name": "semantic_check"},
+                messages=[
+                    {
+                        "role": "user",
+                        "content": f"Command to check:\n{command}",
+                    }
+                ],
+            )
+
+        response = await call_with_retry(
+            _do_call, op_name="Sonnet semantic validation"
         )
 
         for block in response.content:
@@ -242,7 +256,12 @@ class Executor:
         investigation_target: str,
         hypotheses: list[str],
     ) -> str:
-        """Squash raw command output into a short factual summary."""
+        """Squash raw command output into a short factual summary.
+
+        Uses the same retry/backoff policy as ``semantic_validate``.
+        """
+        from ghosthunter.models._api_retry import call_with_retry
+
         # Hard cap on raw input — Sonnet still has a context window.
         if len(output) > self.max_raw_output_chars:
             output = (
@@ -250,18 +269,23 @@ class Executor:
                 + f"\n\n[... truncated, original was {len(output)} chars ...]"
             )
 
-        response = await self.client.messages.create(
-            model=self.model,
-            max_tokens=self.max_compression_tokens,
-            system=self.compression_system,
-            messages=[
-                {
-                    "role": "user",
-                    "content": _build_compression_user_message(
-                        command, output, investigation_target, hypotheses
-                    ),
-                }
-            ],
+        async def _do_call():
+            return await self.client.messages.create(
+                model=self.model,
+                max_tokens=self.max_compression_tokens,
+                system=self.compression_system,
+                messages=[
+                    {
+                        "role": "user",
+                        "content": _build_compression_user_message(
+                            command, output, investigation_target, hypotheses
+                        ),
+                    }
+                ],
+            )
+
+        response = await call_with_retry(
+            _do_call, op_name="Sonnet compression"
         )
 
         parts: list[str] = []

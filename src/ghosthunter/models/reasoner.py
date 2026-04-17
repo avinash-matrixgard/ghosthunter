@@ -265,15 +265,27 @@ class Reasoner:
     async def step(
         self, messages: list[dict[str, Any]]
     ) -> InvestigationStep:
-        """Run one reasoning turn and return the structured step."""
-        response = await self.client.messages.create(
-            model=self.model,
-            max_tokens=self.max_tokens,
-            system=self.system_prompt,
-            tools=[INVESTIGATION_TOOL],
-            tool_choice={"type": "tool", "name": "investigation_step"},
-            messages=messages,
-        )
+        """Run one reasoning turn and return the structured step.
+
+        Transient Anthropic API failures (429 rate limit, 529 overloaded,
+        5xx server, network blips) are retried with exponential backoff
+        inside ``call_with_retry``. Terminal failures raise a typed
+        ``ModelAPIError`` subclass with an actionable hint — see
+        ``models/_api_retry.py``.
+        """
+        from ghosthunter.models._api_retry import call_with_retry
+
+        async def _do_call():
+            return await self.client.messages.create(
+                model=self.model,
+                max_tokens=self.max_tokens,
+                system=self.system_prompt,
+                tools=[INVESTIGATION_TOOL],
+                tool_choice={"type": "tool", "name": "investigation_step"},
+                messages=messages,
+            )
+
+        response = await call_with_retry(_do_call, op_name="Opus reasoning")
 
         for block in response.content:
             if getattr(block, "type", None) == "tool_use" and block.name == "investigation_step":
