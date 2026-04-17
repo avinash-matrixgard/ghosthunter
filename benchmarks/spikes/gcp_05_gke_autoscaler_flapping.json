@@ -1,0 +1,37 @@
+{
+  "id": "gcp_05_gke_autoscaler_flapping",
+  "provider": "gcp",
+  "description": "GKE node-pool cost jumps as cluster autoscaler flaps between 0 and 50 nodes every ~3 minutes; node warm-up is billed each cycle. PodDisruptionBudget was misconfigured.",
+  "difficulty": "hard",
+  "tags": [
+    "gke",
+    "autoscaler",
+    "flapping",
+    "kubernetes"
+  ],
+  "spike": {
+    "service": "Kubernetes Engine",
+    "direction": "up",
+    "min_change_percent": 200.0,
+    "current_cost_range": [
+      40000,
+      70000
+    ],
+    "expected_previous_cost_approx": 16200.0,
+    "expected_current_cost_approx": 56700.0
+  },
+  "root_cause": {
+    "summary": "Cluster autoscaler flapping between min=0 and max=50 every few minutes because a PodDisruptionBudget blocks scale-down; each warm-up boots N nodes fully.",
+    "evidence_keywords": [
+      "gke",
+      "kubernetes",
+      "autoscaler",
+      "flap",
+      "poddisruption",
+      "pdb",
+      "scale",
+      "node pool"
+    ],
+    "remediation": "Fix PDB minAvailable on the offending deployment. Add scale-down-delay-after-add=10m. Alert on cluster autoscaler scaleup_count > 10/hour."
+  }
+}

@@ -1,0 +1,481 @@
+ChargePeriodStart,ServiceName,SkuId,SubAccountId,RegionId,ProviderName,BilledCost
+2026-02-01,Cloud NAT,NAT Gateway Data Processing,training-prod,us-central1,Google Cloud,408.27
+2026-02-01,Compute Engine,N1 Standard Core,gcp-bg-2,europe-west1,Google Cloud,788.73
+2026-02-01,Cloud Storage,Shared VPC,gcp-bg-1,asia-southeast1,Google Cloud,235.56
+2026-02-01,Cloud SQL,Shared VPC,gcp-bg-3,asia-southeast1,Google Cloud,323.79
+2026-02-01,Kubernetes Engine,SSD Capacity,gcp-bg-1,us-central1,Google Cloud,572.29
+2026-02-01,Cloud Logging,E2 Instance Core,gcp-bg-2,asia-southeast1,Google Cloud,207.79
+2026-02-01,Cloud Monitoring,E2 Instance Core,gcp-bg-1,europe-west1,Google Cloud,100.54
+2026-02-01,Networking,Shared VPC,gcp-bg-2,europe-west1,Google Cloud,434.10
+2026-02-02,Cloud NAT,NAT Gateway Data Processing,training-prod,us-central1,Google Cloud,445.86
+2026-02-02,Compute Engine,Query Analysis,gcp-bg-1,europe-west1,Google Cloud,771.85
+2026-02-02,Cloud Storage,Log Volume,gcp-bg-3,asia-southeast1,Google Cloud,196.11
+2026-02-02,Cloud SQL,Network Egress,gcp-bg-1,europe-west1,Google Cloud,306.73
+2026-02-02,Kubernetes Engine,N1 Standard Core,gcp-bg-1,asia-southeast1,Google Cloud,559.42
+2026-02-02,Cloud Logging,N1 Standard Core,gcp-bg-1,us-central1,Google Cloud,144.99
+2026-02-02,Cloud Monitoring,E2 Instance Core,gcp-bg-1,us-east1,Google Cloud,94.23
+2026-02-02,Networking,Shared VPC,gcp-bg-3,europe-west1,Google Cloud,455.20
+2026-02-03,Cloud NAT,NAT Gateway Data Processing,training-prod,us-central1,Google Cloud,416.16
+2026-02-03,Compute Engine,Network Egress,gcp-bg-2,europe-west1,Google Cloud,826.52
+2026-02-03,Cloud Storage,N1 Standard Core,gcp-bg-3,us-central1,Google Cloud,223.99
+2026-02-03,Cloud SQL,Storage Standard Class A Operations,gcp-bg-1,asia-southeast1,Google Cloud,293.76
+2026-02-03,Kubernetes Engine,SSD Capacity,gcp-bg-3,europe-west1,Google Cloud,570.41
+2026-02-03,Cloud Logging,N1 Standard Core,gcp-bg-1,us-east1,Google Cloud,150.40
+2026-02-03,Cloud Monitoring,SSD Capacity,gcp-bg-3,us-east1,Google Cloud,97.24
+2026-02-03,Networking,Shared VPC,gcp-bg-2,us-east1,Google Cloud,425.11
+2026-02-04,Cloud NAT,NAT Gateway Data Processing,training-prod,us-central1,Google Cloud,417.14
+2026-02-04,Compute Engine,Query Analysis,gcp-bg-3,us-east1,Google Cloud,735.95
+2026-02-04,Cloud Storage,Network Egress,gcp-bg-1,europe-west1,Google Cloud,233.97
+2026-02-04,Cloud SQL,Query Analysis,gcp-bg-2,europe-west1,Google Cloud,214.44
+2026-02-04,Kubernetes Engine,Log Volume,gcp-bg-2,us-central1,Google Cloud,528.08
+2026-02-04,Cloud Logging,N1 Standard Core,gcp-bg-1,europe-west1,Google Cloud,224.68
+2026-02-04,Cloud Monitoring,N1 Standard Core,gcp-bg-1,us-central1,Google Cloud,79.77
+2026-02-04,Networking,Network Egress,gcp-bg-2,asia-southeast1,Google Cloud,408.89
+2026-02-05,Cloud NAT,NAT Gateway Data Processing,training-prod,us-central1,Google Cloud,369.39
+2026-02-05,Compute Engine,Query Analysis,gcp-bg-2,us-east1,Google Cloud,760.01
+2026-02-05,Cloud Storage,SSD Capacity,gcp-bg-2,us-east1,Google Cloud,240.77
+2026-02-05,Cloud SQL,Query Analysis,gcp-bg-3,asia-southeast1,Google Cloud,286.49
+2026-02-05,Kubernetes Engine,Shared VPC,gcp-bg-3,europe-west1,Google Cloud,492.88
+2026-02-05,Cloud Logging,SSD Capacity,gcp-bg-3,asia-southeast1,Google Cloud,187.31
+2026-02-05,Cloud Monitoring,SSD Capacity,gcp-bg-3,us-central1,Google Cloud,89.85
+2026-02-05,Networking,N1 Standard Core,gcp-bg-2,europe-west1,Google Cloud,348.89
+2026-02-06,Cloud NAT,NAT Gateway Data Processing,training-prod,us-central1,Google Cloud,428.38
+2026-02-06,Compute Engine,Log Volume,gcp-bg-3,europe-west1,Google Cloud,908.59
+2026-02-06,Cloud Storage,E2 Instance Core,gcp-bg-2,us-central1,Google Cloud,179.66
+2026-02-06,Cloud SQL,Query Analysis,gcp-bg-1,us-east1,Google Cloud,373.15
+2026-02-06,Kubernetes Engine,Query Analysis,gcp-bg-1,us-east1,Google Cloud,534.46
+2026-02-06,Cloud Logging,Log Volume,gcp-bg-3,asia-southeast1,Google Cloud,165.24
+2026-02-06,Cloud Monitoring,Shared VPC,gcp-bg-2,us-east1,Google Cloud,82.68
+2026-02-06,Networking,SSD Capacity,gcp-bg-3,asia-southeast1,Google Cloud,426.84
+2026-02-07,Cloud NAT,NAT Gateway Data Processing,training-prod,us-central1,Google Cloud,393.24
+2026-02-07,Compute Engine,E2 Instance Core,gcp-bg-2,asia-southeast1,Google Cloud,788.80
+2026-02-07,Cloud Storage,Network Egress,gcp-bg-3,asia-southeast1,Google Cloud,222.45
+2026-02-07,Cloud SQL,Query Analysis,gcp-bg-3,us-central1,Google Cloud,299.80
+2026-02-07,Kubernetes Engine,Storage Standard Class A Operations,gcp-bg-1,europe-west1,Google Cloud,563.87
+2026-02-07,Cloud Logging,E2 Instance Core,gcp-bg-3,us-central1,Google Cloud,200.48
+2026-02-07,Cloud Monitoring,N1 Standard Core,gcp-bg-3,us-east1,Google Cloud,90.36
+2026-02-07,Networking,Query Analysis,gcp-bg-2,asia-southeast1,Google Cloud,429.97
+2026-02-08,Cloud NAT,NAT Gateway Data Processing,training-prod,us-central1,Google Cloud,376.07
+2026-02-08,Compute Engine,Shared VPC,gcp-bg-2,us-central1,Google Cloud,964.52
+2026-02-08,Cloud Storage,E2 Instance Core,gcp-bg-1,asia-southeast1,Google Cloud,196.78
+2026-02-08,Cloud SQL,Shared VPC,gcp-bg-2,us-central1,Google Cloud,317.32
+2026-02-08,Kubernetes Engine,N1 Standard Core,gcp-bg-1,europe-west1,Google Cloud,560.22
+2026-02-08,Cloud Logging,Storage Standard Class A Operations,gcp-bg-3,us-central1,Google Cloud,171.38
+2026-02-08,Cloud Monitoring,Log Volume,gcp-bg-1,asia-southeast1,Google Cloud,84.87
+2026-02-08,Networking,Storage Standard Class A Operations,gcp-bg-2,us-east1,Google Cloud,330.12
+2026-02-09,Cloud NAT,NAT Gateway Data Processing,training-prod,us-central1,Google Cloud,411.75
+2026-02-09,Compute Engine,Shared VPC,gcp-bg-2,asia-southeast1,Google Cloud,891.85
+2026-02-09,Cloud Storage,Network Egress,gcp-bg-1,us-east1,Google Cloud,237.32
+2026-02-09,Cloud SQL,Shared VPC,gcp-bg-3,us-central1,Google Cloud,316.99
+2026-02-09,Kubernetes Engine,Query Analysis,gcp-bg-2,us-central1,Google Cloud,535.53
+2026-02-09,Cloud Logging,Shared VPC,gcp-bg-1,europe-west1,Google Cloud,172.96
+2026-02-09,Cloud Monitoring,Shared VPC,gcp-bg-2,us-east1,Google Cloud,101.02
+2026-02-09,Networking,Log Volume,gcp-bg-1,europe-west1,Google Cloud,490.16
+2026-02-10,Cloud NAT,NAT Gateway Data Processing,training-prod,us-central1,Google Cloud,394.30
+2026-02-10,Compute Engine,Storage Standard Class A Operations,gcp-bg-3,europe-west1,Google Cloud,861.53
+2026-02-10,Cloud Storage,Query Analysis,gcp-bg-1,us-central1,Google Cloud,197.04
+2026-02-10,Cloud SQL,Log Volume,gcp-bg-2,us-central1,Google Cloud,259.30
+2026-02-10,Kubernetes Engine,Log Volume,gcp-bg-2,us-central1,Google Cloud,519.58
+2026-02-10,Cloud Logging,Query Analysis,gcp-bg-3,us-east1,Google Cloud,206.24
+2026-02-10,Cloud Monitoring,Log Volume,gcp-bg-3,us-central1,Google Cloud,78.02
+2026-02-10,Networking,Storage Standard Class A Operations,gcp-bg-2,europe-west1,Google Cloud,379.58
+2026-02-11,Cloud NAT,NAT Gateway Data Processing,training-prod,us-central1,Google Cloud,411.65
+2026-02-11,Compute Engine,Network Egress,gcp-bg-2,europe-west1,Google Cloud,815.80
+2026-02-11,Cloud Storage,SSD Capacity,gcp-bg-2,us-central1,Google Cloud,194.41
+2026-02-11,Cloud SQL,N1 Standard Core,gcp-bg-1,us-central1,Google Cloud,334.03
+2026-02-11,Kubernetes Engine,Storage Standard Class A Operations,gcp-bg-3,asia-southeast1,Google Cloud,506.39
+2026-02-11,Cloud Logging,N1 Standard Core,gcp-bg-1,asia-southeast1,Google Cloud,185.39
+2026-02-11,Cloud Monitoring,Storage Standard Class A Operations,gcp-bg-3,europe-west1,Google Cloud,79.18
+2026-02-11,Networking,SSD Capacity,gcp-bg-3,us-central1,Google Cloud,447.17
+2026-02-12,Cloud NAT,NAT Gateway Data Processing,training-prod,us-central1,Google Cloud,368.16
+2026-02-12,Compute Engine,Shared VPC,gcp-bg-1,us-central1,Google Cloud,877.69
+2026-02-12,Cloud Storage,Shared VPC,gcp-bg-3,europe-west1,Google Cloud,262.79
+2026-02-12,Cloud SQL,E2 Instance Core,gcp-bg-1,us-east1,Google Cloud,394.10
+2026-02-12,Kubernetes Engine,E2 Instance Core,gcp-bg-1,europe-west1,Google Cloud,552.67
+2026-02-12,Cloud Logging,Shared VPC,gcp-bg-2,europe-west1,Google Cloud,189.47
+2026-02-12,Cloud Monitoring,SSD Capacity,gcp-bg-2,us-central1,Google Cloud,86.08
+2026-02-12,Networking,SSD Capacity,gcp-bg-2,asia-southeast1,Google Cloud,383.06
+2026-02-13,Cloud NAT,NAT Gateway Data Processing,training-prod,us-central1,Google Cloud,412.06
+2026-02-13,Compute Engine,Query Analysis,gcp-bg-1,asia-southeast1,Google Cloud,842.70
+2026-02-13,Cloud Storage,Query Analysis,gcp-bg-3,asia-southeast1,Google Cloud,220.99
+2026-02-13,Cloud SQL,Shared VPC,gcp-bg-3,europe-west1,Google Cloud,339.94
+2026-02-13,Kubernetes Engine,Shared VPC,gcp-bg-1,us-central1,Google Cloud,546.20
+2026-02-13,Cloud Logging,Network Egress,gcp-bg-2,europe-west1,Google Cloud,198.30
+2026-02-13,Cloud Monitoring,Shared VPC,gcp-bg-1,europe-west1,Google Cloud,66.25
+2026-02-13,Networking,Storage Standard Class A Operations,gcp-bg-3,asia-southeast1,Google Cloud,485.50
+2026-02-14,Cloud NAT,NAT Gateway Data Processing,training-prod,us-central1,Google Cloud,395.59
+2026-02-14,Compute Engine,Storage Standard Class A Operations,gcp-bg-2,us-east1,Google Cloud,755.02
+2026-02-14,Cloud Storage,E2 Instance Core,gcp-bg-3,us-east1,Google Cloud,229.42
+2026-02-14,Cloud SQL,Log Volume,gcp-bg-2,us-east1,Google Cloud,311.94
+2026-02-14,Kubernetes Engine,E2 Instance Core,gcp-bg-3,asia-southeast1,Google Cloud,542.29
+2026-02-14,Cloud Logging,Storage Standard Class A Operations,gcp-bg-3,asia-southeast1,Google Cloud,181.91
+2026-02-14,Cloud Monitoring,SSD Capacity,gcp-bg-3,asia-southeast1,Google Cloud,83.35
+2026-02-14,Networking,Log Volume,gcp-bg-2,us-central1,Google Cloud,431.27
+2026-02-15,Cloud NAT,NAT Gateway Data Processing,training-prod,us-central1,Google Cloud,386.34
+2026-02-15,Compute Engine,Query Analysis,gcp-bg-3,europe-west1,Google Cloud,718.87
+2026-02-15,Cloud Storage,Shared VPC,gcp-bg-1,europe-west1,Google Cloud,204.19
+2026-02-15,Cloud SQL,Storage Standard Class A Operations,gcp-bg-1,us-east1,Google Cloud,316.01
+2026-02-15,Kubernetes Engine,Network Egress,gcp-bg-2,europe-west1,Google Cloud,545.46
+2026-02-15,Cloud Logging,N1 Standard Core,gcp-bg-3,europe-west1,Google Cloud,197.22
+2026-02-15,Cloud Monitoring,Query Analysis,gcp-bg-2,us-central1,Google Cloud,91.16
+2026-02-15,Networking,SSD Capacity,gcp-bg-2,us-east1,Google Cloud,458.34
+2026-02-16,Cloud NAT,NAT Gateway Data Processing,training-prod,us-central1,Google Cloud,384.54
+2026-02-16,Compute Engine,Log Volume,gcp-bg-1,asia-southeast1,Google Cloud,778.47
+2026-02-16,Cloud Storage,Network Egress,gcp-bg-2,us-central1,Google Cloud,203.94
+2026-02-16,Cloud SQL,Query Analysis,gcp-bg-2,us-central1,Google Cloud,290.92
+2026-02-16,Kubernetes Engine,Shared VPC,gcp-bg-3,asia-southeast1,Google Cloud,504.02
+2026-02-16,Cloud Logging,Shared VPC,gcp-bg-3,asia-southeast1,Google Cloud,194.09
+2026-02-16,Cloud Monitoring,N1 Standard Core,gcp-bg-2,us-east1,Google Cloud,82.16
+2026-02-16,Networking,N1 Standard Core,gcp-bg-3,asia-southeast1,Google Cloud,498.10
+2026-02-17,Cloud NAT,NAT Gateway Data Processing,training-prod,us-central1,Google Cloud,398.26
+2026-02-17,Compute Engine,E2 Instance Core,gcp-bg-2,asia-southeast1,Google Cloud,871.90
+2026-02-17,Cloud Storage,E2 Instance Core,gcp-bg-3,europe-west1,Google Cloud,221.99
+2026-02-17,Cloud SQL,SSD Capacity,gcp-bg-3,us-east1,Google Cloud,323.00
+2026-02-17,Kubernetes Engine,Network Egress,gcp-bg-1,us-east1,Google Cloud,539.77
+2026-02-17,Cloud Logging,Storage Standard Class A Operations,gcp-bg-2,asia-southeast1,Google Cloud,186.22
+2026-02-17,Cloud Monitoring,Query Analysis,gcp-bg-1,us-east1,Google Cloud,107.16
+2026-02-17,Networking,Storage Standard Class A Operations,gcp-bg-1,asia-southeast1,Google Cloud,380.46
+2026-02-18,Cloud NAT,NAT Gateway Data Processing,training-prod,us-central1,Google Cloud,424.69
+2026-02-18,Compute Engine,Storage Standard Class A Operations,gcp-bg-1,asia-southeast1,Google Cloud,778.46
+2026-02-18,Cloud Storage,SSD Capacity,gcp-bg-2,europe-west1,Google Cloud,197.10
+2026-02-18,Cloud SQL,E2 Instance Core,gcp-bg-3,asia-southeast1,Google Cloud,321.17
+2026-02-18,Kubernetes Engine,Log Volume,gcp-bg-3,europe-west1,Google Cloud,593.67
+2026-02-18,Cloud Logging,Query Analysis,gcp-bg-1,us-east1,Google Cloud,190.77
+2026-02-18,Cloud Monitoring,Shared VPC,gcp-bg-2,us-central1,Google Cloud,92.19
+2026-02-18,Networking,Query Analysis,gcp-bg-2,us-central1,Google Cloud,380.29
+2026-02-19,Cloud NAT,NAT Gateway Data Processing,training-prod,us-central1,Google Cloud,424.68
+2026-02-19,Compute Engine,E2 Instance Core,gcp-bg-2,europe-west1,Google Cloud,728.36
+2026-02-19,Cloud Storage,N1 Standard Core,gcp-bg-1,europe-west1,Google Cloud,216.12
+2026-02-19,Cloud SQL,Storage Standard Class A Operations,gcp-bg-3,us-east1,Google Cloud,317.74
+2026-02-19,Kubernetes Engine,E2 Instance Core,gcp-bg-2,asia-southeast1,Google Cloud,548.33
+2026-02-19,Cloud Logging,Shared VPC,gcp-bg-1,us-central1,Google Cloud,201.77
+2026-02-19,Cloud Monitoring,Storage Standard Class A Operations,gcp-bg-3,europe-west1,Google Cloud,100.63
+2026-02-19,Networking,Query Analysis,gcp-bg-1,us-east1,Google Cloud,468.37
+2026-02-20,Cloud NAT,NAT Gateway Data Processing,training-prod,us-central1,Google Cloud,374.80
+2026-02-20,Compute Engine,E2 Instance Core,gcp-bg-3,europe-west1,Google Cloud,866.48
+2026-02-20,Cloud Storage,Network Egress,gcp-bg-3,us-central1,Google Cloud,203.88
+2026-02-20,Cloud SQL,E2 Instance Core,gcp-bg-3,us-central1,Google Cloud,250.06
+2026-02-20,Kubernetes Engine,Storage Standard Class A Operations,gcp-bg-3,us-east1,Google Cloud,578.79
+2026-02-20,Cloud Logging,E2 Instance Core,gcp-bg-1,europe-west1,Google Cloud,176.78
+2026-02-20,Cloud Monitoring,Query Analysis,gcp-bg-1,us-central1,Google Cloud,83.90
+2026-02-20,Networking,E2 Instance Core,gcp-bg-2,us-central1,Google Cloud,374.55
+2026-02-21,Cloud NAT,NAT Gateway Data Processing,training-prod,us-central1,Google Cloud,403.64
+2026-02-21,Compute Engine,Network Egress,gcp-bg-3,europe-west1,Google Cloud,811.44
+2026-02-21,Cloud Storage,Storage Standard Class A Operations,gcp-bg-3,us-central1,Google Cloud,229.43
+2026-02-21,Cloud SQL,N1 Standard Core,gcp-bg-2,europe-west1,Google Cloud,313.08
+2026-02-21,Kubernetes Engine,Query Analysis,gcp-bg-3,us-east1,Google Cloud,559.53
+2026-02-21,Cloud Logging,Log Volume,gcp-bg-1,us-east1,Google Cloud,183.94
+2026-02-21,Cloud Monitoring,Query Analysis,gcp-bg-2,us-east1,Google Cloud,71.45
+2026-02-21,Networking,Network Egress,gcp-bg-1,us-central1,Google Cloud,439.79
+2026-02-22,Cloud NAT,NAT Gateway Data Processing,training-prod,us-central1,Google Cloud,390.43
+2026-02-22,Compute Engine,N1 Standard Core,gcp-bg-3,us-central1,Google Cloud,908.18
+2026-02-22,Cloud Storage,Storage Standard Class A Operations,gcp-bg-2,us-central1,Google Cloud,224.95
+2026-02-22,Cloud SQL,N1 Standard Core,gcp-bg-1,us-east1,Google Cloud,327.67
+2026-02-22,Kubernetes Engine,Shared VPC,gcp-bg-1,us-east1,Google Cloud,517.87
+2026-02-22,Cloud Logging,Shared VPC,gcp-bg-2,us-central1,Google Cloud,158.09
+2026-02-22,Cloud Monitoring,Storage Standard Class A Operations,gcp-bg-3,us-central1,Google Cloud,110.42
+2026-02-22,Networking,Storage Standard Class A Operations,gcp-bg-3,us-central1,Google Cloud,378.38
+2026-02-23,Cloud NAT,NAT Gateway Data Processing,training-prod,us-central1,Google Cloud,388.35
+2026-02-23,Compute Engine,N1 Standard Core,gcp-bg-2,europe-west1,Google Cloud,693.70
+2026-02-23,Cloud Storage,Network Egress,gcp-bg-2,europe-west1,Google Cloud,209.24
+2026-02-23,Cloud SQL,SSD Capacity,gcp-bg-1,us-central1,Google Cloud,259.51
+2026-02-23,Kubernetes Engine,SSD Capacity,gcp-bg-2,us-east1,Google Cloud,531.18
+2026-02-23,Cloud Logging,Shared VPC,gcp-bg-1,us-central1,Google Cloud,187.80
+2026-02-23,Cloud Monitoring,SSD Capacity,gcp-bg-2,us-east1,Google Cloud,89.06
+2026-02-23,Networking,N1 Standard Core,gcp-bg-3,asia-southeast1,Google Cloud,431.12
+2026-02-24,Cloud NAT,NAT Gateway Data Processing,training-prod,us-central1,Google Cloud,409.57
+2026-02-24,Compute Engine,SSD Capacity,gcp-bg-1,asia-southeast1,Google Cloud,808.77
+2026-02-24,Cloud Storage,Log Volume,gcp-bg-1,europe-west1,Google Cloud,210.47
+2026-02-24,Cloud SQL,N1 Standard Core,gcp-bg-3,us-east1,Google Cloud,345.10
+2026-02-24,Kubernetes Engine,Storage Standard Class A Operations,gcp-bg-1,europe-west1,Google Cloud,578.55
+2026-02-24,Cloud Logging,Query Analysis,gcp-bg-3,asia-southeast1,Google Cloud,189.32
+2026-02-24,Cloud Monitoring,Network Egress,gcp-bg-3,asia-southeast1,Google Cloud,90.77
+2026-02-24,Networking,Query Analysis,gcp-bg-1,us-central1,Google Cloud,388.01
+2026-02-25,Cloud NAT,NAT Gateway Data Processing,training-prod,us-central1,Google Cloud,382.19
+2026-02-25,Compute Engine,Storage Standard Class A Operations,gcp-bg-2,us-central1,Google Cloud,927.78
+2026-02-25,Cloud Storage,SSD Capacity,gcp-bg-3,us-east1,Google Cloud,202.11
+2026-02-25,Cloud SQL,Shared VPC,gcp-bg-2,us-central1,Google Cloud,291.75
+2026-02-25,Kubernetes Engine,Log Volume,gcp-bg-2,asia-southeast1,Google Cloud,476.06
+2026-02-25,Cloud Logging,Storage Standard Class A Operations,gcp-bg-2,us-central1,Google Cloud,181.57
+2026-02-25,Cloud Monitoring,SSD Capacity,gcp-bg-3,europe-west1,Google Cloud,87.92
+2026-02-25,Networking,E2 Instance Core,gcp-bg-1,us-central1,Google Cloud,346.28
+2026-02-26,Cloud NAT,NAT Gateway Data Processing,training-prod,us-central1,Google Cloud,426.63
+2026-02-26,Compute Engine,SSD Capacity,gcp-bg-3,asia-southeast1,Google Cloud,827.90
+2026-02-26,Cloud Storage,SSD Capacity,gcp-bg-3,us-central1,Google Cloud,184.61
+2026-02-26,Cloud SQL,SSD Capacity,gcp-bg-1,asia-southeast1,Google Cloud,319.36
+2026-02-26,Kubernetes Engine,N1 Standard Core,gcp-bg-2,asia-southeast1,Google Cloud,544.66
+2026-02-26,Cloud Logging,Storage Standard Class A Operations,gcp-bg-3,us-east1,Google Cloud,194.90
+2026-02-26,Cloud Monitoring,Shared VPC,gcp-bg-1,us-east1,Google Cloud,96.48
+2026-02-26,Networking,Query Analysis,gcp-bg-1,europe-west1,Google Cloud,453.24
+2026-02-27,Cloud NAT,NAT Gateway Data Processing,training-prod,us-central1,Google Cloud,387.05
+2026-02-27,Compute Engine,N1 Standard Core,gcp-bg-2,asia-southeast1,Google Cloud,795.17
+2026-02-27,Cloud Storage,Network Egress,gcp-bg-3,us-east1,Google Cloud,231.53
+2026-02-27,Cloud SQL,SSD Capacity,gcp-bg-1,asia-southeast1,Google Cloud,282.53
+2026-02-27,Kubernetes Engine,N1 Standard Core,gcp-bg-2,us-east1,Google Cloud,536.05
+2026-02-27,Cloud Logging,Query Analysis,gcp-bg-2,us-central1,Google Cloud,194.60
+2026-02-27,Cloud Monitoring,Shared VPC,gcp-bg-3,europe-west1,Google Cloud,87.04
+2026-02-27,Networking,Storage Standard Class A Operations,gcp-bg-2,us-east1,Google Cloud,409.48
+2026-02-28,Cloud NAT,NAT Gateway Data Processing,training-prod,us-central1,Google Cloud,411.60
+2026-02-28,Compute Engine,Query Analysis,gcp-bg-2,us-central1,Google Cloud,607.54
+2026-02-28,Cloud Storage,N1 Standard Core,gcp-bg-2,us-east1,Google Cloud,181.45
+2026-02-28,Cloud SQL,Network Egress,gcp-bg-1,europe-west1,Google Cloud,331.79
+2026-02-28,Kubernetes Engine,Log Volume,gcp-bg-1,asia-southeast1,Google Cloud,495.13
+2026-02-28,Cloud Logging,E2 Instance Core,gcp-bg-1,us-central1,Google Cloud,193.12
+2026-02-28,Cloud Monitoring,Storage Standard Class A Operations,gcp-bg-2,europe-west1,Google Cloud,102.88
+2026-02-28,Networking,N1 Standard Core,gcp-bg-3,asia-southeast1,Google Cloud,423.59
+2026-03-01,Cloud NAT,NAT Gateway Data Processing,training-prod,us-central1,Google Cloud,406.64
+2026-03-01,Compute Engine,N1 Standard Core,gcp-bg-1,europe-west1,Google Cloud,795.31
+2026-03-01,Cloud Storage,Network Egress,gcp-bg-2,us-central1,Google Cloud,226.93
+2026-03-01,Cloud SQL,E2 Instance Core,gcp-bg-1,asia-southeast1,Google Cloud,303.84
+2026-03-01,Kubernetes Engine,Network Egress,gcp-bg-2,asia-southeast1,Google Cloud,409.97
+2026-03-01,Cloud Logging,N1 Standard Core,gcp-bg-1,europe-west1,Google Cloud,198.45
+2026-03-01,Cloud Monitoring,E2 Instance Core,gcp-bg-1,europe-west1,Google Cloud,106.37
+2026-03-01,Networking,N1 Standard Core,gcp-bg-2,europe-west1,Google Cloud,407.82
+2026-03-02,Cloud NAT,NAT Gateway Data Processing,training-prod,us-central1,Google Cloud,420.95
+2026-03-02,Compute Engine,E2 Instance Core,gcp-bg-1,asia-southeast1,Google Cloud,676.32
+2026-03-02,Cloud Storage,N1 Standard Core,gcp-bg-1,asia-southeast1,Google Cloud,227.11
+2026-03-02,Cloud SQL,Storage Standard Class A Operations,gcp-bg-2,asia-southeast1,Google Cloud,269.38
+2026-03-02,Kubernetes Engine,N1 Standard Core,gcp-bg-2,us-central1,Google Cloud,501.02
+2026-03-02,Cloud Logging,Network Egress,gcp-bg-1,europe-west1,Google Cloud,174.39
+2026-03-02,Cloud Monitoring,SSD Capacity,gcp-bg-1,asia-southeast1,Google Cloud,82.41
+2026-03-02,Networking,Query Analysis,gcp-bg-2,us-east1,Google Cloud,428.28
+2026-03-03,Cloud NAT,NAT Gateway Data Processing,training-prod,us-central1,Google Cloud,2859.99
+2026-03-03,Compute Engine,E2 Instance Core,gcp-bg-1,us-central1,Google Cloud,883.76
+2026-03-03,Cloud Storage,Storage Standard Class A Operations,gcp-bg-1,us-central1,Google Cloud,210.23
+2026-03-03,Cloud SQL,Storage Standard Class A Operations,gcp-bg-1,us-central1,Google Cloud,337.48
+2026-03-03,Kubernetes Engine,Network Egress,gcp-bg-1,europe-west1,Google Cloud,592.26
+2026-03-03,Cloud Logging,Query Analysis,gcp-bg-2,europe-west1,Google Cloud,157.12
+2026-03-03,Cloud Monitoring,N1 Standard Core,gcp-bg-3,asia-southeast1,Google Cloud,95.70
+2026-03-03,Networking,Shared VPC,gcp-bg-3,asia-southeast1,Google Cloud,394.15
+2026-03-04,Cloud NAT,NAT Gateway Data Processing,training-prod,us-central1,Google Cloud,3037.17
+2026-03-04,Compute Engine,Query Analysis,gcp-bg-3,asia-southeast1,Google Cloud,755.36
+2026-03-04,Cloud Storage,SSD Capacity,gcp-bg-2,europe-west1,Google Cloud,216.04
+2026-03-04,Cloud SQL,N1 Standard Core,gcp-bg-3,asia-southeast1,Google Cloud,320.68
+2026-03-04,Kubernetes Engine,Log Volume,gcp-bg-1,europe-west1,Google Cloud,616.51
+2026-03-04,Cloud Logging,Shared VPC,gcp-bg-1,europe-west1,Google Cloud,168.68
+2026-03-04,Cloud Monitoring,Query Analysis,gcp-bg-1,us-east1,Google Cloud,68.52
+2026-03-04,Networking,N1 Standard Core,gcp-bg-1,asia-southeast1,Google Cloud,440.41
+2026-03-05,Cloud NAT,NAT Gateway Data Processing,training-prod,us-central1,Google Cloud,2768.62
+2026-03-05,Compute Engine,Network Egress,gcp-bg-1,europe-west1,Google Cloud,806.69
+2026-03-05,Cloud Storage,E2 Instance Core,gcp-bg-3,asia-southeast1,Google Cloud,212.78
+2026-03-05,Cloud SQL,Query Analysis,gcp-bg-3,us-central1,Google Cloud,334.92
+2026-03-05,Kubernetes Engine,Storage Standard Class A Operations,gcp-bg-2,europe-west1,Google Cloud,563.84
+2026-03-05,Cloud Logging,Query Analysis,gcp-bg-2,europe-west1,Google Cloud,196.78
+2026-03-05,Cloud Monitoring,Network Egress,gcp-bg-1,asia-southeast1,Google Cloud,88.48
+2026-03-05,Networking,Shared VPC,gcp-bg-2,us-east1,Google Cloud,388.79
+2026-03-06,Cloud NAT,NAT Gateway Data Processing,training-prod,us-central1,Google Cloud,2928.82
+2026-03-06,Compute Engine,SSD Capacity,gcp-bg-2,europe-west1,Google Cloud,730.75
+2026-03-06,Cloud Storage,Shared VPC,gcp-bg-3,europe-west1,Google Cloud,206.34
+2026-03-06,Cloud SQL,Shared VPC,gcp-bg-3,us-central1,Google Cloud,296.27
+2026-03-06,Kubernetes Engine,Query Analysis,gcp-bg-2,europe-west1,Google Cloud,497.52
+2026-03-06,Cloud Logging,SSD Capacity,gcp-bg-2,europe-west1,Google Cloud,182.60
+2026-03-06,Cloud Monitoring,Query Analysis,gcp-bg-2,asia-southeast1,Google Cloud,82.41
+2026-03-06,Networking,Shared VPC,gcp-bg-1,us-central1,Google Cloud,470.56
+2026-03-07,Cloud NAT,NAT Gateway Data Processing,training-prod,us-central1,Google Cloud,2656.89
+2026-03-07,Compute Engine,Query Analysis,gcp-bg-2,europe-west1,Google Cloud,782.99
+2026-03-07,Cloud Storage,E2 Instance Core,gcp-bg-1,europe-west1,Google Cloud,196.09
+2026-03-07,Cloud SQL,Log Volume,gcp-bg-2,europe-west1,Google Cloud,256.98
+2026-03-07,Kubernetes Engine,Shared VPC,gcp-bg-3,europe-west1,Google Cloud,445.79
+2026-03-07,Cloud Logging,Query Analysis,gcp-bg-1,us-east1,Google Cloud,184.29
+2026-03-07,Cloud Monitoring,SSD Capacity,gcp-bg-1,asia-southeast1,Google Cloud,86.74
+2026-03-07,Networking,SSD Capacity,gcp-bg-1,us-central1,Google Cloud,485.85
+2026-03-08,Cloud NAT,NAT Gateway Data Processing,training-prod,us-central1,Google Cloud,2696.49
+2026-03-08,Compute Engine,Storage Standard Class A Operations,gcp-bg-3,asia-southeast1,Google Cloud,703.32
+2026-03-08,Cloud Storage,SSD Capacity,gcp-bg-2,europe-west1,Google Cloud,211.13
+2026-03-08,Cloud SQL,Storage Standard Class A Operations,gcp-bg-1,asia-southeast1,Google Cloud,303.09
+2026-03-08,Kubernetes Engine,E2 Instance Core,gcp-bg-3,europe-west1,Google Cloud,543.76
+2026-03-08,Cloud Logging,SSD Capacity,gcp-bg-1,us-central1,Google Cloud,189.62
+2026-03-08,Cloud Monitoring,Storage Standard Class A Operations,gcp-bg-1,us-east1,Google Cloud,82.94
+2026-03-08,Networking,Storage Standard Class A Operations,gcp-bg-2,asia-southeast1,Google Cloud,326.65
+2026-03-09,Cloud NAT,NAT Gateway Data Processing,training-prod,us-central1,Google Cloud,2907.17
+2026-03-09,Compute Engine,N1 Standard Core,gcp-bg-3,us-east1,Google Cloud,747.84
+2026-03-09,Cloud Storage,Storage Standard Class A Operations,gcp-bg-2,asia-southeast1,Google Cloud,263.83
+2026-03-09,Cloud SQL,Network Egress,gcp-bg-3,asia-southeast1,Google Cloud,302.40
+2026-03-09,Kubernetes Engine,Log Volume,gcp-bg-1,europe-west1,Google Cloud,557.14
+2026-03-09,Cloud Logging,SSD Capacity,gcp-bg-1,us-east1,Google Cloud,194.74
+2026-03-09,Cloud Monitoring,Network Egress,gcp-bg-3,asia-southeast1,Google Cloud,98.94
+2026-03-09,Networking,Network Egress,gcp-bg-2,asia-southeast1,Google Cloud,423.94
+2026-03-10,Cloud NAT,NAT Gateway Data Processing,training-prod,us-central1,Google Cloud,2747.87
+2026-03-10,Compute Engine,Log Volume,gcp-bg-2,asia-southeast1,Google Cloud,731.92
+2026-03-10,Cloud Storage,SSD Capacity,gcp-bg-3,us-east1,Google Cloud,194.53
+2026-03-10,Cloud SQL,Shared VPC,gcp-bg-1,us-east1,Google Cloud,276.79
+2026-03-10,Kubernetes Engine,SSD Capacity,gcp-bg-1,us-central1,Google Cloud,531.88
+2026-03-10,Cloud Logging,Log Volume,gcp-bg-1,asia-southeast1,Google Cloud,195.85
+2026-03-10,Cloud Monitoring,Network Egress,gcp-bg-3,europe-west1,Google Cloud,89.15
+2026-03-10,Networking,Network Egress,gcp-bg-1,asia-southeast1,Google Cloud,364.99
+2026-03-11,Cloud NAT,NAT Gateway Data Processing,training-prod,us-central1,Google Cloud,2878.52
+2026-03-11,Compute Engine,N1 Standard Core,gcp-bg-1,asia-southeast1,Google Cloud,579.07
+2026-03-11,Cloud Storage,Log Volume,gcp-bg-1,us-east1,Google Cloud,225.53
+2026-03-11,Cloud SQL,SSD Capacity,gcp-bg-1,asia-southeast1,Google Cloud,283.56
+2026-03-11,Kubernetes Engine,Shared VPC,gcp-bg-3,us-east1,Google Cloud,588.97
+2026-03-11,Cloud Logging,Network Egress,gcp-bg-1,us-east1,Google Cloud,174.85
+2026-03-11,Cloud Monitoring,N1 Standard Core,gcp-bg-3,us-east1,Google Cloud,74.28
+2026-03-11,Networking,Query Analysis,gcp-bg-3,europe-west1,Google Cloud,406.91
+2026-03-12,Cloud NAT,NAT Gateway Data Processing,training-prod,us-central1,Google Cloud,2670.49
+2026-03-12,Compute Engine,Shared VPC,gcp-bg-1,us-east1,Google Cloud,791.75
+2026-03-12,Cloud Storage,Query Analysis,gcp-bg-3,us-east1,Google Cloud,217.23
+2026-03-12,Cloud SQL,Query Analysis,gcp-bg-3,asia-southeast1,Google Cloud,289.09
+2026-03-12,Kubernetes Engine,Query Analysis,gcp-bg-2,us-central1,Google Cloud,569.29
+2026-03-12,Cloud Logging,N1 Standard Core,gcp-bg-3,europe-west1,Google Cloud,183.90
+2026-03-12,Cloud Monitoring,Storage Standard Class A Operations,gcp-bg-1,europe-west1,Google Cloud,92.25
+2026-03-12,Networking,SSD Capacity,gcp-bg-3,asia-southeast1,Google Cloud,347.87
+2026-03-13,Cloud NAT,NAT Gateway Data Processing,training-prod,us-central1,Google Cloud,2866.87
+2026-03-13,Compute Engine,Shared VPC,gcp-bg-3,asia-southeast1,Google Cloud,850.18
+2026-03-13,Cloud Storage,Log Volume,gcp-bg-1,us-east1,Google Cloud,229.54
+2026-03-13,Cloud SQL,Network Egress,gcp-bg-1,europe-west1,Google Cloud,326.65
+2026-03-13,Kubernetes Engine,Query Analysis,gcp-bg-1,us-east1,Google Cloud,550.03
+2026-03-13,Cloud Logging,Log Volume,gcp-bg-3,europe-west1,Google Cloud,198.03
+2026-03-13,Cloud Monitoring,Network Egress,gcp-bg-1,us-central1,Google Cloud,75.90
+2026-03-13,Networking,SSD Capacity,gcp-bg-1,asia-southeast1,Google Cloud,456.58
+2026-03-14,Cloud NAT,NAT Gateway Data Processing,training-prod,us-central1,Google Cloud,2606.02
+2026-03-14,Compute Engine,Network Egress,gcp-bg-2,us-east1,Google Cloud,844.77
+2026-03-14,Cloud Storage,N1 Standard Core,gcp-bg-2,us-central1,Google Cloud,234.55
+2026-03-14,Cloud SQL,Shared VPC,gcp-bg-3,europe-west1,Google Cloud,323.36
+2026-03-14,Kubernetes Engine,Log Volume,gcp-bg-2,us-east1,Google Cloud,563.19
+2026-03-14,Cloud Logging,SSD Capacity,gcp-bg-2,us-east1,Google Cloud,210.40
+2026-03-14,Cloud Monitoring,Network Egress,gcp-bg-1,us-central1,Google Cloud,85.60
+2026-03-14,Networking,E2 Instance Core,gcp-bg-2,us-central1,Google Cloud,500.18
+2026-03-15,Cloud NAT,NAT Gateway Data Processing,training-prod,us-central1,Google Cloud,2842.26
+2026-03-15,Compute Engine,Log Volume,gcp-bg-2,us-central1,Google Cloud,803.49
+2026-03-15,Cloud Storage,Log Volume,gcp-bg-1,asia-southeast1,Google Cloud,233.64
+2026-03-15,Cloud SQL,E2 Instance Core,gcp-bg-2,asia-southeast1,Google Cloud,355.79
+2026-03-15,Kubernetes Engine,Log Volume,gcp-bg-3,asia-southeast1,Google Cloud,578.54
+2026-03-15,Cloud Logging,SSD Capacity,gcp-bg-3,us-east1,Google Cloud,170.55
+2026-03-15,Cloud Monitoring,Query Analysis,gcp-bg-3,asia-southeast1,Google Cloud,69.56
+2026-03-15,Networking,Network Egress,gcp-bg-1,asia-southeast1,Google Cloud,368.60
+2026-03-16,Cloud NAT,NAT Gateway Data Processing,training-prod,us-central1,Google Cloud,2948.48
+2026-03-16,Compute Engine,SSD Capacity,gcp-bg-3,us-central1,Google Cloud,874.17
+2026-03-16,Cloud Storage,Log Volume,gcp-bg-3,asia-southeast1,Google Cloud,159.18
+2026-03-16,Cloud SQL,Log Volume,gcp-bg-2,asia-southeast1,Google Cloud,280.28
+2026-03-16,Kubernetes Engine,SSD Capacity,gcp-bg-2,asia-southeast1,Google Cloud,568.93
+2026-03-16,Cloud Logging,Network Egress,gcp-bg-2,us-east1,Google Cloud,139.05
+2026-03-16,Cloud Monitoring,E2 Instance Core,gcp-bg-2,us-central1,Google Cloud,105.78
+2026-03-16,Networking,Query Analysis,gcp-bg-2,us-east1,Google Cloud,429.26
+2026-03-17,Cloud NAT,NAT Gateway Data Processing,training-prod,us-central1,Google Cloud,2718.68
+2026-03-17,Compute Engine,E2 Instance Core,gcp-bg-1,us-central1,Google Cloud,798.09
+2026-03-17,Cloud Storage,Shared VPC,gcp-bg-1,us-east1,Google Cloud,231.93
+2026-03-17,Cloud SQL,Network Egress,gcp-bg-3,us-central1,Google Cloud,286.18
+2026-03-17,Kubernetes Engine,SSD Capacity,gcp-bg-2,us-east1,Google Cloud,581.69
+2026-03-17,Cloud Logging,N1 Standard Core,gcp-bg-2,europe-west1,Google Cloud,159.80
+2026-03-17,Cloud Monitoring,SSD Capacity,gcp-bg-3,us-east1,Google Cloud,92.45
+2026-03-17,Networking,N1 Standard Core,gcp-bg-2,asia-southeast1,Google Cloud,536.22
+2026-03-18,Cloud NAT,NAT Gateway Data Processing,training-prod,us-central1,Google Cloud,2623.23
+2026-03-18,Compute Engine,Shared VPC,gcp-bg-2,europe-west1,Google Cloud,709.07
+2026-03-18,Cloud Storage,E2 Instance Core,gcp-bg-1,europe-west1,Google Cloud,172.34
+2026-03-18,Cloud SQL,Log Volume,gcp-bg-1,us-east1,Google Cloud,324.91
+2026-03-18,Kubernetes Engine,N1 Standard Core,gcp-bg-1,us-east1,Google Cloud,581.46
+2026-03-18,Cloud Logging,Log Volume,gcp-bg-3,us-central1,Google Cloud,197.37
+2026-03-18,Cloud Monitoring,Log Volume,gcp-bg-2,us-east1,Google Cloud,83.61
+2026-03-18,Networking,Network Egress,gcp-bg-2,europe-west1,Google Cloud,447.33
+2026-03-19,Cloud NAT,NAT Gateway Data Processing,training-prod,us-central1,Google Cloud,2778.55
+2026-03-19,Compute Engine,Shared VPC,gcp-bg-3,us-east1,Google Cloud,871.56
+2026-03-19,Cloud Storage,Shared VPC,gcp-bg-3,us-east1,Google Cloud,217.97
+2026-03-19,Cloud SQL,Query Analysis,gcp-bg-2,us-east1,Google Cloud,273.87
+2026-03-19,Kubernetes Engine,E2 Instance Core,gcp-bg-2,us-east1,Google Cloud,505.88
+2026-03-19,Cloud Logging,Query Analysis,gcp-bg-3,asia-southeast1,Google Cloud,209.36
+2026-03-19,Cloud Monitoring,SSD Capacity,gcp-bg-2,asia-southeast1,Google Cloud,91.37
+2026-03-19,Networking,SSD Capacity,gcp-bg-1,us-central1,Google Cloud,466.42
+2026-03-20,Cloud NAT,NAT Gateway Data Processing,training-prod,us-central1,Google Cloud,2609.73
+2026-03-20,Compute Engine,Shared VPC,gcp-bg-1,asia-southeast1,Google Cloud,845.95
+2026-03-20,Cloud Storage,N1 Standard Core,gcp-bg-1,us-east1,Google Cloud,190.49
+2026-03-20,Cloud SQL,Network Egress,gcp-bg-2,us-east1,Google Cloud,316.64
+2026-03-20,Kubernetes Engine,E2 Instance Core,gcp-bg-3,europe-west1,Google Cloud,529.16
+2026-03-20,Cloud Logging,N1 Standard Core,gcp-bg-3,europe-west1,Google Cloud,176.49
+2026-03-20,Cloud Monitoring,N1 Standard Core,gcp-bg-2,europe-west1,Google Cloud,73.41
+2026-03-20,Networking,Query Analysis,gcp-bg-1,asia-southeast1,Google Cloud,381.10
+2026-03-21,Cloud NAT,NAT Gateway Data Processing,training-prod,us-central1,Google Cloud,2573.20
+2026-03-21,Compute Engine,Storage Standard Class A Operations,gcp-bg-3,us-central1,Google Cloud,814.47
+2026-03-21,Cloud Storage,Log Volume,gcp-bg-1,us-central1,Google Cloud,185.28
+2026-03-21,Cloud SQL,Storage Standard Class A Operations,gcp-bg-1,asia-southeast1,Google Cloud,320.74
+2026-03-21,Kubernetes Engine,SSD Capacity,gcp-bg-2,us-central1,Google Cloud,514.73
+2026-03-21,Cloud Logging,SSD Capacity,gcp-bg-2,us-east1,Google Cloud,219.16
+2026-03-21,Cloud Monitoring,Log Volume,gcp-bg-3,asia-southeast1,Google Cloud,91.12
+2026-03-21,Networking,Query Analysis,gcp-bg-2,asia-southeast1,Google Cloud,358.45
+2026-03-22,Cloud NAT,NAT Gateway Data Processing,training-prod,us-central1,Google Cloud,2757.72
+2026-03-22,Compute Engine,Network Egress,gcp-bg-1,asia-southeast1,Google Cloud,844.11
+2026-03-22,Cloud Storage,N1 Standard Core,gcp-bg-2,us-central1,Google Cloud,195.83
+2026-03-22,Cloud SQL,Log Volume,gcp-bg-2,us-east1,Google Cloud,296.41
+2026-03-22,Kubernetes Engine,Log Volume,gcp-bg-2,asia-southeast1,Google Cloud,593.61
+2026-03-22,Cloud Logging,SSD Capacity,gcp-bg-2,us-east1,Google Cloud,184.34
+2026-03-22,Cloud Monitoring,Query Analysis,gcp-bg-3,asia-southeast1,Google Cloud,95.70
+2026-03-22,Networking,E2 Instance Core,gcp-bg-3,us-east1,Google Cloud,435.92
+2026-03-23,Cloud NAT,NAT Gateway Data Processing,training-prod,us-central1,Google Cloud,2741.90
+2026-03-23,Compute Engine,E2 Instance Core,gcp-bg-2,asia-southeast1,Google Cloud,917.94
+2026-03-23,Cloud Storage,SSD Capacity,gcp-bg-1,europe-west1,Google Cloud,232.63
+2026-03-23,Cloud SQL,Query Analysis,gcp-bg-2,asia-southeast1,Google Cloud,302.68
+2026-03-23,Kubernetes Engine,N1 Standard Core,gcp-bg-3,europe-west1,Google Cloud,553.51
+2026-03-23,Cloud Logging,Log Volume,gcp-bg-2,us-central1,Google Cloud,172.87
+2026-03-23,Cloud Monitoring,Query Analysis,gcp-bg-1,asia-southeast1,Google Cloud,100.88
+2026-03-23,Networking,E2 Instance Core,gcp-bg-2,europe-west1,Google Cloud,454.96
+2026-03-24,Cloud NAT,NAT Gateway Data Processing,training-prod,us-central1,Google Cloud,2829.72
+2026-03-24,Compute Engine,Network Egress,gcp-bg-1,europe-west1,Google Cloud,699.90
+2026-03-24,Cloud Storage,E2 Instance Core,gcp-bg-1,europe-west1,Google Cloud,235.62
+2026-03-24,Cloud SQL,Storage Standard Class A Operations,gcp-bg-3,us-east1,Google Cloud,340.76
+2026-03-24,Kubernetes Engine,Shared VPC,gcp-bg-3,us-east1,Google Cloud,508.27
+2026-03-24,Cloud Logging,Storage Standard Class A Operations,gcp-bg-2,asia-southeast1,Google Cloud,187.06
+2026-03-24,Cloud Monitoring,Log Volume,gcp-bg-1,europe-west1,Google Cloud,84.20
+2026-03-24,Networking,N1 Standard Core,gcp-bg-3,europe-west1,Google Cloud,402.15
+2026-03-25,Cloud NAT,NAT Gateway Data Processing,training-prod,us-central1,Google Cloud,2753.35
+2026-03-25,Compute Engine,SSD Capacity,gcp-bg-2,europe-west1,Google Cloud,829.09
+2026-03-25,Cloud Storage,SSD Capacity,gcp-bg-3,us-east1,Google Cloud,219.84
+2026-03-25,Cloud SQL,E2 Instance Core,gcp-bg-3,asia-southeast1,Google Cloud,355.83
+2026-03-25,Kubernetes Engine,Log Volume,gcp-bg-1,asia-southeast1,Google Cloud,540.69
+2026-03-25,Cloud Logging,Storage Standard Class A Operations,gcp-bg-2,us-central1,Google Cloud,184.02
+2026-03-25,Cloud Monitoring,E2 Instance Core,gcp-bg-3,us-east1,Google Cloud,74.39
+2026-03-25,Networking,Network Egress,gcp-bg-1,asia-southeast1,Google Cloud,467.83
+2026-03-26,Cloud NAT,NAT Gateway Data Processing,training-prod,us-central1,Google Cloud,3241.38
+2026-03-26,Compute Engine,Storage Standard Class A Operations,gcp-bg-3,us-central1,Google Cloud,960.74
+2026-03-26,Cloud Storage,Shared VPC,gcp-bg-2,us-central1,Google Cloud,225.91
+2026-03-26,Cloud SQL,SSD Capacity,gcp-bg-3,europe-west1,Google Cloud,335.18
+2026-03-26,Kubernetes Engine,E2 Instance Core,gcp-bg-3,europe-west1,Google Cloud,601.60
+2026-03-26,Cloud Logging,SSD Capacity,gcp-bg-2,europe-west1,Google Cloud,184.08
+2026-03-26,Cloud Monitoring,Query Analysis,gcp-bg-2,europe-west1,Google Cloud,87.36
+2026-03-26,Networking,E2 Instance Core,gcp-bg-2,us-east1,Google Cloud,430.48
+2026-03-27,Cloud NAT,NAT Gateway Data Processing,training-prod,us-central1,Google Cloud,2608.60
+2026-03-27,Compute Engine,E2 Instance Core,gcp-bg-2,europe-west1,Google Cloud,869.77
+2026-03-27,Cloud Storage,Storage Standard Class A Operations,gcp-bg-1,us-central1,Google Cloud,189.17
+2026-03-27,Cloud SQL,Log Volume,gcp-bg-1,europe-west1,Google Cloud,286.31
+2026-03-27,Kubernetes Engine,Shared VPC,gcp-bg-3,us-central1,Google Cloud,481.45
+2026-03-27,Cloud Logging,E2 Instance Core,gcp-bg-3,europe-west1,Google Cloud,191.82
+2026-03-27,Cloud Monitoring,SSD Capacity,gcp-bg-3,asia-southeast1,Google Cloud,98.94
+2026-03-27,Networking,Network Egress,gcp-bg-1,us-central1,Google Cloud,401.03
+2026-03-28,Cloud NAT,NAT Gateway Data Processing,training-prod,us-central1,Google Cloud,2922.69
+2026-03-28,Compute Engine,E2 Instance Core,gcp-bg-1,us-east1,Google Cloud,915.41
+2026-03-28,Cloud Storage,Shared VPC,gcp-bg-2,asia-southeast1,Google Cloud,204.31
+2026-03-28,Cloud SQL,E2 Instance Core,gcp-bg-1,us-central1,Google Cloud,338.70
+2026-03-28,Kubernetes Engine,E2 Instance Core,gcp-bg-2,us-east1,Google Cloud,621.41
+2026-03-28,Cloud Logging,N1 Standard Core,gcp-bg-1,europe-west1,Google Cloud,193.48
+2026-03-28,Cloud Monitoring,Storage Standard Class A Operations,gcp-bg-1,us-east1,Google Cloud,103.85
+2026-03-28,Networking,Log Volume,gcp-bg-2,europe-west1,Google Cloud,428.65
+2026-03-29,Cloud NAT,NAT Gateway Data Processing,training-prod,us-central1,Google Cloud,3028.02
+2026-03-29,Compute Engine,Storage Standard Class A Operations,gcp-bg-1,europe-west1,Google Cloud,944.35
+2026-03-29,Cloud Storage,Network Egress,gcp-bg-3,us-central1,Google Cloud,223.32
+2026-03-29,Cloud SQL,Query Analysis,gcp-bg-1,us-central1,Google Cloud,316.24
+2026-03-29,Kubernetes Engine,E2 Instance Core,gcp-bg-3,us-east1,Google Cloud,593.18
+2026-03-29,Cloud Logging,E2 Instance Core,gcp-bg-3,us-central1,Google Cloud,171.11
+2026-03-29,Cloud Monitoring,Log Volume,gcp-bg-2,asia-southeast1,Google Cloud,97.30
+2026-03-29,Networking,SSD Capacity,gcp-bg-2,us-central1,Google Cloud,421.12
+2026-03-30,Cloud NAT,NAT Gateway Data Processing,training-prod,us-central1,Google Cloud,2668.15
+2026-03-30,Compute Engine,Storage Standard Class A Operations,gcp-bg-2,us-east1,Google Cloud,796.13
+2026-03-30,Cloud Storage,Storage Standard Class A Operations,gcp-bg-3,asia-southeast1,Google Cloud,208.90
+2026-03-30,Cloud SQL,N1 Standard Core,gcp-bg-2,europe-west1,Google Cloud,287.91
+2026-03-30,Kubernetes Engine,Storage Standard Class A Operations,gcp-bg-2,europe-west1,Google Cloud,555.99
+2026-03-30,Cloud Logging,Storage Standard Class A Operations,gcp-bg-3,us-east1,Google Cloud,149.65
+2026-03-30,Cloud Monitoring,Log Volume,gcp-bg-2,asia-southeast1,Google Cloud,85.73
+2026-03-30,Networking,Log Volume,gcp-bg-2,europe-west1,Google Cloud,384.23
+2026-03-31,Cloud NAT,NAT Gateway Data Processing,training-prod,us-central1,Google Cloud,2945.16
+2026-03-31,Compute Engine,Storage Standard Class A Operations,gcp-bg-2,asia-southeast1,Google Cloud,858.91
+2026-03-31,Cloud Storage,E2 Instance Core,gcp-bg-3,europe-west1,Google Cloud,232.64
+2026-03-31,Cloud SQL,E2 Instance Core,gcp-bg-1,us-central1,Google Cloud,288.67
+2026-03-31,Kubernetes Engine,Network Egress,gcp-bg-1,us-central1,Google Cloud,554.26
+2026-03-31,Cloud Logging,E2 Instance Core,gcp-bg-2,us-central1,Google Cloud,181.60
+2026-03-31,Cloud Monitoring,Query Analysis,gcp-bg-2,us-east1,Google Cloud,90.82
+2026-03-31,Networking,Shared VPC,gcp-bg-1,us-east1,Google Cloud,388.86
+2026-04-01,Cloud NAT,NAT Gateway Data Processing,training-prod,us-central1,Google Cloud,3155.86
+2026-04-01,Compute Engine,Network Egress,gcp-bg-3,us-central1,Google Cloud,702.49
+2026-04-01,Cloud Storage,Log Volume,gcp-bg-2,us-central1,Google Cloud,181.24
+2026-04-01,Cloud SQL,Log Volume,gcp-bg-2,us-central1,Google Cloud,398.08
+2026-04-01,Kubernetes Engine,Log Volume,gcp-bg-3,europe-west1,Google Cloud,567.22
+2026-04-01,Cloud Logging,Log Volume,gcp-bg-1,us-east1,Google Cloud,176.26
+2026-04-01,Cloud Monitoring,Network Egress,gcp-bg-1,europe-west1,Google Cloud,97.03
+2026-04-01,Networking,E2 Instance Core,gcp-bg-2,asia-southeast1,Google Cloud,377.01

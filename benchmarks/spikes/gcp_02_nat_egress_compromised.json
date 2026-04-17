@@ -1,0 +1,38 @@
+{
+  "id": "gcp_02_nat_egress_compromised",
+  "provider": "gcp",
+  "description": "Cloud NAT egress explodes after a leaked service-account key is used from a training GCE instance to exfiltrate ~8 TB/day to an external S3 bucket.",
+  "difficulty": "hard",
+  "tags": [
+    "nat",
+    "egress",
+    "security",
+    "exfiltration"
+  ],
+  "spike": {
+    "service": "Cloud NAT",
+    "direction": "up",
+    "min_change_percent": 500.0,
+    "current_cost_range": [
+      75000,
+      95000
+    ],
+    "expected_previous_cost_approx": 12000.0,
+    "expected_current_cost_approx": 84000.0
+  },
+  "root_cause": {
+    "summary": "Leaked service-account key exfiltrating data via Cloud NAT to an external endpoint. Egress to internet from a single instance in training-prod.",
+    "evidence_keywords": [
+      "nat",
+      "egress",
+      "external",
+      "exfiltration",
+      "service account",
+      "key",
+      "compromise",
+      "training",
+      "internet"
+    ],
+    "remediation": "Rotate the compromised key immediately, add egress VPC-SC perimeter, cap NAT gateway egress per-instance with a quota, enable Flow Logs if not already on."
+  }
+}

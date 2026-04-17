@@ -1,0 +1,36 @@
+{
+  "id": "gcp_03_cloudrun_min_instances",
+  "provider": "gcp",
+  "description": "Cloud Run cost jumps because a staging rollout set min-instances=100 on 8 services and shipped to production.",
+  "difficulty": "easy",
+  "tags": [
+    "cloud-run",
+    "min-instances",
+    "config-drift"
+  ],
+  "spike": {
+    "service": "Cloud Run",
+    "direction": "up",
+    "min_change_percent": 250.0,
+    "current_cost_range": [
+      40000,
+      70000
+    ],
+    "expected_previous_cost_approx": 9600.0,
+    "expected_current_cost_approx": 52800.0
+  },
+  "root_cause": {
+    "summary": "min-instances=100 accidentally promoted from staging to prod across 8 Cloud Run services \u2014 each now keeps 100 warm containers 24/7 regardless of traffic.",
+    "evidence_keywords": [
+      "cloud run",
+      "min-instances",
+      "minimum",
+      "warm",
+      "idle",
+      "staging",
+      "rollout",
+      "config"
+    ],
+    "remediation": "Roll back to min-instances=0 (or 1 for latency-sensitive services). Add an admission controller / Terraform review rule that flags min-instances > 5."
+  }
+}

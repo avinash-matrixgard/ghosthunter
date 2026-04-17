@@ -1,0 +1,37 @@
+{
+  "id": "aws_05_bedrock_runaway",
+  "provider": "aws",
+  "description": "Amazon Bedrock spend triples after an experimental agent framework is left running over a weekend with no rate limit and a prompt that chains 200 LLM calls per user message.",
+  "difficulty": "medium",
+  "tags": [
+    "bedrock",
+    "llm",
+    "rate-limit",
+    "agent"
+  ],
+  "spike": {
+    "service": "Amazon Bedrock",
+    "direction": "up",
+    "min_change_percent": 600.0,
+    "current_cost_range": [
+      25000,
+      60000
+    ],
+    "expected_previous_cost_approx": 4200.0,
+    "expected_current_cost_approx": 37800.0
+  },
+  "root_cause": {
+    "summary": "An internal agent demo chains ~200 Bedrock model calls per user turn, and a synthetic load test was left looping over a weekend. No per-key rate limit or cost quota.",
+    "evidence_keywords": [
+      "bedrock",
+      "agent",
+      "chain",
+      "loop",
+      "rate limit",
+      "quota",
+      "weekend",
+      "synthetic"
+    ],
+    "remediation": "Kill the runaway agent job. Add Bedrock provisioned throughput quotas per service role, add CloudWatch alarm on InvokeModel call-count anomalies."
+  }
+}

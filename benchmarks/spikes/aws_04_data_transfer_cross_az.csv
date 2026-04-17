@@ -1,0 +1,421 @@
+ChargePeriodStart,ServiceName,SkuId,SubAccountId,RegionId,ProviderName,BilledCost
+2026-02-01,Amazon Elastic Compute Cloud - Compute,DataTransfer-Regional-Bytes,streaming-prod,us-east-1,AWS,866.61
+2026-02-01,Amazon Simple Storage Service,DataTransfer-Out-Bytes,aws-bg-3,us-east-1,AWS,282.20
+2026-02-01,Amazon Relational Database Service,BoxUsage:m5.large,aws-bg-1,eu-west-1,AWS,392.26
+2026-02-01,Amazon Elastic Kubernetes Service,TimedStorage-ByteHrs,aws-bg-2,us-west-2,AWS,546.29
+2026-02-01,AWS Lambda,BoxUsage:m5.large,aws-bg-1,us-east-1,AWS,138.22
+2026-02-01,Amazon CloudWatch,DataProcessing-Bytes,aws-bg-3,ap-southeast-1,AWS,98.34
+2026-02-01,Amazon Virtual Private Cloud,DataProcessing-Bytes,aws-bg-1,eu-west-1,AWS,301.33
+2026-02-02,Amazon Elastic Compute Cloud - Compute,DataTransfer-Regional-Bytes,streaming-prod,us-east-1,AWS,987.80
+2026-02-02,Amazon Simple Storage Service,RunInstances:0002,aws-bg-3,us-west-2,AWS,210.59
+2026-02-02,Amazon Relational Database Service,BoxUsage:m5.large,aws-bg-1,eu-west-1,AWS,321.17
+2026-02-02,Amazon Elastic Kubernetes Service,TimedStorage-ByteHrs,aws-bg-3,us-east-1,AWS,536.29
+2026-02-02,AWS Lambda,RunInstances:0002,aws-bg-1,us-east-1,AWS,164.00
+2026-02-02,Amazon CloudWatch,BoxUsage:m5.large,aws-bg-3,ap-southeast-1,AWS,114.94
+2026-02-02,Amazon Virtual Private Cloud,RunInstances:0002,aws-bg-1,us-east-1,AWS,274.77
+2026-02-03,Amazon Elastic Compute Cloud - Compute,DataTransfer-Regional-Bytes,streaming-prod,us-east-1,AWS,898.26
+2026-02-03,Amazon Simple Storage Service,TimedStorage-ByteHrs,aws-bg-3,us-west-2,AWS,280.58
+2026-02-03,Amazon Relational Database Service,BoxUsage:t3.medium,aws-bg-3,us-west-2,AWS,368.47
+2026-02-03,Amazon Elastic Kubernetes Service,InvokeRequest,aws-bg-3,us-east-1,AWS,521.52
+2026-02-03,AWS Lambda,BoxUsage:t3.medium,aws-bg-3,us-west-2,AWS,133.11
+2026-02-03,Amazon CloudWatch,InvokeRequest,aws-bg-1,us-west-2,AWS,121.04
+2026-02-03,Amazon Virtual Private Cloud,TimedStorage-ByteHrs,aws-bg-2,us-east-1,AWS,215.04
+2026-02-04,Amazon Elastic Compute Cloud - Compute,DataTransfer-Regional-Bytes,streaming-prod,us-east-1,AWS,857.64
+2026-02-04,Amazon Simple Storage Service,InvokeRequest,aws-bg-3,ap-southeast-1,AWS,271.86
+2026-02-04,Amazon Relational Database Service,BoxUsage:t3.medium,aws-bg-1,us-west-2,AWS,406.06
+2026-02-04,Amazon Elastic Kubernetes Service,DataTransfer-Out-Bytes,aws-bg-2,eu-west-1,AWS,505.23
+2026-02-04,AWS Lambda,BoxUsage:t3.medium,aws-bg-2,eu-west-1,AWS,150.43
+2026-02-04,Amazon CloudWatch,DataProcessing-Bytes,aws-bg-2,ap-southeast-1,AWS,118.33
+2026-02-04,Amazon Virtual Private Cloud,BoxUsage:t3.medium,aws-bg-1,us-west-2,AWS,279.44
+2026-02-05,Amazon Elastic Compute Cloud - Compute,DataTransfer-Regional-Bytes,streaming-prod,us-east-1,AWS,941.87
+2026-02-05,Amazon Simple Storage Service,DataProcessing-Bytes,aws-bg-3,us-west-2,AWS,287.31
+2026-02-05,Amazon Relational Database Service,DataTransfer-Out-Bytes,aws-bg-3,us-east-1,AWS,370.49
+2026-02-05,Amazon Elastic Kubernetes Service,DataTransfer-Out-Bytes,aws-bg-1,ap-southeast-1,AWS,411.22
+2026-02-05,AWS Lambda,BoxUsage:t3.medium,aws-bg-1,eu-west-1,AWS,135.46
+2026-02-05,Amazon CloudWatch,InvokeRequest,aws-bg-1,ap-southeast-1,AWS,120.34
+2026-02-05,Amazon Virtual Private Cloud,TimedStorage-ByteHrs,aws-bg-3,ap-southeast-1,AWS,224.91
+2026-02-06,Amazon Elastic Compute Cloud - Compute,DataTransfer-Regional-Bytes,streaming-prod,us-east-1,AWS,881.84
+2026-02-06,Amazon Simple Storage Service,Requests-Tier1,aws-bg-3,eu-west-1,AWS,239.77
+2026-02-06,Amazon Relational Database Service,RunInstances:0002,aws-bg-1,us-west-2,AWS,335.44
+2026-02-06,Amazon Elastic Kubernetes Service,DataTransfer-Out-Bytes,aws-bg-2,eu-west-1,AWS,464.13
+2026-02-06,AWS Lambda,BoxUsage:m5.large,aws-bg-3,us-west-2,AWS,159.65
+2026-02-06,Amazon CloudWatch,RunInstances:0002,aws-bg-1,us-east-1,AWS,97.45
+2026-02-06,Amazon Virtual Private Cloud,BoxUsage:m5.large,aws-bg-3,ap-southeast-1,AWS,259.60
+2026-02-07,Amazon Elastic Compute Cloud - Compute,DataTransfer-Regional-Bytes,streaming-prod,us-east-1,AWS,965.64
+2026-02-07,Amazon Simple Storage Service,Requests-Tier1,aws-bg-1,eu-west-1,AWS,226.88
+2026-02-07,Amazon Relational Database Service,Requests-Tier1,aws-bg-3,us-west-2,AWS,344.54
+2026-02-07,Amazon Elastic Kubernetes Service,BoxUsage:m5.large,aws-bg-2,us-east-1,AWS,492.74
+2026-02-07,AWS Lambda,InvokeRequest,aws-bg-2,eu-west-1,AWS,187.83
+2026-02-07,Amazon CloudWatch,RunInstances:0002,aws-bg-2,us-east-1,AWS,112.32
+2026-02-07,Amazon Virtual Private Cloud,Requests-Tier1,aws-bg-3,us-east-1,AWS,257.40
+2026-02-08,Amazon Elastic Compute Cloud - Compute,DataTransfer-Regional-Bytes,streaming-prod,us-east-1,AWS,908.49
+2026-02-08,Amazon Simple Storage Service,RunInstances:0002,aws-bg-2,us-east-1,AWS,286.21
+2026-02-08,Amazon Relational Database Service,BoxUsage:m5.large,aws-bg-3,eu-west-1,AWS,414.20
+2026-02-08,Amazon Elastic Kubernetes Service,DataProcessing-Bytes,aws-bg-3,eu-west-1,AWS,511.50
+2026-02-08,AWS Lambda,RunInstances:0002,aws-bg-1,us-east-1,AWS,137.83
+2026-02-08,Amazon CloudWatch,InvokeRequest,aws-bg-2,us-east-1,AWS,125.93
+2026-02-08,Amazon Virtual Private Cloud,Requests-Tier1,aws-bg-2,ap-southeast-1,AWS,266.62
+2026-02-09,Amazon Elastic Compute Cloud - Compute,DataTransfer-Regional-Bytes,streaming-prod,us-east-1,AWS,951.20
+2026-02-09,Amazon Simple Storage Service,BoxUsage:m5.large,aws-bg-3,us-west-2,AWS,238.53
+2026-02-09,Amazon Relational Database Service,BoxUsage:m5.large,aws-bg-1,us-west-2,AWS,386.77
+2026-02-09,Amazon Elastic Kubernetes Service,TimedStorage-ByteHrs,aws-bg-1,us-west-2,AWS,507.12
+2026-02-09,AWS Lambda,Requests-Tier1,aws-bg-1,us-west-2,AWS,153.04
+2026-02-09,Amazon CloudWatch,TimedStorage-ByteHrs,aws-bg-1,ap-southeast-1,AWS,94.21
+2026-02-09,Amazon Virtual Private Cloud,DataTransfer-Out-Bytes,aws-bg-1,eu-west-1,AWS,234.56
+2026-02-10,Amazon Elastic Compute Cloud - Compute,DataTransfer-Regional-Bytes,streaming-prod,us-east-1,AWS,880.77
+2026-02-10,Amazon Simple Storage Service,DataTransfer-Out-Bytes,aws-bg-2,ap-southeast-1,AWS,246.63
+2026-02-10,Amazon Relational Database Service,DataProcessing-Bytes,aws-bg-2,eu-west-1,AWS,346.04
+2026-02-10,Amazon Elastic Kubernetes Service,InvokeRequest,aws-bg-2,us-east-1,AWS,500.03
+2026-02-10,AWS Lambda,InvokeRequest,aws-bg-2,us-west-2,AWS,149.94
+2026-02-10,Amazon CloudWatch,TimedStorage-ByteHrs,aws-bg-3,ap-southeast-1,AWS,109.90
+2026-02-10,Amazon Virtual Private Cloud,Requests-Tier1,aws-bg-2,ap-southeast-1,AWS,245.79
+2026-02-11,Amazon Elastic Compute Cloud - Compute,DataTransfer-Regional-Bytes,streaming-prod,us-east-1,AWS,914.09
+2026-02-11,Amazon Simple Storage Service,DataTransfer-Out-Bytes,aws-bg-3,ap-southeast-1,AWS,248.77
+2026-02-11,Amazon Relational Database Service,DataTransfer-Out-Bytes,aws-bg-2,us-west-2,AWS,416.32
+2026-02-11,Amazon Elastic Kubernetes Service,DataTransfer-Out-Bytes,aws-bg-2,us-west-2,AWS,460.04
+2026-02-11,AWS Lambda,BoxUsage:m5.large,aws-bg-3,us-west-2,AWS,143.77
+2026-02-11,Amazon CloudWatch,DataProcessing-Bytes,aws-bg-2,eu-west-1,AWS,111.15
+2026-02-11,Amazon Virtual Private Cloud,Requests-Tier1,aws-bg-1,us-west-2,AWS,244.48
+2026-02-12,Amazon Elastic Compute Cloud - Compute,DataTransfer-Regional-Bytes,streaming-prod,us-east-1,AWS,927.18
+2026-02-12,Amazon Simple Storage Service,RunInstances:0002,aws-bg-3,ap-southeast-1,AWS,237.75
+2026-02-12,Amazon Relational Database Service,TimedStorage-ByteHrs,aws-bg-2,ap-southeast-1,AWS,408.74
+2026-02-12,Amazon Elastic Kubernetes Service,BoxUsage:t3.medium,aws-bg-3,eu-west-1,AWS,427.27
+2026-02-12,AWS Lambda,RunInstances:0002,aws-bg-3,us-west-2,AWS,121.86
+2026-02-12,Amazon CloudWatch,Requests-Tier1,aws-bg-2,eu-west-1,AWS,119.52
+2026-02-12,Amazon Virtual Private Cloud,DataTransfer-Out-Bytes,aws-bg-2,ap-southeast-1,AWS,263.36
+2026-02-13,Amazon Elastic Compute Cloud - Compute,DataTransfer-Regional-Bytes,streaming-prod,us-east-1,AWS,967.58
+2026-02-13,Amazon Simple Storage Service,Requests-Tier1,aws-bg-3,us-west-2,AWS,284.62
+2026-02-13,Amazon Relational Database Service,BoxUsage:t3.medium,aws-bg-3,us-east-1,AWS,427.83
+2026-02-13,Amazon Elastic Kubernetes Service,InvokeRequest,aws-bg-1,us-west-2,AWS,513.88
+2026-02-13,AWS Lambda,RunInstances:0002,aws-bg-1,us-west-2,AWS,148.03
+2026-02-13,Amazon CloudWatch,Requests-Tier1,aws-bg-3,us-west-2,AWS,89.76
+2026-02-13,Amazon Virtual Private Cloud,InvokeRequest,aws-bg-2,ap-southeast-1,AWS,281.43
+2026-02-14,Amazon Elastic Compute Cloud - Compute,DataTransfer-Regional-Bytes,streaming-prod,us-east-1,AWS,936.92
+2026-02-14,Amazon Simple Storage Service,InvokeRequest,aws-bg-2,eu-west-1,AWS,248.45
+2026-02-14,Amazon Relational Database Service,BoxUsage:t3.medium,aws-bg-2,us-east-1,AWS,360.49
+2026-02-14,Amazon Elastic Kubernetes Service,BoxUsage:t3.medium,aws-bg-3,ap-southeast-1,AWS,458.21
+2026-02-14,AWS Lambda,InvokeRequest,aws-bg-1,eu-west-1,AWS,128.93
+2026-02-14,Amazon CloudWatch,DataProcessing-Bytes,aws-bg-1,us-east-1,AWS,95.20
+2026-02-14,Amazon Virtual Private Cloud,Requests-Tier1,aws-bg-1,eu-west-1,AWS,237.17
+2026-02-15,Amazon Elastic Compute Cloud - Compute,DataTransfer-Regional-Bytes,streaming-prod,us-east-1,AWS,878.61
+2026-02-15,Amazon Simple Storage Service,DataTransfer-Out-Bytes,aws-bg-2,us-west-2,AWS,271.88
+2026-02-15,Amazon Relational Database Service,BoxUsage:t3.medium,aws-bg-2,ap-southeast-1,AWS,333.84
+2026-02-15,Amazon Elastic Kubernetes Service,Requests-Tier1,aws-bg-1,us-west-2,AWS,416.70
+2026-02-15,AWS Lambda,BoxUsage:t3.medium,aws-bg-1,eu-west-1,AWS,132.15
+2026-02-15,Amazon CloudWatch,BoxUsage:t3.medium,aws-bg-1,ap-southeast-1,AWS,120.68
+2026-02-15,Amazon Virtual Private Cloud,TimedStorage-ByteHrs,aws-bg-3,eu-west-1,AWS,249.48
+2026-02-16,Amazon Elastic Compute Cloud - Compute,DataTransfer-Regional-Bytes,streaming-prod,us-east-1,AWS,908.24
+2026-02-16,Amazon Simple Storage Service,DataProcessing-Bytes,aws-bg-3,eu-west-1,AWS,224.58
+2026-02-16,Amazon Relational Database Service,Requests-Tier1,aws-bg-1,us-east-1,AWS,387.11
+2026-02-16,Amazon Elastic Kubernetes Service,DataTransfer-Out-Bytes,aws-bg-3,eu-west-1,AWS,454.28
+2026-02-16,AWS Lambda,Requests-Tier1,aws-bg-2,eu-west-1,AWS,126.64
+2026-02-16,Amazon CloudWatch,DataTransfer-Out-Bytes,aws-bg-1,eu-west-1,AWS,109.32
+2026-02-16,Amazon Virtual Private Cloud,RunInstances:0002,aws-bg-3,us-east-1,AWS,251.64
+2026-02-17,Amazon Elastic Compute Cloud - Compute,DataTransfer-Regional-Bytes,streaming-prod,us-east-1,AWS,920.11
+2026-02-17,Amazon Simple Storage Service,DataProcessing-Bytes,aws-bg-2,eu-west-1,AWS,261.60
+2026-02-17,Amazon Relational Database Service,BoxUsage:m5.large,aws-bg-3,eu-west-1,AWS,459.23
+2026-02-17,Amazon Elastic Kubernetes Service,TimedStorage-ByteHrs,aws-bg-3,eu-west-1,AWS,476.84
+2026-02-17,AWS Lambda,Requests-Tier1,aws-bg-1,ap-southeast-1,AWS,133.60
+2026-02-17,Amazon CloudWatch,TimedStorage-ByteHrs,aws-bg-3,ap-southeast-1,AWS,117.18
+2026-02-17,Amazon Virtual Private Cloud,InvokeRequest,aws-bg-2,us-east-1,AWS,266.90
+2026-02-18,Amazon Elastic Compute Cloud - Compute,DataTransfer-Regional-Bytes,streaming-prod,us-east-1,AWS,975.37
+2026-02-18,Amazon Simple Storage Service,Requests-Tier1,aws-bg-2,us-east-1,AWS,286.49
+2026-02-18,Amazon Relational Database Service,InvokeRequest,aws-bg-3,eu-west-1,AWS,434.77
+2026-02-18,Amazon Elastic Kubernetes Service,DataProcessing-Bytes,aws-bg-3,us-east-1,AWS,448.94
+2026-02-18,AWS Lambda,InvokeRequest,aws-bg-1,us-west-2,AWS,150.38
+2026-02-18,Amazon CloudWatch,BoxUsage:m5.large,aws-bg-3,us-west-2,AWS,122.27
+2026-02-18,Amazon Virtual Private Cloud,DataTransfer-Out-Bytes,aws-bg-1,us-west-2,AWS,299.41
+2026-02-19,Amazon Elastic Compute Cloud - Compute,DataTransfer-Regional-Bytes,streaming-prod,us-east-1,AWS,906.98
+2026-02-19,Amazon Simple Storage Service,DataProcessing-Bytes,aws-bg-2,us-west-2,AWS,283.97
+2026-02-19,Amazon Relational Database Service,BoxUsage:m5.large,aws-bg-3,us-east-1,AWS,340.66
+2026-02-19,Amazon Elastic Kubernetes Service,TimedStorage-ByteHrs,aws-bg-2,ap-southeast-1,AWS,486.85
+2026-02-19,AWS Lambda,DataProcessing-Bytes,aws-bg-2,us-west-2,AWS,166.30
+2026-02-19,Amazon CloudWatch,BoxUsage:m5.large,aws-bg-2,us-west-2,AWS,104.15
+2026-02-19,Amazon Virtual Private Cloud,Requests-Tier1,aws-bg-1,us-west-2,AWS,239.79
+2026-02-20,Amazon Elastic Compute Cloud - Compute,DataTransfer-Regional-Bytes,streaming-prod,us-east-1,AWS,944.30
+2026-02-20,Amazon Simple Storage Service,TimedStorage-ByteHrs,aws-bg-1,ap-southeast-1,AWS,268.77
+2026-02-20,Amazon Relational Database Service,BoxUsage:m5.large,aws-bg-3,us-west-2,AWS,385.40
+2026-02-20,Amazon Elastic Kubernetes Service,InvokeRequest,aws-bg-1,eu-west-1,AWS,444.71
+2026-02-20,AWS Lambda,InvokeRequest,aws-bg-3,us-east-1,AWS,176.49
+2026-02-20,Amazon CloudWatch,BoxUsage:t3.medium,aws-bg-3,us-west-2,AWS,109.09
+2026-02-20,Amazon Virtual Private Cloud,DataTransfer-Out-Bytes,aws-bg-3,us-west-2,AWS,293.07
+2026-02-21,Amazon Elastic Compute Cloud - Compute,DataTransfer-Regional-Bytes,streaming-prod,us-east-1,AWS,892.83
+2026-02-21,Amazon Simple Storage Service,BoxUsage:m5.large,aws-bg-1,eu-west-1,AWS,292.41
+2026-02-21,Amazon Relational Database Service,BoxUsage:t3.medium,aws-bg-2,eu-west-1,AWS,371.61
+2026-02-21,Amazon Elastic Kubernetes Service,Requests-Tier1,aws-bg-3,us-west-2,AWS,459.86
+2026-02-21,AWS Lambda,DataTransfer-Out-Bytes,aws-bg-3,eu-west-1,AWS,129.68
+2026-02-21,Amazon CloudWatch,BoxUsage:t3.medium,aws-bg-2,us-west-2,AWS,116.81
+2026-02-21,Amazon Virtual Private Cloud,DataProcessing-Bytes,aws-bg-3,ap-southeast-1,AWS,227.02
+2026-02-22,Amazon Elastic Compute Cloud - Compute,DataTransfer-Regional-Bytes,streaming-prod,us-east-1,AWS,819.20
+2026-02-22,Amazon Simple Storage Service,TimedStorage-ByteHrs,aws-bg-3,us-east-1,AWS,240.33
+2026-02-22,Amazon Relational Database Service,Requests-Tier1,aws-bg-1,us-east-1,AWS,445.06
+2026-02-22,Amazon Elastic Kubernetes Service,TimedStorage-ByteHrs,aws-bg-1,us-west-2,AWS,492.30
+2026-02-22,AWS Lambda,BoxUsage:m5.large,aws-bg-2,us-west-2,AWS,134.89
+2026-02-22,Amazon CloudWatch,Requests-Tier1,aws-bg-3,ap-southeast-1,AWS,126.46
+2026-02-22,Amazon Virtual Private Cloud,BoxUsage:m5.large,aws-bg-3,us-west-2,AWS,237.98
+2026-02-23,Amazon Elastic Compute Cloud - Compute,DataTransfer-Regional-Bytes,streaming-prod,us-east-1,AWS,799.92
+2026-02-23,Amazon Simple Storage Service,BoxUsage:m5.large,aws-bg-3,eu-west-1,AWS,273.19
+2026-02-23,Amazon Relational Database Service,RunInstances:0002,aws-bg-2,eu-west-1,AWS,360.67
+2026-02-23,Amazon Elastic Kubernetes Service,TimedStorage-ByteHrs,aws-bg-2,eu-west-1,AWS,474.25
+2026-02-23,AWS Lambda,BoxUsage:t3.medium,aws-bg-2,us-west-2,AWS,156.46
+2026-02-23,Amazon CloudWatch,InvokeRequest,aws-bg-3,us-west-2,AWS,96.79
+2026-02-23,Amazon Virtual Private Cloud,BoxUsage:m5.large,aws-bg-3,us-west-2,AWS,277.87
+2026-02-24,Amazon Elastic Compute Cloud - Compute,DataTransfer-Regional-Bytes,streaming-prod,us-east-1,AWS,994.14
+2026-02-24,Amazon Simple Storage Service,InvokeRequest,aws-bg-3,eu-west-1,AWS,259.98
+2026-02-24,Amazon Relational Database Service,RunInstances:0002,aws-bg-1,us-west-2,AWS,468.89
+2026-02-24,Amazon Elastic Kubernetes Service,DataTransfer-Out-Bytes,aws-bg-3,ap-southeast-1,AWS,459.70
+2026-02-24,AWS Lambda,BoxUsage:m5.large,aws-bg-1,eu-west-1,AWS,137.21
+2026-02-24,Amazon CloudWatch,DataProcessing-Bytes,aws-bg-1,ap-southeast-1,AWS,108.28
+2026-02-24,Amazon Virtual Private Cloud,BoxUsage:m5.large,aws-bg-2,eu-west-1,AWS,265.00
+2026-02-25,Amazon Elastic Compute Cloud - Compute,DataTransfer-Regional-Bytes,streaming-prod,us-east-1,AWS,902.70
+2026-02-25,Amazon Simple Storage Service,BoxUsage:m5.large,aws-bg-3,us-west-2,AWS,238.81
+2026-02-25,Amazon Relational Database Service,DataTransfer-Out-Bytes,aws-bg-1,ap-southeast-1,AWS,391.51
+2026-02-25,Amazon Elastic Kubernetes Service,Requests-Tier1,aws-bg-2,us-east-1,AWS,511.55
+2026-02-25,AWS Lambda,Requests-Tier1,aws-bg-3,eu-west-1,AWS,158.44
+2026-02-25,Amazon CloudWatch,DataProcessing-Bytes,aws-bg-2,us-west-2,AWS,125.66
+2026-02-25,Amazon Virtual Private Cloud,DataTransfer-Out-Bytes,aws-bg-3,us-west-2,AWS,260.74
+2026-02-26,Amazon Elastic Compute Cloud - Compute,DataTransfer-Regional-Bytes,streaming-prod,us-east-1,AWS,975.86
+2026-02-26,Amazon Simple Storage Service,TimedStorage-ByteHrs,aws-bg-1,us-east-1,AWS,273.83
+2026-02-26,Amazon Relational Database Service,TimedStorage-ByteHrs,aws-bg-3,eu-west-1,AWS,390.67
+2026-02-26,Amazon Elastic Kubernetes Service,Requests-Tier1,aws-bg-3,ap-southeast-1,AWS,399.20
+2026-02-26,AWS Lambda,BoxUsage:m5.large,aws-bg-1,us-east-1,AWS,115.75
+2026-02-26,Amazon CloudWatch,DataTransfer-Out-Bytes,aws-bg-2,us-east-1,AWS,111.34
+2026-02-26,Amazon Virtual Private Cloud,BoxUsage:t3.medium,aws-bg-2,us-east-1,AWS,263.63
+2026-02-27,Amazon Elastic Compute Cloud - Compute,DataTransfer-Regional-Bytes,streaming-prod,us-east-1,AWS,872.30
+2026-02-27,Amazon Simple Storage Service,RunInstances:0002,aws-bg-1,eu-west-1,AWS,291.46
+2026-02-27,Amazon Relational Database Service,RunInstances:0002,aws-bg-1,us-west-2,AWS,389.93
+2026-02-27,Amazon Elastic Kubernetes Service,Requests-Tier1,aws-bg-3,ap-southeast-1,AWS,506.45
+2026-02-27,AWS Lambda,Requests-Tier1,aws-bg-3,us-west-2,AWS,133.77
+2026-02-27,Amazon CloudWatch,BoxUsage:m5.large,aws-bg-3,eu-west-1,AWS,83.87
+2026-02-27,Amazon Virtual Private Cloud,DataProcessing-Bytes,aws-bg-2,us-east-1,AWS,313.59
+2026-02-28,Amazon Elastic Compute Cloud - Compute,DataTransfer-Regional-Bytes,streaming-prod,us-east-1,AWS,902.55
+2026-02-28,Amazon Simple Storage Service,DataProcessing-Bytes,aws-bg-3,us-west-2,AWS,208.19
+2026-02-28,Amazon Relational Database Service,BoxUsage:t3.medium,aws-bg-1,eu-west-1,AWS,351.71
+2026-02-28,Amazon Elastic Kubernetes Service,BoxUsage:m5.large,aws-bg-3,eu-west-1,AWS,405.91
+2026-02-28,AWS Lambda,Requests-Tier1,aws-bg-2,us-east-1,AWS,137.69
+2026-02-28,Amazon CloudWatch,TimedStorage-ByteHrs,aws-bg-2,us-west-2,AWS,105.41
+2026-02-28,Amazon Virtual Private Cloud,InvokeRequest,aws-bg-2,us-east-1,AWS,277.26
+2026-03-01,Amazon Elastic Compute Cloud - Compute,DataTransfer-Regional-Bytes,streaming-prod,us-east-1,AWS,950.04
+2026-03-01,Amazon Simple Storage Service,Requests-Tier1,aws-bg-1,eu-west-1,AWS,239.73
+2026-03-01,Amazon Relational Database Service,Requests-Tier1,aws-bg-3,us-east-1,AWS,444.79
+2026-03-01,Amazon Elastic Kubernetes Service,TimedStorage-ByteHrs,aws-bg-2,us-west-2,AWS,480.50
+2026-03-01,AWS Lambda,BoxUsage:t3.medium,aws-bg-3,ap-southeast-1,AWS,158.22
+2026-03-01,Amazon CloudWatch,RunInstances:0002,aws-bg-3,ap-southeast-1,AWS,121.04
+2026-03-01,Amazon Virtual Private Cloud,InvokeRequest,aws-bg-3,ap-southeast-1,AWS,272.69
+2026-03-02,Amazon Elastic Compute Cloud - Compute,DataTransfer-Regional-Bytes,streaming-prod,us-east-1,AWS,953.91
+2026-03-02,Amazon Simple Storage Service,DataProcessing-Bytes,aws-bg-2,us-east-1,AWS,282.50
+2026-03-02,Amazon Relational Database Service,DataTransfer-Out-Bytes,aws-bg-2,us-west-2,AWS,373.75
+2026-03-02,Amazon Elastic Kubernetes Service,RunInstances:0002,aws-bg-3,ap-southeast-1,AWS,401.96
+2026-03-02,AWS Lambda,DataProcessing-Bytes,aws-bg-1,ap-southeast-1,AWS,148.33
+2026-03-02,Amazon CloudWatch,BoxUsage:m5.large,aws-bg-1,us-east-1,AWS,127.03
+2026-03-02,Amazon Virtual Private Cloud,DataTransfer-Out-Bytes,aws-bg-1,us-west-2,AWS,300.36
+2026-03-03,Amazon Elastic Compute Cloud - Compute,DataTransfer-Regional-Bytes,streaming-prod,us-east-1,AWS,1763.53
+2026-03-03,Amazon Simple Storage Service,BoxUsage:m5.large,aws-bg-1,us-east-1,AWS,227.41
+2026-03-03,Amazon Relational Database Service,InvokeRequest,aws-bg-3,ap-southeast-1,AWS,328.84
+2026-03-03,Amazon Elastic Kubernetes Service,RunInstances:0002,aws-bg-1,us-east-1,AWS,444.28
+2026-03-03,AWS Lambda,DataTransfer-Out-Bytes,aws-bg-2,us-west-2,AWS,122.70
+2026-03-03,Amazon CloudWatch,InvokeRequest,aws-bg-1,eu-west-1,AWS,110.07
+2026-03-03,Amazon Virtual Private Cloud,BoxUsage:t3.medium,aws-bg-2,eu-west-1,AWS,230.16
+2026-03-04,Amazon Elastic Compute Cloud - Compute,DataTransfer-Regional-Bytes,streaming-prod,us-east-1,AWS,1679.86
+2026-03-04,Amazon Simple Storage Service,DataTransfer-Out-Bytes,aws-bg-1,eu-west-1,AWS,246.60
+2026-03-04,Amazon Relational Database Service,Requests-Tier1,aws-bg-3,eu-west-1,AWS,342.45
+2026-03-04,Amazon Elastic Kubernetes Service,DataProcessing-Bytes,aws-bg-1,eu-west-1,AWS,428.96
+2026-03-04,AWS Lambda,BoxUsage:t3.medium,aws-bg-1,us-east-1,AWS,134.97
+2026-03-04,Amazon CloudWatch,BoxUsage:m5.large,aws-bg-3,ap-southeast-1,AWS,86.46
+2026-03-04,Amazon Virtual Private Cloud,DataProcessing-Bytes,aws-bg-3,us-west-2,AWS,256.95
+2026-03-05,Amazon Elastic Compute Cloud - Compute,DataTransfer-Regional-Bytes,streaming-prod,us-east-1,AWS,1698.23
+2026-03-05,Amazon Simple Storage Service,TimedStorage-ByteHrs,aws-bg-2,ap-southeast-1,AWS,273.17
+2026-03-05,Amazon Relational Database Service,Requests-Tier1,aws-bg-1,ap-southeast-1,AWS,388.87
+2026-03-05,Amazon Elastic Kubernetes Service,Requests-Tier1,aws-bg-1,eu-west-1,AWS,505.78
+2026-03-05,AWS Lambda,RunInstances:0002,aws-bg-3,us-east-1,AWS,161.94
+2026-03-05,Amazon CloudWatch,DataTransfer-Out-Bytes,aws-bg-1,eu-west-1,AWS,127.02
+2026-03-05,Amazon Virtual Private Cloud,TimedStorage-ByteHrs,aws-bg-1,us-east-1,AWS,253.69
+2026-03-06,Amazon Elastic Compute Cloud - Compute,DataTransfer-Regional-Bytes,streaming-prod,us-east-1,AWS,1914.37
+2026-03-06,Amazon Simple Storage Service,InvokeRequest,aws-bg-1,us-west-2,AWS,293.50
+2026-03-06,Amazon Relational Database Service,BoxUsage:m5.large,aws-bg-1,eu-west-1,AWS,366.70
+2026-03-06,Amazon Elastic Kubernetes Service,DataProcessing-Bytes,aws-bg-1,us-west-2,AWS,495.19
+2026-03-06,AWS Lambda,BoxUsage:t3.medium,aws-bg-3,us-east-1,AWS,179.61
+2026-03-06,Amazon CloudWatch,RunInstances:0002,aws-bg-1,us-east-1,AWS,112.90
+2026-03-06,Amazon Virtual Private Cloud,DataProcessing-Bytes,aws-bg-2,eu-west-1,AWS,268.50
+2026-03-07,Amazon Elastic Compute Cloud - Compute,DataTransfer-Regional-Bytes,streaming-prod,us-east-1,AWS,1719.81
+2026-03-07,Amazon Simple Storage Service,TimedStorage-ByteHrs,aws-bg-2,ap-southeast-1,AWS,281.06
+2026-03-07,Amazon Relational Database Service,Requests-Tier1,aws-bg-1,eu-west-1,AWS,360.67
+2026-03-07,Amazon Elastic Kubernetes Service,InvokeRequest,aws-bg-2,us-west-2,AWS,593.98
+2026-03-07,AWS Lambda,Requests-Tier1,aws-bg-3,us-east-1,AWS,156.36
+2026-03-07,Amazon CloudWatch,InvokeRequest,aws-bg-3,us-east-1,AWS,124.42
+2026-03-07,Amazon Virtual Private Cloud,DataTransfer-Out-Bytes,aws-bg-2,eu-west-1,AWS,304.16
+2026-03-08,Amazon Elastic Compute Cloud - Compute,DataTransfer-Regional-Bytes,streaming-prod,us-east-1,AWS,1765.19
+2026-03-08,Amazon Simple Storage Service,Requests-Tier1,aws-bg-2,us-west-2,AWS,286.48
+2026-03-08,Amazon Relational Database Service,TimedStorage-ByteHrs,aws-bg-2,us-east-1,AWS,351.85
+2026-03-08,Amazon Elastic Kubernetes Service,TimedStorage-ByteHrs,aws-bg-1,ap-southeast-1,AWS,485.71
+2026-03-08,AWS Lambda,BoxUsage:t3.medium,aws-bg-2,us-west-2,AWS,113.27
+2026-03-08,Amazon CloudWatch,Requests-Tier1,aws-bg-3,eu-west-1,AWS,117.94
+2026-03-08,Amazon Virtual Private Cloud,BoxUsage:m5.large,aws-bg-3,ap-southeast-1,AWS,272.26
+2026-03-09,Amazon Elastic Compute Cloud - Compute,DataTransfer-Regional-Bytes,streaming-prod,us-east-1,AWS,1810.00
+2026-03-09,Amazon Simple Storage Service,DataTransfer-Out-Bytes,aws-bg-2,us-east-1,AWS,240.54
+2026-03-09,Amazon Relational Database Service,BoxUsage:m5.large,aws-bg-2,ap-southeast-1,AWS,419.94
+2026-03-09,Amazon Elastic Kubernetes Service,DataProcessing-Bytes,aws-bg-3,ap-southeast-1,AWS,501.79
+2026-03-09,AWS Lambda,DataTransfer-Out-Bytes,aws-bg-2,ap-southeast-1,AWS,130.68
+2026-03-09,Amazon CloudWatch,InvokeRequest,aws-bg-2,ap-southeast-1,AWS,113.95
+2026-03-09,Amazon Virtual Private Cloud,TimedStorage-ByteHrs,aws-bg-2,ap-southeast-1,AWS,272.04
+2026-03-10,Amazon Elastic Compute Cloud - Compute,DataTransfer-Regional-Bytes,streaming-prod,us-east-1,AWS,1811.11
+2026-03-10,Amazon Simple Storage Service,Requests-Tier1,aws-bg-1,us-west-2,AWS,260.85
+2026-03-10,Amazon Relational Database Service,DataProcessing-Bytes,aws-bg-2,us-east-1,AWS,332.80
+2026-03-10,Amazon Elastic Kubernetes Service,DataTransfer-Out-Bytes,aws-bg-2,eu-west-1,AWS,488.43
+2026-03-10,AWS Lambda,TimedStorage-ByteHrs,aws-bg-1,ap-southeast-1,AWS,136.59
+2026-03-10,Amazon CloudWatch,BoxUsage:t3.medium,aws-bg-3,eu-west-1,AWS,94.76
+2026-03-10,Amazon Virtual Private Cloud,BoxUsage:m5.large,aws-bg-1,us-east-1,AWS,251.81
+2026-03-11,Amazon Elastic Compute Cloud - Compute,DataTransfer-Regional-Bytes,streaming-prod,us-east-1,AWS,1798.71
+2026-03-11,Amazon Simple Storage Service,BoxUsage:t3.medium,aws-bg-3,eu-west-1,AWS,262.94
+2026-03-11,Amazon Relational Database Service,BoxUsage:t3.medium,aws-bg-1,ap-southeast-1,AWS,312.02
+2026-03-11,Amazon Elastic Kubernetes Service,DataTransfer-Out-Bytes,aws-bg-3,ap-southeast-1,AWS,481.26
+2026-03-11,AWS Lambda,RunInstances:0002,aws-bg-1,us-east-1,AWS,163.88
+2026-03-11,Amazon CloudWatch,BoxUsage:t3.medium,aws-bg-2,us-west-2,AWS,105.55
+2026-03-11,Amazon Virtual Private Cloud,DataProcessing-Bytes,aws-bg-1,us-east-1,AWS,274.01
+2026-03-12,Amazon Elastic Compute Cloud - Compute,DataTransfer-Regional-Bytes,streaming-prod,us-east-1,AWS,1635.85
+2026-03-12,Amazon Simple Storage Service,DataProcessing-Bytes,aws-bg-1,us-east-1,AWS,275.44
+2026-03-12,Amazon Relational Database Service,DataTransfer-Out-Bytes,aws-bg-3,us-west-2,AWS,383.26
+2026-03-12,Amazon Elastic Kubernetes Service,DataProcessing-Bytes,aws-bg-2,ap-southeast-1,AWS,444.93
+2026-03-12,AWS Lambda,DataProcessing-Bytes,aws-bg-1,ap-southeast-1,AWS,128.98
+2026-03-12,Amazon CloudWatch,TimedStorage-ByteHrs,aws-bg-1,eu-west-1,AWS,115.76
+2026-03-12,Amazon Virtual Private Cloud,DataProcessing-Bytes,aws-bg-3,ap-southeast-1,AWS,236.75
+2026-03-13,Amazon Elastic Compute Cloud - Compute,DataTransfer-Regional-Bytes,streaming-prod,us-east-1,AWS,1749.39
+2026-03-13,Amazon Simple Storage Service,BoxUsage:t3.medium,aws-bg-3,eu-west-1,AWS,227.16
+2026-03-13,Amazon Relational Database Service,DataTransfer-Out-Bytes,aws-bg-3,eu-west-1,AWS,382.49
+2026-03-13,Amazon Elastic Kubernetes Service,BoxUsage:m5.large,aws-bg-2,us-west-2,AWS,430.43
+2026-03-13,AWS Lambda,InvokeRequest,aws-bg-3,us-east-1,AWS,148.58
+2026-03-13,Amazon CloudWatch,InvokeRequest,aws-bg-2,eu-west-1,AWS,120.80
+2026-03-13,Amazon Virtual Private Cloud,TimedStorage-ByteHrs,aws-bg-2,ap-southeast-1,AWS,232.84
+2026-03-14,Amazon Elastic Compute Cloud - Compute,DataTransfer-Regional-Bytes,streaming-prod,us-east-1,AWS,1843.13
+2026-03-14,Amazon Simple Storage Service,Requests-Tier1,aws-bg-1,eu-west-1,AWS,270.78
+2026-03-14,Amazon Relational Database Service,BoxUsage:m5.large,aws-bg-3,eu-west-1,AWS,338.14
+2026-03-14,Amazon Elastic Kubernetes Service,TimedStorage-ByteHrs,aws-bg-3,eu-west-1,AWS,445.92
+2026-03-14,AWS Lambda,RunInstances:0002,aws-bg-2,us-east-1,AWS,116.47
+2026-03-14,Amazon CloudWatch,Requests-Tier1,aws-bg-1,eu-west-1,AWS,111.90
+2026-03-14,Amazon Virtual Private Cloud,DataProcessing-Bytes,aws-bg-1,ap-southeast-1,AWS,274.76
+2026-03-15,Amazon Elastic Compute Cloud - Compute,DataTransfer-Regional-Bytes,streaming-prod,us-east-1,AWS,1631.19
+2026-03-15,Amazon Simple Storage Service,Requests-Tier1,aws-bg-1,us-west-2,AWS,230.06
+2026-03-15,Amazon Relational Database Service,Requests-Tier1,aws-bg-3,eu-west-1,AWS,370.15
+2026-03-15,Amazon Elastic Kubernetes Service,Requests-Tier1,aws-bg-3,ap-southeast-1,AWS,377.90
+2026-03-15,AWS Lambda,DataProcessing-Bytes,aws-bg-1,ap-southeast-1,AWS,152.74
+2026-03-15,Amazon CloudWatch,BoxUsage:m5.large,aws-bg-2,ap-southeast-1,AWS,118.67
+2026-03-15,Amazon Virtual Private Cloud,BoxUsage:t3.medium,aws-bg-1,eu-west-1,AWS,238.30
+2026-03-16,Amazon Elastic Compute Cloud - Compute,DataTransfer-Regional-Bytes,streaming-prod,us-east-1,AWS,1557.31
+2026-03-16,Amazon Simple Storage Service,TimedStorage-ByteHrs,aws-bg-2,ap-southeast-1,AWS,221.03
+2026-03-16,Amazon Relational Database Service,BoxUsage:m5.large,aws-bg-1,us-west-2,AWS,370.47
+2026-03-16,Amazon Elastic Kubernetes Service,BoxUsage:t3.medium,aws-bg-3,us-east-1,AWS,576.02
+2026-03-16,AWS Lambda,Requests-Tier1,aws-bg-1,ap-southeast-1,AWS,163.12
+2026-03-16,Amazon CloudWatch,Requests-Tier1,aws-bg-1,us-west-2,AWS,97.09
+2026-03-16,Amazon Virtual Private Cloud,InvokeRequest,aws-bg-3,eu-west-1,AWS,292.91
+2026-03-17,Amazon Elastic Compute Cloud - Compute,DataTransfer-Regional-Bytes,streaming-prod,us-east-1,AWS,1849.46
+2026-03-17,Amazon Simple Storage Service,BoxUsage:m5.large,aws-bg-1,eu-west-1,AWS,273.39
+2026-03-17,Amazon Relational Database Service,Requests-Tier1,aws-bg-3,ap-southeast-1,AWS,360.07
+2026-03-17,Amazon Elastic Kubernetes Service,InvokeRequest,aws-bg-1,ap-southeast-1,AWS,463.56
+2026-03-17,AWS Lambda,BoxUsage:t3.medium,aws-bg-3,eu-west-1,AWS,127.07
+2026-03-17,Amazon CloudWatch,InvokeRequest,aws-bg-3,ap-southeast-1,AWS,97.86
+2026-03-17,Amazon Virtual Private Cloud,TimedStorage-ByteHrs,aws-bg-3,us-east-1,AWS,308.82
+2026-03-18,Amazon Elastic Compute Cloud - Compute,DataTransfer-Regional-Bytes,streaming-prod,us-east-1,AWS,1855.24
+2026-03-18,Amazon Simple Storage Service,BoxUsage:m5.large,aws-bg-2,eu-west-1,AWS,225.81
+2026-03-18,Amazon Relational Database Service,DataTransfer-Out-Bytes,aws-bg-3,us-west-2,AWS,373.48
+2026-03-18,Amazon Elastic Kubernetes Service,Requests-Tier1,aws-bg-2,us-east-1,AWS,422.43
+2026-03-18,AWS Lambda,BoxUsage:m5.large,aws-bg-1,eu-west-1,AWS,150.34
+2026-03-18,Amazon CloudWatch,RunInstances:0002,aws-bg-1,eu-west-1,AWS,114.54
+2026-03-18,Amazon Virtual Private Cloud,BoxUsage:t3.medium,aws-bg-3,us-west-2,AWS,240.42
+2026-03-19,Amazon Elastic Compute Cloud - Compute,DataTransfer-Regional-Bytes,streaming-prod,us-east-1,AWS,1584.23
+2026-03-19,Amazon Simple Storage Service,TimedStorage-ByteHrs,aws-bg-1,us-west-2,AWS,274.24
+2026-03-19,Amazon Relational Database Service,TimedStorage-ByteHrs,aws-bg-1,ap-southeast-1,AWS,380.66
+2026-03-19,Amazon Elastic Kubernetes Service,Requests-Tier1,aws-bg-2,ap-southeast-1,AWS,464.37
+2026-03-19,AWS Lambda,TimedStorage-ByteHrs,aws-bg-2,ap-southeast-1,AWS,137.38
+2026-03-19,Amazon CloudWatch,InvokeRequest,aws-bg-2,us-west-2,AWS,102.65
+2026-03-19,Amazon Virtual Private Cloud,DataTransfer-Out-Bytes,aws-bg-1,us-west-2,AWS,235.54
+2026-03-20,Amazon Elastic Compute Cloud - Compute,DataTransfer-Regional-Bytes,streaming-prod,us-east-1,AWS,1732.33
+2026-03-20,Amazon Simple Storage Service,BoxUsage:t3.medium,aws-bg-2,us-east-1,AWS,248.31
+2026-03-20,Amazon Relational Database Service,DataTransfer-Out-Bytes,aws-bg-3,us-west-2,AWS,352.39
+2026-03-20,Amazon Elastic Kubernetes Service,InvokeRequest,aws-bg-2,us-east-1,AWS,477.38
+2026-03-20,AWS Lambda,RunInstances:0002,aws-bg-1,us-west-2,AWS,156.59
+2026-03-20,Amazon CloudWatch,BoxUsage:t3.medium,aws-bg-3,us-west-2,AWS,114.38
+2026-03-20,Amazon Virtual Private Cloud,BoxUsage:m5.large,aws-bg-2,us-west-2,AWS,284.75
+2026-03-21,Amazon Elastic Compute Cloud - Compute,DataTransfer-Regional-Bytes,streaming-prod,us-east-1,AWS,1745.09
+2026-03-21,Amazon Simple Storage Service,InvokeRequest,aws-bg-3,ap-southeast-1,AWS,240.16
+2026-03-21,Amazon Relational Database Service,BoxUsage:m5.large,aws-bg-1,us-west-2,AWS,328.40
+2026-03-21,Amazon Elastic Kubernetes Service,DataTransfer-Out-Bytes,aws-bg-1,eu-west-1,AWS,512.13
+2026-03-21,AWS Lambda,DataProcessing-Bytes,aws-bg-1,eu-west-1,AWS,140.99
+2026-03-21,Amazon CloudWatch,DataProcessing-Bytes,aws-bg-1,us-east-1,AWS,112.97
+2026-03-21,Amazon Virtual Private Cloud,BoxUsage:t3.medium,aws-bg-1,ap-southeast-1,AWS,306.04
+2026-03-22,Amazon Elastic Compute Cloud - Compute,DataTransfer-Regional-Bytes,streaming-prod,us-east-1,AWS,1739.54
+2026-03-22,Amazon Simple Storage Service,TimedStorage-ByteHrs,aws-bg-1,eu-west-1,AWS,268.88
+2026-03-22,Amazon Relational Database Service,BoxUsage:t3.medium,aws-bg-1,us-east-1,AWS,370.72
+2026-03-22,Amazon Elastic Kubernetes Service,TimedStorage-ByteHrs,aws-bg-2,us-east-1,AWS,502.59
+2026-03-22,AWS Lambda,DataTransfer-Out-Bytes,aws-bg-1,eu-west-1,AWS,155.33
+2026-03-22,Amazon CloudWatch,BoxUsage:m5.large,aws-bg-1,us-east-1,AWS,122.56
+2026-03-22,Amazon Virtual Private Cloud,DataTransfer-Out-Bytes,aws-bg-3,eu-west-1,AWS,230.70
+2026-03-23,Amazon Elastic Compute Cloud - Compute,DataTransfer-Regional-Bytes,streaming-prod,us-east-1,AWS,1817.10
+2026-03-23,Amazon Simple Storage Service,BoxUsage:m5.large,aws-bg-3,us-west-2,AWS,289.05
+2026-03-23,Amazon Relational Database Service,DataTransfer-Out-Bytes,aws-bg-2,us-west-2,AWS,311.86
+2026-03-23,Amazon Elastic Kubernetes Service,RunInstances:0002,aws-bg-1,us-east-1,AWS,478.56
+2026-03-23,AWS Lambda,BoxUsage:t3.medium,aws-bg-3,us-west-2,AWS,132.24
+2026-03-23,Amazon CloudWatch,RunInstances:0002,aws-bg-2,us-west-2,AWS,124.24
+2026-03-23,Amazon Virtual Private Cloud,TimedStorage-ByteHrs,aws-bg-2,us-east-1,AWS,240.43
+2026-03-24,Amazon Elastic Compute Cloud - Compute,DataTransfer-Regional-Bytes,streaming-prod,us-east-1,AWS,1754.27
+2026-03-24,Amazon Simple Storage Service,InvokeRequest,aws-bg-3,ap-southeast-1,AWS,233.68
+2026-03-24,Amazon Relational Database Service,BoxUsage:m5.large,aws-bg-1,ap-southeast-1,AWS,414.61
+2026-03-24,Amazon Elastic Kubernetes Service,Requests-Tier1,aws-bg-3,us-west-2,AWS,560.04
+2026-03-24,AWS Lambda,BoxUsage:m5.large,aws-bg-2,us-west-2,AWS,133.56
+2026-03-24,Amazon CloudWatch,InvokeRequest,aws-bg-2,us-west-2,AWS,118.25
+2026-03-24,Amazon Virtual Private Cloud,Requests-Tier1,aws-bg-1,us-west-2,AWS,237.94
+2026-03-25,Amazon Elastic Compute Cloud - Compute,DataTransfer-Regional-Bytes,streaming-prod,us-east-1,AWS,1811.83
+2026-03-25,Amazon Simple Storage Service,BoxUsage:m5.large,aws-bg-1,us-west-2,AWS,224.06
+2026-03-25,Amazon Relational Database Service,TimedStorage-ByteHrs,aws-bg-3,us-west-2,AWS,372.73
+2026-03-25,Amazon Elastic Kubernetes Service,BoxUsage:m5.large,aws-bg-2,ap-southeast-1,AWS,411.01
+2026-03-25,AWS Lambda,DataProcessing-Bytes,aws-bg-1,us-west-2,AWS,143.88
+2026-03-25,Amazon CloudWatch,TimedStorage-ByteHrs,aws-bg-1,ap-southeast-1,AWS,126.53
+2026-03-25,Amazon Virtual Private Cloud,DataTransfer-Out-Bytes,aws-bg-1,ap-southeast-1,AWS,281.32
+2026-03-26,Amazon Elastic Compute Cloud - Compute,DataTransfer-Regional-Bytes,streaming-prod,us-east-1,AWS,1683.99
+2026-03-26,Amazon Simple Storage Service,DataTransfer-Out-Bytes,aws-bg-2,ap-southeast-1,AWS,214.53
+2026-03-26,Amazon Relational Database Service,RunInstances:0002,aws-bg-1,ap-southeast-1,AWS,378.65
+2026-03-26,Amazon Elastic Kubernetes Service,TimedStorage-ByteHrs,aws-bg-3,us-east-1,AWS,447.32
+2026-03-26,AWS Lambda,RunInstances:0002,aws-bg-2,eu-west-1,AWS,124.81
+2026-03-26,Amazon CloudWatch,DataProcessing-Bytes,aws-bg-3,ap-southeast-1,AWS,131.62
+2026-03-26,Amazon Virtual Private Cloud,TimedStorage-ByteHrs,aws-bg-1,us-east-1,AWS,239.65
+2026-03-27,Amazon Elastic Compute Cloud - Compute,DataTransfer-Regional-Bytes,streaming-prod,us-east-1,AWS,1825.78
+2026-03-27,Amazon Simple Storage Service,RunInstances:0002,aws-bg-3,ap-southeast-1,AWS,234.11
+2026-03-27,Amazon Relational Database Service,InvokeRequest,aws-bg-3,ap-southeast-1,AWS,362.05
+2026-03-27,Amazon Elastic Kubernetes Service,BoxUsage:m5.large,aws-bg-1,ap-southeast-1,AWS,378.16
+2026-03-27,AWS Lambda,BoxUsage:t3.medium,aws-bg-1,eu-west-1,AWS,141.39
+2026-03-27,Amazon CloudWatch,Requests-Tier1,aws-bg-1,eu-west-1,AWS,122.10
+2026-03-27,Amazon Virtual Private Cloud,DataTransfer-Out-Bytes,aws-bg-1,eu-west-1,AWS,235.41
+2026-03-28,Amazon Elastic Compute Cloud - Compute,DataTransfer-Regional-Bytes,streaming-prod,us-east-1,AWS,1688.88
+2026-03-28,Amazon Simple Storage Service,InvokeRequest,aws-bg-1,us-east-1,AWS,284.32
+2026-03-28,Amazon Relational Database Service,TimedStorage-ByteHrs,aws-bg-2,ap-southeast-1,AWS,443.27
+2026-03-28,Amazon Elastic Kubernetes Service,RunInstances:0002,aws-bg-1,ap-southeast-1,AWS,427.89
+2026-03-28,AWS Lambda,BoxUsage:t3.medium,aws-bg-2,us-east-1,AWS,143.92
+2026-03-28,Amazon CloudWatch,RunInstances:0002,aws-bg-1,eu-west-1,AWS,123.25
+2026-03-28,Amazon Virtual Private Cloud,RunInstances:0002,aws-bg-2,eu-west-1,AWS,286.94
+2026-03-29,Amazon Elastic Compute Cloud - Compute,DataTransfer-Regional-Bytes,streaming-prod,us-east-1,AWS,1710.03
+2026-03-29,Amazon Simple Storage Service,DataProcessing-Bytes,aws-bg-1,us-east-1,AWS,281.41
+2026-03-29,Amazon Relational Database Service,BoxUsage:t3.medium,aws-bg-3,us-west-2,AWS,449.89
+2026-03-29,Amazon Elastic Kubernetes Service,Requests-Tier1,aws-bg-2,us-east-1,AWS,525.85
+2026-03-29,AWS Lambda,BoxUsage:m5.large,aws-bg-1,us-east-1,AWS,128.21
+2026-03-29,Amazon CloudWatch,BoxUsage:t3.medium,aws-bg-2,ap-southeast-1,AWS,85.28
+2026-03-29,Amazon Virtual Private Cloud,Requests-Tier1,aws-bg-2,ap-southeast-1,AWS,302.99
+2026-03-30,Amazon Elastic Compute Cloud - Compute,DataTransfer-Regional-Bytes,streaming-prod,us-east-1,AWS,1742.47
+2026-03-30,Amazon Simple Storage Service,DataProcessing-Bytes,aws-bg-3,us-east-1,AWS,287.23
+2026-03-30,Amazon Relational Database Service,Requests-Tier1,aws-bg-1,eu-west-1,AWS,354.37
+2026-03-30,Amazon Elastic Kubernetes Service,TimedStorage-ByteHrs,aws-bg-3,eu-west-1,AWS,377.63
+2026-03-30,AWS Lambda,BoxUsage:m5.large,aws-bg-3,ap-southeast-1,AWS,143.90
+2026-03-30,Amazon CloudWatch,InvokeRequest,aws-bg-3,ap-southeast-1,AWS,119.52
+2026-03-30,Amazon Virtual Private Cloud,DataProcessing-Bytes,aws-bg-2,eu-west-1,AWS,302.13
+2026-03-31,Amazon Elastic Compute Cloud - Compute,DataTransfer-Regional-Bytes,streaming-prod,us-east-1,AWS,1752.92
+2026-03-31,Amazon Simple Storage Service,Requests-Tier1,aws-bg-3,eu-west-1,AWS,216.87
+2026-03-31,Amazon Relational Database Service,TimedStorage-ByteHrs,aws-bg-3,ap-southeast-1,AWS,339.86
+2026-03-31,Amazon Elastic Kubernetes Service,Requests-Tier1,aws-bg-3,ap-southeast-1,AWS,494.46
+2026-03-31,AWS Lambda,InvokeRequest,aws-bg-3,us-east-1,AWS,144.15
+2026-03-31,Amazon CloudWatch,BoxUsage:m5.large,aws-bg-1,us-east-1,AWS,100.86
+2026-03-31,Amazon Virtual Private Cloud,DataProcessing-Bytes,aws-bg-2,us-west-2,AWS,190.54
+2026-04-01,Amazon Elastic Compute Cloud - Compute,DataTransfer-Regional-Bytes,streaming-prod,us-east-1,AWS,1817.33
+2026-04-01,Amazon Simple Storage Service,DataProcessing-Bytes,aws-bg-2,us-east-1,AWS,264.75
+2026-04-01,Amazon Relational Database Service,BoxUsage:m5.large,aws-bg-3,ap-southeast-1,AWS,317.25
+2026-04-01,Amazon Elastic Kubernetes Service,BoxUsage:t3.medium,aws-bg-3,eu-west-1,AWS,417.54
+2026-04-01,AWS Lambda,BoxUsage:t3.medium,aws-bg-3,us-east-1,AWS,110.16
+2026-04-01,Amazon CloudWatch,RunInstances:0002,aws-bg-3,eu-west-1,AWS,103.96
+2026-04-01,Amazon Virtual Private Cloud,BoxUsage:t3.medium,aws-bg-1,ap-southeast-1,AWS,257.94

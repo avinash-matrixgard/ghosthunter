@@ -1,0 +1,37 @@
+{
+  "id": "aws_02_s3_lifecycle_miss",
+  "provider": "aws",
+  "description": "S3 Standard-tier storage bill doubles after a security log pipeline starts writing 12 TB/month of compliance logs without lifecycle policies moving them to Glacier.",
+  "difficulty": "easy",
+  "tags": [
+    "s3",
+    "lifecycle",
+    "storage-tier",
+    "compliance"
+  ],
+  "spike": {
+    "service": "Amazon Simple Storage Service",
+    "direction": "up",
+    "min_change_percent": 120.0,
+    "current_cost_range": [
+      18000,
+      35000
+    ],
+    "expected_previous_cost_approx": 10800.0,
+    "expected_current_cost_approx": 27000.0
+  },
+  "root_cause": {
+    "summary": "Security compliance log pipeline writes to S3 Standard with no lifecycle rule. Logs are read once then never again but accrue Standard pricing indefinitely.",
+    "evidence_keywords": [
+      "s3",
+      "lifecycle",
+      "standard",
+      "glacier",
+      "tier",
+      "compliance",
+      "log",
+      "cold"
+    ],
+    "remediation": "Add a lifecycle rule: transition to Standard-IA at 30 days, Glacier Instant Retrieval at 90 days, Deep Archive at 365 days. ~70% cost reduction on old logs."
+  }
+}

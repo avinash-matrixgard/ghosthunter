@@ -1,0 +1,37 @@
+{
+  "id": "gcp_01_bigquery_slot_runaway",
+  "provider": "gcp",
+  "description": "BigQuery on-demand costs blow up after a new experimental analytics project submits a Cartesian-join query on a 40 TB table every 5 minutes from a Composer DAG.",
+  "difficulty": "medium",
+  "tags": [
+    "bigquery",
+    "runaway-query",
+    "composer"
+  ],
+  "spike": {
+    "service": "BigQuery",
+    "direction": "up",
+    "min_change_percent": 400.0,
+    "current_cost_range": [
+      298000,
+      350000
+    ],
+    "expected_previous_cost_approx": 27000.0,
+    "expected_current_cost_approx": 324000.0
+  },
+  "root_cause": {
+    "summary": "Composer DAG scheduled to run every 5 minutes executes an unbounded Cartesian join. On-demand BigQuery billed per TB scanned \u2014 the same query scans the full 40 TB table 288 times/day.",
+    "evidence_keywords": [
+      "bigquery",
+      "on-demand",
+      "scan",
+      "tb",
+      "cartesian",
+      "join",
+      "composer",
+      "schedule",
+      "unbounded"
+    ],
+    "remediation": "Kill the DAG, add partition / clustering filters, and switch project to slot reservations with a per-query byte-scan limit."
+  }
+}

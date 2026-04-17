@@ -1,0 +1,36 @@
+{
+  "id": "aws_04_data_transfer_cross_az",
+  "provider": "aws",
+  "description": "Cross-AZ data transfer cost jumps because a Kafka consumer group was moved to a different subnet but producers kept publishing to the original AZ's brokers.",
+  "difficulty": "hard",
+  "tags": [
+    "data-transfer",
+    "cross-az",
+    "kafka",
+    "msk"
+  ],
+  "spike": {
+    "service": "Amazon Elastic Compute Cloud - Compute",
+    "direction": "up",
+    "min_change_percent": 80.0,
+    "current_cost_range": [
+      47000,
+      58000
+    ],
+    "expected_previous_cost_approx": 27600.0,
+    "expected_current_cost_approx": 52440.0
+  },
+  "root_cause": {
+    "summary": "Kafka consumers relocated to us-east-1c but MSK brokers are in us-east-1a. Every consumed message crosses an AZ boundary; cross-AZ data transfer is $0.01/GB each way.",
+    "evidence_keywords": [
+      "cross-az",
+      "data transfer",
+      "kafka",
+      "msk",
+      "subnet",
+      "availability zone",
+      "consumer"
+    ],
+    "remediation": "Move consumers back to the broker's AZ, or use MSK rack-awareness + client-side fetch.from.closest."
+  }
+}

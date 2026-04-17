@@ -1,0 +1,35 @@
+{
+  "id": "gcp_04_logging_debug_leak",
+  "provider": "gcp",
+  "description": "Cloud Logging spikes after a debug log level was left on in a high-traffic microservice across all regions.",
+  "difficulty": "easy",
+  "tags": [
+    "logging",
+    "debug",
+    "verbosity"
+  ],
+  "spike": {
+    "service": "Cloud Logging",
+    "direction": "up",
+    "min_change_percent": 300.0,
+    "current_cost_range": [
+      35000,
+      60000
+    ],
+    "expected_previous_cost_approx": 5400.0,
+    "expected_current_cost_approx": 43200.0
+  },
+  "root_cause": {
+    "summary": "A feature-flag rollout left LOG_LEVEL=DEBUG on in the checkout service. DEBUG emits request/response payloads; log volume grew ~8x.",
+    "evidence_keywords": [
+      "logging",
+      "debug",
+      "verbose",
+      "log level",
+      "volume",
+      "ingestion",
+      "checkout"
+    ],
+    "remediation": "Set LOG_LEVEL=INFO, add a log-volume alert at 2x week-over-week, sample DEBUG rather than emitting all of it."
+  }
+}

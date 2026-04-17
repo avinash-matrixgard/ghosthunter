@@ -1,0 +1,37 @@
+{
+  "id": "aws_03_cloudwatch_logs_verbose",
+  "provider": "aws",
+  "description": "CloudWatch Logs ingestion charges spike when a staging release accidentally enables DEBUG-level JSON structured logging across 40 Lambda functions in production.",
+  "difficulty": "easy",
+  "tags": [
+    "cloudwatch",
+    "logs",
+    "lambda",
+    "verbosity"
+  ],
+  "spike": {
+    "service": "Amazon CloudWatch",
+    "direction": "up",
+    "min_change_percent": 400.0,
+    "current_cost_range": [
+      22000,
+      45000
+    ],
+    "expected_previous_cost_approx": 3300.0,
+    "expected_current_cost_approx": 33000.0
+  },
+  "root_cause": {
+    "summary": "40 Lambda functions deployed with LOG_LEVEL=DEBUG via a shared layer update. Each invocation now writes ~8x the previous log volume to CloudWatch Logs at $0.50/GB ingestion.",
+    "evidence_keywords": [
+      "cloudwatch",
+      "logs",
+      "ingestion",
+      "debug",
+      "verbose",
+      "lambda",
+      "log level",
+      "layer"
+    ],
+    "remediation": "Pin LOG_LEVEL=INFO in the shared Lambda layer. Set CloudWatch Log Group retention to 7 days for Lambda functions. Add a metric filter + alarm on log volume."
+  }
+}

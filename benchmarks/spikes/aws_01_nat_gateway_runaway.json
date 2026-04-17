@@ -1,0 +1,35 @@
+{
+  "id": "aws_01_nat_gateway_runaway",
+  "provider": "aws",
+  "description": "NAT Gateway data-processing costs explode because a new ETL job in us-east-1 pulls from a public S3 bucket via the NAT Gateway instead of a VPC endpoint.",
+  "difficulty": "medium",
+  "tags": [
+    "nat-gateway",
+    "vpc-endpoint",
+    "etl"
+  ],
+  "spike": {
+    "service": "Amazon Virtual Private Cloud",
+    "direction": "up",
+    "min_change_percent": 500.0,
+    "current_cost_range": [
+      45000,
+      90000
+    ],
+    "expected_previous_cost_approx": 8400.0,
+    "expected_current_cost_approx": 63000.0
+  },
+  "root_cause": {
+    "summary": "ETL job pulls ~4 TB/day from a public S3 bucket through the NAT Gateway instead of a Gateway VPC Endpoint for S3. NAT Gateway charges $0.045/GB processed; VPC endpoints are free for same-region S3.",
+    "evidence_keywords": [
+      "nat gateway",
+      "vpc endpoint",
+      "s3",
+      "etl",
+      "egress",
+      "data processing",
+      "gateway endpoint"
+    ],
+    "remediation": "Add an S3 Gateway VPC Endpoint in the VPC and update the ETL job's route table. One-line fix; savings \u2248 100%."
+  }
+}

@@ -1,0 +1,481 @@
+ChargePeriodStart,ServiceName,SkuId,SubAccountId,RegionId,ProviderName,BilledCost
+2026-02-01,Cloud Run,CPU Allocation Time (Always-On),platform-prod,us-central1,Google Cloud,319.15
+2026-02-01,Compute Engine,Storage Standard Class A Operations,gcp-bg-3,us-east1,Google Cloud,842.59
+2026-02-01,Cloud Storage,N1 Standard Core,gcp-bg-2,us-east1,Google Cloud,239.46
+2026-02-01,Cloud SQL,Storage Standard Class A Operations,gcp-bg-3,asia-southeast1,Google Cloud,291.34
+2026-02-01,Kubernetes Engine,Shared VPC,gcp-bg-2,us-east1,Google Cloud,576.42
+2026-02-01,Cloud Logging,N1 Standard Core,gcp-bg-3,us-east1,Google Cloud,213.62
+2026-02-01,Cloud Monitoring,N1 Standard Core,gcp-bg-1,us-east1,Google Cloud,100.99
+2026-02-01,Networking,E2 Instance Core,gcp-bg-3,asia-southeast1,Google Cloud,494.27
+2026-02-02,Cloud Run,CPU Allocation Time (Always-On),platform-prod,us-central1,Google Cloud,326.16
+2026-02-02,Compute Engine,Query Analysis,gcp-bg-3,europe-west1,Google Cloud,720.54
+2026-02-02,Cloud Storage,N1 Standard Core,gcp-bg-3,us-east1,Google Cloud,225.95
+2026-02-02,Cloud SQL,Storage Standard Class A Operations,gcp-bg-2,asia-southeast1,Google Cloud,342.75
+2026-02-02,Kubernetes Engine,Query Analysis,gcp-bg-1,us-east1,Google Cloud,621.83
+2026-02-02,Cloud Logging,Shared VPC,gcp-bg-2,europe-west1,Google Cloud,169.72
+2026-02-02,Cloud Monitoring,Storage Standard Class A Operations,gcp-bg-3,europe-west1,Google Cloud,81.69
+2026-02-02,Networking,N1 Standard Core,gcp-bg-1,europe-west1,Google Cloud,425.88
+2026-02-03,Cloud Run,CPU Allocation Time (Always-On),platform-prod,us-central1,Google Cloud,326.42
+2026-02-03,Compute Engine,Storage Standard Class A Operations,gcp-bg-3,europe-west1,Google Cloud,815.60
+2026-02-03,Cloud Storage,E2 Instance Core,gcp-bg-2,us-central1,Google Cloud,197.95
+2026-02-03,Cloud SQL,Query Analysis,gcp-bg-3,us-east1,Google Cloud,280.70
+2026-02-03,Kubernetes Engine,Query Analysis,gcp-bg-3,us-east1,Google Cloud,507.79
+2026-02-03,Cloud Logging,Storage Standard Class A Operations,gcp-bg-1,asia-southeast1,Google Cloud,190.90
+2026-02-03,Cloud Monitoring,Storage Standard Class A Operations,gcp-bg-2,us-east1,Google Cloud,89.77
+2026-02-03,Networking,Network Egress,gcp-bg-2,us-central1,Google Cloud,386.66
+2026-02-04,Cloud Run,CPU Allocation Time (Always-On),platform-prod,us-central1,Google Cloud,325.49
+2026-02-04,Compute Engine,E2 Instance Core,gcp-bg-1,asia-southeast1,Google Cloud,834.39
+2026-02-04,Cloud Storage,Network Egress,gcp-bg-3,europe-west1,Google Cloud,225.82
+2026-02-04,Cloud SQL,Network Egress,gcp-bg-3,europe-west1,Google Cloud,333.66
+2026-02-04,Kubernetes Engine,Network Egress,gcp-bg-3,europe-west1,Google Cloud,428.84
+2026-02-04,Cloud Logging,Query Analysis,gcp-bg-1,europe-west1,Google Cloud,182.83
+2026-02-04,Cloud Monitoring,Network Egress,gcp-bg-1,us-central1,Google Cloud,85.48
+2026-02-04,Networking,Storage Standard Class A Operations,gcp-bg-1,asia-southeast1,Google Cloud,391.69
+2026-02-05,Cloud Run,CPU Allocation Time (Always-On),platform-prod,us-central1,Google Cloud,325.60
+2026-02-05,Compute Engine,Shared VPC,gcp-bg-2,us-east1,Google Cloud,775.79
+2026-02-05,Cloud Storage,Shared VPC,gcp-bg-2,asia-southeast1,Google Cloud,218.27
+2026-02-05,Cloud SQL,Network Egress,gcp-bg-3,asia-southeast1,Google Cloud,337.21
+2026-02-05,Kubernetes Engine,Network Egress,gcp-bg-3,europe-west1,Google Cloud,576.95
+2026-02-05,Cloud Logging,Log Volume,gcp-bg-3,us-central1,Google Cloud,164.33
+2026-02-05,Cloud Monitoring,Log Volume,gcp-bg-2,europe-west1,Google Cloud,81.07
+2026-02-05,Networking,Log Volume,gcp-bg-1,asia-southeast1,Google Cloud,390.77
+2026-02-06,Cloud Run,CPU Allocation Time (Always-On),platform-prod,us-central1,Google Cloud,279.12
+2026-02-06,Compute Engine,N1 Standard Core,gcp-bg-1,asia-southeast1,Google Cloud,794.22
+2026-02-06,Cloud Storage,SSD Capacity,gcp-bg-3,europe-west1,Google Cloud,211.05
+2026-02-06,Cloud SQL,Network Egress,gcp-bg-1,us-central1,Google Cloud,308.15
+2026-02-06,Kubernetes Engine,SSD Capacity,gcp-bg-3,europe-west1,Google Cloud,625.24
+2026-02-06,Cloud Logging,Network Egress,gcp-bg-3,us-east1,Google Cloud,186.35
+2026-02-06,Cloud Monitoring,Log Volume,gcp-bg-2,europe-west1,Google Cloud,100.54
+2026-02-06,Networking,N1 Standard Core,gcp-bg-3,europe-west1,Google Cloud,453.29
+2026-02-07,Cloud Run,CPU Allocation Time (Always-On),platform-prod,us-central1,Google Cloud,325.72
+2026-02-07,Compute Engine,Network Egress,gcp-bg-1,europe-west1,Google Cloud,742.73
+2026-02-07,Cloud Storage,Shared VPC,gcp-bg-3,us-east1,Google Cloud,254.42
+2026-02-07,Cloud SQL,Shared VPC,gcp-bg-3,asia-southeast1,Google Cloud,273.84
+2026-02-07,Kubernetes Engine,Storage Standard Class A Operations,gcp-bg-2,europe-west1,Google Cloud,433.04
+2026-02-07,Cloud Logging,N1 Standard Core,gcp-bg-3,us-central1,Google Cloud,150.67
+2026-02-07,Cloud Monitoring,Shared VPC,gcp-bg-3,europe-west1,Google Cloud,84.32
+2026-02-07,Networking,SSD Capacity,gcp-bg-1,us-central1,Google Cloud,383.70
+2026-02-08,Cloud Run,CPU Allocation Time (Always-On),platform-prod,us-central1,Google Cloud,329.20
+2026-02-08,Compute Engine,N1 Standard Core,gcp-bg-2,us-central1,Google Cloud,854.53
+2026-02-08,Cloud Storage,N1 Standard Core,gcp-bg-2,asia-southeast1,Google Cloud,239.06
+2026-02-08,Cloud SQL,Storage Standard Class A Operations,gcp-bg-2,us-central1,Google Cloud,374.91
+2026-02-08,Kubernetes Engine,N1 Standard Core,gcp-bg-1,europe-west1,Google Cloud,552.31
+2026-02-08,Cloud Logging,SSD Capacity,gcp-bg-3,europe-west1,Google Cloud,206.22
+2026-02-08,Cloud Monitoring,E2 Instance Core,gcp-bg-1,asia-southeast1,Google Cloud,100.33
+2026-02-08,Networking,Log Volume,gcp-bg-2,europe-west1,Google Cloud,383.94
+2026-02-09,Cloud Run,CPU Allocation Time (Always-On),platform-prod,us-central1,Google Cloud,298.15
+2026-02-09,Compute Engine,N1 Standard Core,gcp-bg-1,us-east1,Google Cloud,578.03
+2026-02-09,Cloud Storage,N1 Standard Core,gcp-bg-3,us-central1,Google Cloud,233.22
+2026-02-09,Cloud SQL,Storage Standard Class A Operations,gcp-bg-1,europe-west1,Google Cloud,326.81
+2026-02-09,Kubernetes Engine,E2 Instance Core,gcp-bg-2,us-east1,Google Cloud,477.27
+2026-02-09,Cloud Logging,N1 Standard Core,gcp-bg-2,europe-west1,Google Cloud,218.22
+2026-02-09,Cloud Monitoring,N1 Standard Core,gcp-bg-2,us-central1,Google Cloud,94.48
+2026-02-09,Networking,Query Analysis,gcp-bg-3,us-east1,Google Cloud,405.85
+2026-02-10,Cloud Run,CPU Allocation Time (Always-On),platform-prod,us-central1,Google Cloud,309.79
+2026-02-10,Compute Engine,SSD Capacity,gcp-bg-3,europe-west1,Google Cloud,856.29
+2026-02-10,Cloud Storage,SSD Capacity,gcp-bg-1,us-central1,Google Cloud,182.60
+2026-02-10,Cloud SQL,Storage Standard Class A Operations,gcp-bg-2,asia-southeast1,Google Cloud,344.54
+2026-02-10,Kubernetes Engine,E2 Instance Core,gcp-bg-1,asia-southeast1,Google Cloud,488.71
+2026-02-10,Cloud Logging,Query Analysis,gcp-bg-3,asia-southeast1,Google Cloud,168.75
+2026-02-10,Cloud Monitoring,N1 Standard Core,gcp-bg-3,europe-west1,Google Cloud,93.62
+2026-02-10,Networking,SSD Capacity,gcp-bg-2,us-east1,Google Cloud,407.27
+2026-02-11,Cloud Run,CPU Allocation Time (Always-On),platform-prod,us-central1,Google Cloud,329.60
+2026-02-11,Compute Engine,Network Egress,gcp-bg-1,asia-southeast1,Google Cloud,929.87
+2026-02-11,Cloud Storage,SSD Capacity,gcp-bg-2,asia-southeast1,Google Cloud,214.39
+2026-02-11,Cloud SQL,Shared VPC,gcp-bg-1,asia-southeast1,Google Cloud,294.56
+2026-02-11,Kubernetes Engine,Log Volume,gcp-bg-2,us-central1,Google Cloud,652.12
+2026-02-11,Cloud Logging,N1 Standard Core,gcp-bg-1,us-east1,Google Cloud,186.41
+2026-02-11,Cloud Monitoring,N1 Standard Core,gcp-bg-1,europe-west1,Google Cloud,72.77
+2026-02-11,Networking,SSD Capacity,gcp-bg-3,us-central1,Google Cloud,411.58
+2026-02-12,Cloud Run,CPU Allocation Time (Always-On),platform-prod,us-central1,Google Cloud,337.31
+2026-02-12,Compute Engine,N1 Standard Core,gcp-bg-3,us-central1,Google Cloud,803.29
+2026-02-12,Cloud Storage,Query Analysis,gcp-bg-3,asia-southeast1,Google Cloud,211.22
+2026-02-12,Cloud SQL,Shared VPC,gcp-bg-3,asia-southeast1,Google Cloud,274.20
+2026-02-12,Kubernetes Engine,Query Analysis,gcp-bg-1,europe-west1,Google Cloud,515.07
+2026-02-12,Cloud Logging,Network Egress,gcp-bg-1,us-east1,Google Cloud,164.95
+2026-02-12,Cloud Monitoring,Network Egress,gcp-bg-2,europe-west1,Google Cloud,82.99
+2026-02-12,Networking,Shared VPC,gcp-bg-2,europe-west1,Google Cloud,425.51
+2026-02-13,Cloud Run,CPU Allocation Time (Always-On),platform-prod,us-central1,Google Cloud,318.77
+2026-02-13,Compute Engine,Network Egress,gcp-bg-2,us-east1,Google Cloud,766.32
+2026-02-13,Cloud Storage,Query Analysis,gcp-bg-2,europe-west1,Google Cloud,204.91
+2026-02-13,Cloud SQL,N1 Standard Core,gcp-bg-3,us-central1,Google Cloud,336.32
+2026-02-13,Kubernetes Engine,E2 Instance Core,gcp-bg-2,europe-west1,Google Cloud,589.97
+2026-02-13,Cloud Logging,Network Egress,gcp-bg-2,us-central1,Google Cloud,174.91
+2026-02-13,Cloud Monitoring,SSD Capacity,gcp-bg-1,europe-west1,Google Cloud,93.85
+2026-02-13,Networking,Storage Standard Class A Operations,gcp-bg-3,us-east1,Google Cloud,502.65
+2026-02-14,Cloud Run,CPU Allocation Time (Always-On),platform-prod,us-central1,Google Cloud,328.69
+2026-02-14,Compute Engine,Shared VPC,gcp-bg-1,asia-southeast1,Google Cloud,797.54
+2026-02-14,Cloud Storage,Query Analysis,gcp-bg-2,asia-southeast1,Google Cloud,202.81
+2026-02-14,Cloud SQL,Shared VPC,gcp-bg-3,europe-west1,Google Cloud,294.55
+2026-02-14,Kubernetes Engine,SSD Capacity,gcp-bg-2,europe-west1,Google Cloud,603.58
+2026-02-14,Cloud Logging,Shared VPC,gcp-bg-3,asia-southeast1,Google Cloud,188.32
+2026-02-14,Cloud Monitoring,SSD Capacity,gcp-bg-2,us-east1,Google Cloud,95.79
+2026-02-14,Networking,N1 Standard Core,gcp-bg-3,asia-southeast1,Google Cloud,464.73
+2026-02-15,Cloud Run,CPU Allocation Time (Always-On),platform-prod,us-central1,Google Cloud,332.02
+2026-02-15,Compute Engine,Query Analysis,gcp-bg-3,asia-southeast1,Google Cloud,964.83
+2026-02-15,Cloud Storage,Network Egress,gcp-bg-2,us-east1,Google Cloud,236.51
+2026-02-15,Cloud SQL,Log Volume,gcp-bg-3,europe-west1,Google Cloud,256.10
+2026-02-15,Kubernetes Engine,Log Volume,gcp-bg-3,asia-southeast1,Google Cloud,437.33
+2026-02-15,Cloud Logging,Query Analysis,gcp-bg-3,europe-west1,Google Cloud,175.44
+2026-02-15,Cloud Monitoring,N1 Standard Core,gcp-bg-2,europe-west1,Google Cloud,80.95
+2026-02-15,Networking,Query Analysis,gcp-bg-1,europe-west1,Google Cloud,386.15
+2026-02-16,Cloud Run,CPU Allocation Time (Always-On),platform-prod,us-central1,Google Cloud,301.68
+2026-02-16,Compute Engine,Network Egress,gcp-bg-3,asia-southeast1,Google Cloud,732.24
+2026-02-16,Cloud Storage,Network Egress,gcp-bg-2,asia-southeast1,Google Cloud,202.70
+2026-02-16,Cloud SQL,Log Volume,gcp-bg-1,us-central1,Google Cloud,352.23
+2026-02-16,Kubernetes Engine,Network Egress,gcp-bg-2,europe-west1,Google Cloud,540.62
+2026-02-16,Cloud Logging,Query Analysis,gcp-bg-2,us-east1,Google Cloud,148.88
+2026-02-16,Cloud Monitoring,Query Analysis,gcp-bg-3,europe-west1,Google Cloud,100.53
+2026-02-16,Networking,Query Analysis,gcp-bg-2,europe-west1,Google Cloud,468.14
+2026-02-17,Cloud Run,CPU Allocation Time (Always-On),platform-prod,us-central1,Google Cloud,325.10
+2026-02-17,Compute Engine,Shared VPC,gcp-bg-1,us-central1,Google Cloud,775.77
+2026-02-17,Cloud Storage,N1 Standard Core,gcp-bg-2,europe-west1,Google Cloud,251.73
+2026-02-17,Cloud SQL,SSD Capacity,gcp-bg-2,europe-west1,Google Cloud,279.10
+2026-02-17,Kubernetes Engine,Shared VPC,gcp-bg-1,us-central1,Google Cloud,654.81
+2026-02-17,Cloud Logging,Storage Standard Class A Operations,gcp-bg-3,asia-southeast1,Google Cloud,179.14
+2026-02-17,Cloud Monitoring,Log Volume,gcp-bg-3,europe-west1,Google Cloud,88.88
+2026-02-17,Networking,Query Analysis,gcp-bg-1,asia-southeast1,Google Cloud,456.71
+2026-02-18,Cloud Run,CPU Allocation Time (Always-On),platform-prod,us-central1,Google Cloud,284.63
+2026-02-18,Compute Engine,Shared VPC,gcp-bg-1,europe-west1,Google Cloud,726.84
+2026-02-18,Cloud Storage,SSD Capacity,gcp-bg-2,europe-west1,Google Cloud,212.77
+2026-02-18,Cloud SQL,SSD Capacity,gcp-bg-3,asia-southeast1,Google Cloud,296.04
+2026-02-18,Kubernetes Engine,E2 Instance Core,gcp-bg-1,asia-southeast1,Google Cloud,518.08
+2026-02-18,Cloud Logging,SSD Capacity,gcp-bg-2,us-central1,Google Cloud,198.08
+2026-02-18,Cloud Monitoring,Shared VPC,gcp-bg-2,us-central1,Google Cloud,93.70
+2026-02-18,Networking,Log Volume,gcp-bg-2,us-central1,Google Cloud,479.88
+2026-02-19,Cloud Run,CPU Allocation Time (Always-On),platform-prod,us-central1,Google Cloud,306.27
+2026-02-19,Compute Engine,Log Volume,gcp-bg-1,europe-west1,Google Cloud,771.46
+2026-02-19,Cloud Storage,Shared VPC,gcp-bg-1,europe-west1,Google Cloud,217.18
+2026-02-19,Cloud SQL,N1 Standard Core,gcp-bg-1,us-east1,Google Cloud,309.77
+2026-02-19,Kubernetes Engine,SSD Capacity,gcp-bg-1,us-central1,Google Cloud,534.17
+2026-02-19,Cloud Logging,SSD Capacity,gcp-bg-3,us-east1,Google Cloud,183.46
+2026-02-19,Cloud Monitoring,Shared VPC,gcp-bg-2,europe-west1,Google Cloud,106.04
+2026-02-19,Networking,Query Analysis,gcp-bg-1,europe-west1,Google Cloud,430.86
+2026-02-20,Cloud Run,CPU Allocation Time (Always-On),platform-prod,us-central1,Google Cloud,305.32
+2026-02-20,Compute Engine,Log Volume,gcp-bg-1,asia-southeast1,Google Cloud,628.06
+2026-02-20,Cloud Storage,Query Analysis,gcp-bg-3,us-east1,Google Cloud,223.72
+2026-02-20,Cloud SQL,Query Analysis,gcp-bg-2,us-east1,Google Cloud,323.52
+2026-02-20,Kubernetes Engine,N1 Standard Core,gcp-bg-2,us-central1,Google Cloud,538.02
+2026-02-20,Cloud Logging,SSD Capacity,gcp-bg-2,us-central1,Google Cloud,175.53
+2026-02-20,Cloud Monitoring,Log Volume,gcp-bg-3,us-central1,Google Cloud,88.46
+2026-02-20,Networking,Shared VPC,gcp-bg-2,europe-west1,Google Cloud,431.45
+2026-02-21,Cloud Run,CPU Allocation Time (Always-On),platform-prod,us-central1,Google Cloud,332.45
+2026-02-21,Compute Engine,Log Volume,gcp-bg-3,us-east1,Google Cloud,867.08
+2026-02-21,Cloud Storage,E2 Instance Core,gcp-bg-3,europe-west1,Google Cloud,212.86
+2026-02-21,Cloud SQL,Log Volume,gcp-bg-2,us-central1,Google Cloud,302.35
+2026-02-21,Kubernetes Engine,N1 Standard Core,gcp-bg-1,europe-west1,Google Cloud,480.94
+2026-02-21,Cloud Logging,SSD Capacity,gcp-bg-3,asia-southeast1,Google Cloud,166.22
+2026-02-21,Cloud Monitoring,SSD Capacity,gcp-bg-2,us-central1,Google Cloud,89.96
+2026-02-21,Networking,Storage Standard Class A Operations,gcp-bg-3,asia-southeast1,Google Cloud,466.70
+2026-02-22,Cloud Run,CPU Allocation Time (Always-On),platform-prod,us-central1,Google Cloud,339.43
+2026-02-22,Compute Engine,E2 Instance Core,gcp-bg-2,europe-west1,Google Cloud,704.06
+2026-02-22,Cloud Storage,E2 Instance Core,gcp-bg-3,us-central1,Google Cloud,207.52
+2026-02-22,Cloud SQL,Shared VPC,gcp-bg-2,us-central1,Google Cloud,285.03
+2026-02-22,Kubernetes Engine,Query Analysis,gcp-bg-2,us-east1,Google Cloud,543.01
+2026-02-22,Cloud Logging,Shared VPC,gcp-bg-1,us-central1,Google Cloud,174.22
+2026-02-22,Cloud Monitoring,Query Analysis,gcp-bg-1,asia-southeast1,Google Cloud,99.75
+2026-02-22,Networking,Storage Standard Class A Operations,gcp-bg-1,us-central1,Google Cloud,414.34
+2026-02-23,Cloud Run,CPU Allocation Time (Always-On),platform-prod,us-central1,Google Cloud,332.96
+2026-02-23,Compute Engine,E2 Instance Core,gcp-bg-2,us-east1,Google Cloud,787.07
+2026-02-23,Cloud Storage,SSD Capacity,gcp-bg-3,asia-southeast1,Google Cloud,243.38
+2026-02-23,Cloud SQL,Shared VPC,gcp-bg-3,europe-west1,Google Cloud,348.53
+2026-02-23,Kubernetes Engine,Query Analysis,gcp-bg-3,us-east1,Google Cloud,610.32
+2026-02-23,Cloud Logging,E2 Instance Core,gcp-bg-2,us-central1,Google Cloud,174.86
+2026-02-23,Cloud Monitoring,E2 Instance Core,gcp-bg-2,us-east1,Google Cloud,84.89
+2026-02-23,Networking,Network Egress,gcp-bg-2,europe-west1,Google Cloud,442.03
+2026-02-24,Cloud Run,CPU Allocation Time (Always-On),platform-prod,us-central1,Google Cloud,323.06
+2026-02-24,Compute Engine,Shared VPC,gcp-bg-3,asia-southeast1,Google Cloud,778.24
+2026-02-24,Cloud Storage,Network Egress,gcp-bg-3,us-east1,Google Cloud,254.26
+2026-02-24,Cloud SQL,SSD Capacity,gcp-bg-1,europe-west1,Google Cloud,265.15
+2026-02-24,Kubernetes Engine,Shared VPC,gcp-bg-2,asia-southeast1,Google Cloud,531.01
+2026-02-24,Cloud Logging,Log Volume,gcp-bg-1,us-east1,Google Cloud,193.37
+2026-02-24,Cloud Monitoring,Network Egress,gcp-bg-3,us-east1,Google Cloud,76.50
+2026-02-24,Networking,Log Volume,gcp-bg-2,us-east1,Google Cloud,482.62
+2026-02-25,Cloud Run,CPU Allocation Time (Always-On),platform-prod,us-central1,Google Cloud,320.94
+2026-02-25,Compute Engine,N1 Standard Core,gcp-bg-1,us-east1,Google Cloud,874.18
+2026-02-25,Cloud Storage,Storage Standard Class A Operations,gcp-bg-1,europe-west1,Google Cloud,240.07
+2026-02-25,Cloud SQL,Network Egress,gcp-bg-3,europe-west1,Google Cloud,348.63
+2026-02-25,Kubernetes Engine,Storage Standard Class A Operations,gcp-bg-2,asia-southeast1,Google Cloud,529.65
+2026-02-25,Cloud Logging,Shared VPC,gcp-bg-2,us-central1,Google Cloud,178.11
+2026-02-25,Cloud Monitoring,Query Analysis,gcp-bg-1,us-central1,Google Cloud,82.07
+2026-02-25,Networking,N1 Standard Core,gcp-bg-1,europe-west1,Google Cloud,457.81
+2026-02-26,Cloud Run,CPU Allocation Time (Always-On),platform-prod,us-central1,Google Cloud,303.69
+2026-02-26,Compute Engine,SSD Capacity,gcp-bg-3,asia-southeast1,Google Cloud,804.39
+2026-02-26,Cloud Storage,E2 Instance Core,gcp-bg-2,us-east1,Google Cloud,189.11
+2026-02-26,Cloud SQL,E2 Instance Core,gcp-bg-1,asia-southeast1,Google Cloud,356.37
+2026-02-26,Kubernetes Engine,Query Analysis,gcp-bg-1,us-east1,Google Cloud,565.05
+2026-02-26,Cloud Logging,SSD Capacity,gcp-bg-3,asia-southeast1,Google Cloud,174.66
+2026-02-26,Cloud Monitoring,Query Analysis,gcp-bg-3,europe-west1,Google Cloud,101.05
+2026-02-26,Networking,Network Egress,gcp-bg-1,us-east1,Google Cloud,405.10
+2026-02-27,Cloud Run,CPU Allocation Time (Always-On),platform-prod,us-central1,Google Cloud,326.61
+2026-02-27,Compute Engine,SSD Capacity,gcp-bg-3,europe-west1,Google Cloud,765.01
+2026-02-27,Cloud Storage,E2 Instance Core,gcp-bg-3,asia-southeast1,Google Cloud,213.28
+2026-02-27,Cloud SQL,Shared VPC,gcp-bg-2,us-central1,Google Cloud,332.42
+2026-02-27,Kubernetes Engine,Log Volume,gcp-bg-1,europe-west1,Google Cloud,533.38
+2026-02-27,Cloud Logging,Shared VPC,gcp-bg-2,asia-southeast1,Google Cloud,172.11
+2026-02-27,Cloud Monitoring,Query Analysis,gcp-bg-3,europe-west1,Google Cloud,100.37
+2026-02-27,Networking,Query Analysis,gcp-bg-2,us-central1,Google Cloud,493.26
+2026-02-28,Cloud Run,CPU Allocation Time (Always-On),platform-prod,us-central1,Google Cloud,341.03
+2026-02-28,Compute Engine,N1 Standard Core,gcp-bg-3,europe-west1,Google Cloud,831.81
+2026-02-28,Cloud Storage,Query Analysis,gcp-bg-1,asia-southeast1,Google Cloud,214.74
+2026-02-28,Cloud SQL,Storage Standard Class A Operations,gcp-bg-3,us-central1,Google Cloud,319.88
+2026-02-28,Kubernetes Engine,Network Egress,gcp-bg-2,us-central1,Google Cloud,543.28
+2026-02-28,Cloud Logging,Log Volume,gcp-bg-2,europe-west1,Google Cloud,167.72
+2026-02-28,Cloud Monitoring,Network Egress,gcp-bg-1,us-central1,Google Cloud,87.95
+2026-02-28,Networking,Network Egress,gcp-bg-1,europe-west1,Google Cloud,423.29
+2026-03-01,Cloud Run,CPU Allocation Time (Always-On),platform-prod,us-central1,Google Cloud,316.32
+2026-03-01,Compute Engine,Log Volume,gcp-bg-2,europe-west1,Google Cloud,846.97
+2026-03-01,Cloud Storage,Shared VPC,gcp-bg-1,us-east1,Google Cloud,202.42
+2026-03-01,Cloud SQL,Log Volume,gcp-bg-1,us-east1,Google Cloud,327.18
+2026-03-01,Kubernetes Engine,Network Egress,gcp-bg-2,asia-southeast1,Google Cloud,527.33
+2026-03-01,Cloud Logging,SSD Capacity,gcp-bg-2,us-east1,Google Cloud,157.45
+2026-03-01,Cloud Monitoring,Storage Standard Class A Operations,gcp-bg-2,asia-southeast1,Google Cloud,85.42
+2026-03-01,Networking,SSD Capacity,gcp-bg-3,asia-southeast1,Google Cloud,395.95
+2026-03-02,Cloud Run,CPU Allocation Time (Always-On),platform-prod,us-central1,Google Cloud,302.68
+2026-03-02,Compute Engine,Network Egress,gcp-bg-2,europe-west1,Google Cloud,748.93
+2026-03-02,Cloud Storage,Shared VPC,gcp-bg-2,asia-southeast1,Google Cloud,212.59
+2026-03-02,Cloud SQL,Query Analysis,gcp-bg-2,asia-southeast1,Google Cloud,322.71
+2026-03-02,Kubernetes Engine,Network Egress,gcp-bg-3,asia-southeast1,Google Cloud,507.53
+2026-03-02,Cloud Logging,SSD Capacity,gcp-bg-3,us-east1,Google Cloud,199.89
+2026-03-02,Cloud Monitoring,Log Volume,gcp-bg-2,us-east1,Google Cloud,106.72
+2026-03-02,Networking,SSD Capacity,gcp-bg-2,asia-southeast1,Google Cloud,473.00
+2026-03-03,Cloud Run,CPU Allocation Time (Always-On),platform-prod,us-central1,Google Cloud,1881.05
+2026-03-03,Compute Engine,E2 Instance Core,gcp-bg-2,us-central1,Google Cloud,808.91
+2026-03-03,Cloud Storage,Query Analysis,gcp-bg-3,asia-southeast1,Google Cloud,233.63
+2026-03-03,Cloud SQL,SSD Capacity,gcp-bg-3,us-central1,Google Cloud,247.29
+2026-03-03,Kubernetes Engine,SSD Capacity,gcp-bg-2,us-east1,Google Cloud,475.35
+2026-03-03,Cloud Logging,Shared VPC,gcp-bg-2,europe-west1,Google Cloud,181.95
+2026-03-03,Cloud Monitoring,Query Analysis,gcp-bg-1,europe-west1,Google Cloud,91.42
+2026-03-03,Networking,SSD Capacity,gcp-bg-1,us-central1,Google Cloud,353.59
+2026-03-04,Cloud Run,CPU Allocation Time (Always-On),platform-prod,us-central1,Google Cloud,1836.37
+2026-03-04,Compute Engine,Log Volume,gcp-bg-1,asia-southeast1,Google Cloud,704.43
+2026-03-04,Cloud Storage,SSD Capacity,gcp-bg-1,asia-southeast1,Google Cloud,193.34
+2026-03-04,Cloud SQL,E2 Instance Core,gcp-bg-2,us-central1,Google Cloud,319.09
+2026-03-04,Kubernetes Engine,Network Egress,gcp-bg-2,us-central1,Google Cloud,571.39
+2026-03-04,Cloud Logging,Query Analysis,gcp-bg-1,europe-west1,Google Cloud,171.22
+2026-03-04,Cloud Monitoring,Storage Standard Class A Operations,gcp-bg-1,us-central1,Google Cloud,88.56
+2026-03-04,Networking,N1 Standard Core,gcp-bg-3,us-east1,Google Cloud,472.15
+2026-03-05,Cloud Run,CPU Allocation Time (Always-On),platform-prod,us-central1,Google Cloud,1580.49
+2026-03-05,Compute Engine,SSD Capacity,gcp-bg-2,asia-southeast1,Google Cloud,739.43
+2026-03-05,Cloud Storage,Storage Standard Class A Operations,gcp-bg-2,europe-west1,Google Cloud,206.88
+2026-03-05,Cloud SQL,Network Egress,gcp-bg-2,asia-southeast1,Google Cloud,363.62
+2026-03-05,Kubernetes Engine,E2 Instance Core,gcp-bg-1,asia-southeast1,Google Cloud,580.02
+2026-03-05,Cloud Logging,Shared VPC,gcp-bg-2,us-central1,Google Cloud,181.75
+2026-03-05,Cloud Monitoring,N1 Standard Core,gcp-bg-2,us-east1,Google Cloud,79.41
+2026-03-05,Networking,Query Analysis,gcp-bg-2,us-central1,Google Cloud,412.68
+2026-03-06,Cloud Run,CPU Allocation Time (Always-On),platform-prod,us-central1,Google Cloud,1827.95
+2026-03-06,Compute Engine,Storage Standard Class A Operations,gcp-bg-3,us-central1,Google Cloud,835.86
+2026-03-06,Cloud Storage,Log Volume,gcp-bg-2,us-central1,Google Cloud,217.45
+2026-03-06,Cloud SQL,SSD Capacity,gcp-bg-2,us-east1,Google Cloud,330.76
+2026-03-06,Kubernetes Engine,Network Egress,gcp-bg-1,asia-southeast1,Google Cloud,570.63
+2026-03-06,Cloud Logging,N1 Standard Core,gcp-bg-2,us-central1,Google Cloud,192.00
+2026-03-06,Cloud Monitoring,Storage Standard Class A Operations,gcp-bg-1,us-east1,Google Cloud,83.10
+2026-03-06,Networking,Query Analysis,gcp-bg-2,us-central1,Google Cloud,453.64
+2026-03-07,Cloud Run,CPU Allocation Time (Always-On),platform-prod,us-central1,Google Cloud,1555.22
+2026-03-07,Compute Engine,Storage Standard Class A Operations,gcp-bg-2,asia-southeast1,Google Cloud,822.29
+2026-03-07,Cloud Storage,Network Egress,gcp-bg-2,us-east1,Google Cloud,241.47
+2026-03-07,Cloud SQL,Log Volume,gcp-bg-2,us-east1,Google Cloud,302.46
+2026-03-07,Kubernetes Engine,SSD Capacity,gcp-bg-3,us-central1,Google Cloud,599.26
+2026-03-07,Cloud Logging,Storage Standard Class A Operations,gcp-bg-3,us-east1,Google Cloud,175.95
+2026-03-07,Cloud Monitoring,N1 Standard Core,gcp-bg-3,us-central1,Google Cloud,96.52
+2026-03-07,Networking,Log Volume,gcp-bg-3,us-east1,Google Cloud,337.57
+2026-03-08,Cloud Run,CPU Allocation Time (Always-On),platform-prod,us-central1,Google Cloud,1854.85
+2026-03-08,Compute Engine,Shared VPC,gcp-bg-1,us-central1,Google Cloud,846.79
+2026-03-08,Cloud Storage,SSD Capacity,gcp-bg-3,europe-west1,Google Cloud,226.61
+2026-03-08,Cloud SQL,N1 Standard Core,gcp-bg-2,us-central1,Google Cloud,372.38
+2026-03-08,Kubernetes Engine,N1 Standard Core,gcp-bg-3,us-central1,Google Cloud,492.53
+2026-03-08,Cloud Logging,SSD Capacity,gcp-bg-1,europe-west1,Google Cloud,197.14
+2026-03-08,Cloud Monitoring,Network Egress,gcp-bg-3,europe-west1,Google Cloud,94.33
+2026-03-08,Networking,Shared VPC,gcp-bg-1,us-east1,Google Cloud,410.23
+2026-03-09,Cloud Run,CPU Allocation Time (Always-On),platform-prod,us-central1,Google Cloud,1747.93
+2026-03-09,Compute Engine,Query Analysis,gcp-bg-2,europe-west1,Google Cloud,900.69
+2026-03-09,Cloud Storage,Storage Standard Class A Operations,gcp-bg-1,asia-southeast1,Google Cloud,186.61
+2026-03-09,Cloud SQL,E2 Instance Core,gcp-bg-1,asia-southeast1,Google Cloud,305.89
+2026-03-09,Kubernetes Engine,E2 Instance Core,gcp-bg-2,asia-southeast1,Google Cloud,515.72
+2026-03-09,Cloud Logging,E2 Instance Core,gcp-bg-2,us-central1,Google Cloud,176.48
+2026-03-09,Cloud Monitoring,Storage Standard Class A Operations,gcp-bg-3,us-central1,Google Cloud,83.26
+2026-03-09,Networking,Log Volume,gcp-bg-1,europe-west1,Google Cloud,410.22
+2026-03-10,Cloud Run,CPU Allocation Time (Always-On),platform-prod,us-central1,Google Cloud,1762.16
+2026-03-10,Compute Engine,N1 Standard Core,gcp-bg-2,us-east1,Google Cloud,814.96
+2026-03-10,Cloud Storage,Log Volume,gcp-bg-1,europe-west1,Google Cloud,236.21
+2026-03-10,Cloud SQL,Query Analysis,gcp-bg-3,europe-west1,Google Cloud,346.81
+2026-03-10,Kubernetes Engine,Network Egress,gcp-bg-2,europe-west1,Google Cloud,571.56
+2026-03-10,Cloud Logging,E2 Instance Core,gcp-bg-3,asia-southeast1,Google Cloud,176.71
+2026-03-10,Cloud Monitoring,Log Volume,gcp-bg-2,us-east1,Google Cloud,88.01
+2026-03-10,Networking,Shared VPC,gcp-bg-1,us-central1,Google Cloud,330.69
+2026-03-11,Cloud Run,CPU Allocation Time (Always-On),platform-prod,us-central1,Google Cloud,1730.31
+2026-03-11,Compute Engine,Shared VPC,gcp-bg-3,us-central1,Google Cloud,884.99
+2026-03-11,Cloud Storage,E2 Instance Core,gcp-bg-3,us-central1,Google Cloud,218.44
+2026-03-11,Cloud SQL,Log Volume,gcp-bg-2,us-central1,Google Cloud,244.17
+2026-03-11,Kubernetes Engine,Log Volume,gcp-bg-3,us-central1,Google Cloud,479.94
+2026-03-11,Cloud Logging,SSD Capacity,gcp-bg-1,us-east1,Google Cloud,194.21
+2026-03-11,Cloud Monitoring,SSD Capacity,gcp-bg-3,us-central1,Google Cloud,96.10
+2026-03-11,Networking,SSD Capacity,gcp-bg-2,asia-southeast1,Google Cloud,410.82
+2026-03-12,Cloud Run,CPU Allocation Time (Always-On),platform-prod,us-central1,Google Cloud,1790.73
+2026-03-12,Compute Engine,Network Egress,gcp-bg-2,asia-southeast1,Google Cloud,783.31
+2026-03-12,Cloud Storage,Log Volume,gcp-bg-1,asia-southeast1,Google Cloud,208.84
+2026-03-12,Cloud SQL,Network Egress,gcp-bg-1,asia-southeast1,Google Cloud,269.46
+2026-03-12,Kubernetes Engine,Network Egress,gcp-bg-2,europe-west1,Google Cloud,472.54
+2026-03-12,Cloud Logging,Query Analysis,gcp-bg-2,us-east1,Google Cloud,158.00
+2026-03-12,Cloud Monitoring,Log Volume,gcp-bg-3,europe-west1,Google Cloud,87.17
+2026-03-12,Networking,Storage Standard Class A Operations,gcp-bg-3,us-central1,Google Cloud,417.30
+2026-03-13,Cloud Run,CPU Allocation Time (Always-On),platform-prod,us-central1,Google Cloud,1796.10
+2026-03-13,Compute Engine,SSD Capacity,gcp-bg-2,europe-west1,Google Cloud,695.29
+2026-03-13,Cloud Storage,Log Volume,gcp-bg-2,asia-southeast1,Google Cloud,233.75
+2026-03-13,Cloud SQL,N1 Standard Core,gcp-bg-1,us-east1,Google Cloud,261.68
+2026-03-13,Kubernetes Engine,Query Analysis,gcp-bg-1,us-east1,Google Cloud,537.27
+2026-03-13,Cloud Logging,Storage Standard Class A Operations,gcp-bg-1,us-east1,Google Cloud,187.36
+2026-03-13,Cloud Monitoring,Storage Standard Class A Operations,gcp-bg-1,us-central1,Google Cloud,86.41
+2026-03-13,Networking,N1 Standard Core,gcp-bg-3,us-central1,Google Cloud,352.42
+2026-03-14,Cloud Run,CPU Allocation Time (Always-On),platform-prod,us-central1,Google Cloud,1590.31
+2026-03-14,Compute Engine,N1 Standard Core,gcp-bg-3,asia-southeast1,Google Cloud,803.50
+2026-03-14,Cloud Storage,Shared VPC,gcp-bg-1,europe-west1,Google Cloud,199.20
+2026-03-14,Cloud SQL,N1 Standard Core,gcp-bg-1,us-east1,Google Cloud,330.53
+2026-03-14,Kubernetes Engine,N1 Standard Core,gcp-bg-2,europe-west1,Google Cloud,632.09
+2026-03-14,Cloud Logging,Shared VPC,gcp-bg-2,asia-southeast1,Google Cloud,170.22
+2026-03-14,Cloud Monitoring,Log Volume,gcp-bg-2,asia-southeast1,Google Cloud,84.51
+2026-03-14,Networking,Log Volume,gcp-bg-2,us-central1,Google Cloud,456.71
+2026-03-15,Cloud Run,CPU Allocation Time (Always-On),platform-prod,us-central1,Google Cloud,1818.78
+2026-03-15,Compute Engine,Log Volume,gcp-bg-1,asia-southeast1,Google Cloud,854.73
+2026-03-15,Cloud Storage,Network Egress,gcp-bg-2,us-central1,Google Cloud,219.17
+2026-03-15,Cloud SQL,Query Analysis,gcp-bg-1,us-central1,Google Cloud,296.83
+2026-03-15,Kubernetes Engine,SSD Capacity,gcp-bg-3,us-central1,Google Cloud,489.38
+2026-03-15,Cloud Logging,Storage Standard Class A Operations,gcp-bg-2,us-central1,Google Cloud,192.31
+2026-03-15,Cloud Monitoring,Network Egress,gcp-bg-2,us-central1,Google Cloud,88.70
+2026-03-15,Networking,E2 Instance Core,gcp-bg-1,us-east1,Google Cloud,422.29
+2026-03-16,Cloud Run,CPU Allocation Time (Always-On),platform-prod,us-central1,Google Cloud,1817.39
+2026-03-16,Compute Engine,SSD Capacity,gcp-bg-3,europe-west1,Google Cloud,813.19
+2026-03-16,Cloud Storage,E2 Instance Core,gcp-bg-2,us-central1,Google Cloud,224.22
+2026-03-16,Cloud SQL,Storage Standard Class A Operations,gcp-bg-3,europe-west1,Google Cloud,291.13
+2026-03-16,Kubernetes Engine,N1 Standard Core,gcp-bg-2,us-central1,Google Cloud,520.35
+2026-03-16,Cloud Logging,Shared VPC,gcp-bg-2,europe-west1,Google Cloud,163.95
+2026-03-16,Cloud Monitoring,Shared VPC,gcp-bg-2,europe-west1,Google Cloud,71.15
+2026-03-16,Networking,Network Egress,gcp-bg-1,us-east1,Google Cloud,412.35
+2026-03-17,Cloud Run,CPU Allocation Time (Always-On),platform-prod,us-central1,Google Cloud,1673.42
+2026-03-17,Compute Engine,Query Analysis,gcp-bg-1,us-central1,Google Cloud,849.88
+2026-03-17,Cloud Storage,Network Egress,gcp-bg-2,us-east1,Google Cloud,241.18
+2026-03-17,Cloud SQL,N1 Standard Core,gcp-bg-3,europe-west1,Google Cloud,330.81
+2026-03-17,Kubernetes Engine,Shared VPC,gcp-bg-1,us-central1,Google Cloud,469.78
+2026-03-17,Cloud Logging,Log Volume,gcp-bg-2,us-east1,Google Cloud,190.94
+2026-03-17,Cloud Monitoring,Network Egress,gcp-bg-2,us-east1,Google Cloud,83.99
+2026-03-17,Networking,SSD Capacity,gcp-bg-2,us-central1,Google Cloud,426.70
+2026-03-18,Cloud Run,CPU Allocation Time (Always-On),platform-prod,us-central1,Google Cloud,1891.63
+2026-03-18,Compute Engine,Network Egress,gcp-bg-2,us-east1,Google Cloud,730.36
+2026-03-18,Cloud Storage,Log Volume,gcp-bg-3,us-east1,Google Cloud,189.30
+2026-03-18,Cloud SQL,Query Analysis,gcp-bg-2,asia-southeast1,Google Cloud,362.27
+2026-03-18,Kubernetes Engine,E2 Instance Core,gcp-bg-3,us-central1,Google Cloud,589.27
+2026-03-18,Cloud Logging,SSD Capacity,gcp-bg-2,us-central1,Google Cloud,182.25
+2026-03-18,Cloud Monitoring,Log Volume,gcp-bg-2,europe-west1,Google Cloud,86.85
+2026-03-18,Networking,Storage Standard Class A Operations,gcp-bg-3,us-central1,Google Cloud,500.15
+2026-03-19,Cloud Run,CPU Allocation Time (Always-On),platform-prod,us-central1,Google Cloud,1781.11
+2026-03-19,Compute Engine,N1 Standard Core,gcp-bg-2,asia-southeast1,Google Cloud,783.90
+2026-03-19,Cloud Storage,N1 Standard Core,gcp-bg-3,asia-southeast1,Google Cloud,240.71
+2026-03-19,Cloud SQL,E2 Instance Core,gcp-bg-3,asia-southeast1,Google Cloud,371.89
+2026-03-19,Kubernetes Engine,SSD Capacity,gcp-bg-1,us-central1,Google Cloud,526.56
+2026-03-19,Cloud Logging,SSD Capacity,gcp-bg-1,asia-southeast1,Google Cloud,187.11
+2026-03-19,Cloud Monitoring,Network Egress,gcp-bg-1,asia-southeast1,Google Cloud,84.92
+2026-03-19,Networking,Storage Standard Class A Operations,gcp-bg-1,us-east1,Google Cloud,367.91
+2026-03-20,Cloud Run,CPU Allocation Time (Always-On),platform-prod,us-central1,Google Cloud,1643.59
+2026-03-20,Compute Engine,Shared VPC,gcp-bg-1,us-central1,Google Cloud,842.12
+2026-03-20,Cloud Storage,SSD Capacity,gcp-bg-1,us-east1,Google Cloud,251.00
+2026-03-20,Cloud SQL,Storage Standard Class A Operations,gcp-bg-1,europe-west1,Google Cloud,292.94
+2026-03-20,Kubernetes Engine,E2 Instance Core,gcp-bg-1,us-east1,Google Cloud,514.69
+2026-03-20,Cloud Logging,Shared VPC,gcp-bg-1,asia-southeast1,Google Cloud,195.88
+2026-03-20,Cloud Monitoring,Network Egress,gcp-bg-3,us-central1,Google Cloud,86.74
+2026-03-20,Networking,Query Analysis,gcp-bg-1,us-east1,Google Cloud,387.68
+2026-03-21,Cloud Run,CPU Allocation Time (Always-On),platform-prod,us-central1,Google Cloud,1774.56
+2026-03-21,Compute Engine,E2 Instance Core,gcp-bg-1,us-east1,Google Cloud,757.85
+2026-03-21,Cloud Storage,Query Analysis,gcp-bg-2,us-central1,Google Cloud,234.31
+2026-03-21,Cloud SQL,Storage Standard Class A Operations,gcp-bg-1,asia-southeast1,Google Cloud,353.87
+2026-03-21,Kubernetes Engine,SSD Capacity,gcp-bg-3,us-central1,Google Cloud,470.38
+2026-03-21,Cloud Logging,SSD Capacity,gcp-bg-1,us-central1,Google Cloud,183.92
+2026-03-21,Cloud Monitoring,Network Egress,gcp-bg-1,asia-southeast1,Google Cloud,94.20
+2026-03-21,Networking,SSD Capacity,gcp-bg-1,us-east1,Google Cloud,420.76
+2026-03-22,Cloud Run,CPU Allocation Time (Always-On),platform-prod,us-central1,Google Cloud,1797.72
+2026-03-22,Compute Engine,Shared VPC,gcp-bg-3,europe-west1,Google Cloud,869.64
+2026-03-22,Cloud Storage,Storage Standard Class A Operations,gcp-bg-3,us-east1,Google Cloud,283.60
+2026-03-22,Cloud SQL,Shared VPC,gcp-bg-1,us-east1,Google Cloud,323.92
+2026-03-22,Kubernetes Engine,E2 Instance Core,gcp-bg-2,us-east1,Google Cloud,607.60
+2026-03-22,Cloud Logging,SSD Capacity,gcp-bg-3,us-east1,Google Cloud,154.14
+2026-03-22,Cloud Monitoring,Shared VPC,gcp-bg-1,asia-southeast1,Google Cloud,81.07
+2026-03-22,Networking,Shared VPC,gcp-bg-1,us-central1,Google Cloud,401.00
+2026-03-23,Cloud Run,CPU Allocation Time (Always-On),platform-prod,us-central1,Google Cloud,1920.39
+2026-03-23,Compute Engine,Storage Standard Class A Operations,gcp-bg-2,europe-west1,Google Cloud,783.00
+2026-03-23,Cloud Storage,SSD Capacity,gcp-bg-2,asia-southeast1,Google Cloud,218.75
+2026-03-23,Cloud SQL,Shared VPC,gcp-bg-1,europe-west1,Google Cloud,326.01
+2026-03-23,Kubernetes Engine,Shared VPC,gcp-bg-3,us-central1,Google Cloud,520.17
+2026-03-23,Cloud Logging,SSD Capacity,gcp-bg-3,us-central1,Google Cloud,186.82
+2026-03-23,Cloud Monitoring,Storage Standard Class A Operations,gcp-bg-2,asia-southeast1,Google Cloud,102.62
+2026-03-23,Networking,Storage Standard Class A Operations,gcp-bg-3,europe-west1,Google Cloud,359.12
+2026-03-24,Cloud Run,CPU Allocation Time (Always-On),platform-prod,us-central1,Google Cloud,1917.44
+2026-03-24,Compute Engine,Query Analysis,gcp-bg-2,asia-southeast1,Google Cloud,907.13
+2026-03-24,Cloud Storage,Query Analysis,gcp-bg-3,us-east1,Google Cloud,236.20
+2026-03-24,Cloud SQL,E2 Instance Core,gcp-bg-2,asia-southeast1,Google Cloud,341.72
+2026-03-24,Kubernetes Engine,Shared VPC,gcp-bg-1,europe-west1,Google Cloud,485.03
+2026-03-24,Cloud Logging,Log Volume,gcp-bg-3,europe-west1,Google Cloud,164.24
+2026-03-24,Cloud Monitoring,Shared VPC,gcp-bg-1,europe-west1,Google Cloud,83.07
+2026-03-24,Networking,Shared VPC,gcp-bg-1,us-central1,Google Cloud,412.39
+2026-03-25,Cloud Run,CPU Allocation Time (Always-On),platform-prod,us-central1,Google Cloud,1604.70
+2026-03-25,Compute Engine,Storage Standard Class A Operations,gcp-bg-3,us-east1,Google Cloud,678.93
+2026-03-25,Cloud Storage,Network Egress,gcp-bg-2,us-east1,Google Cloud,212.24
+2026-03-25,Cloud SQL,N1 Standard Core,gcp-bg-3,asia-southeast1,Google Cloud,340.84
+2026-03-25,Kubernetes Engine,Log Volume,gcp-bg-1,europe-west1,Google Cloud,573.32
+2026-03-25,Cloud Logging,Query Analysis,gcp-bg-2,asia-southeast1,Google Cloud,174.78
+2026-03-25,Cloud Monitoring,Log Volume,gcp-bg-2,us-east1,Google Cloud,85.93
+2026-03-25,Networking,Query Analysis,gcp-bg-1,us-central1,Google Cloud,423.08
+2026-03-26,Cloud Run,CPU Allocation Time (Always-On),platform-prod,us-central1,Google Cloud,1780.68
+2026-03-26,Compute Engine,Query Analysis,gcp-bg-2,us-east1,Google Cloud,713.09
+2026-03-26,Cloud Storage,Shared VPC,gcp-bg-1,us-central1,Google Cloud,189.69
+2026-03-26,Cloud SQL,Network Egress,gcp-bg-3,europe-west1,Google Cloud,294.17
+2026-03-26,Kubernetes Engine,SSD Capacity,gcp-bg-3,asia-southeast1,Google Cloud,549.47
+2026-03-26,Cloud Logging,E2 Instance Core,gcp-bg-1,us-central1,Google Cloud,176.10
+2026-03-26,Cloud Monitoring,N1 Standard Core,gcp-bg-2,asia-southeast1,Google Cloud,96.81
+2026-03-26,Networking,Log Volume,gcp-bg-3,asia-southeast1,Google Cloud,387.89
+2026-03-27,Cloud Run,CPU Allocation Time (Always-On),platform-prod,us-central1,Google Cloud,1786.86
+2026-03-27,Compute Engine,Storage Standard Class A Operations,gcp-bg-3,us-east1,Google Cloud,856.58
+2026-03-27,Cloud Storage,Query Analysis,gcp-bg-1,asia-southeast1,Google Cloud,243.83
+2026-03-27,Cloud SQL,Log Volume,gcp-bg-1,asia-southeast1,Google Cloud,249.56
+2026-03-27,Kubernetes Engine,Log Volume,gcp-bg-1,us-east1,Google Cloud,587.47
+2026-03-27,Cloud Logging,Shared VPC,gcp-bg-1,europe-west1,Google Cloud,169.45
+2026-03-27,Cloud Monitoring,Log Volume,gcp-bg-3,europe-west1,Google Cloud,88.20
+2026-03-27,Networking,SSD Capacity,gcp-bg-2,us-central1,Google Cloud,392.12
+2026-03-28,Cloud Run,CPU Allocation Time (Always-On),platform-prod,us-central1,Google Cloud,1726.56
+2026-03-28,Compute Engine,Network Egress,gcp-bg-2,asia-southeast1,Google Cloud,854.45
+2026-03-28,Cloud Storage,E2 Instance Core,gcp-bg-1,us-central1,Google Cloud,223.96
+2026-03-28,Cloud SQL,Storage Standard Class A Operations,gcp-bg-1,europe-west1,Google Cloud,287.89
+2026-03-28,Kubernetes Engine,E2 Instance Core,gcp-bg-2,us-east1,Google Cloud,528.43
+2026-03-28,Cloud Logging,E2 Instance Core,gcp-bg-2,asia-southeast1,Google Cloud,153.19
+2026-03-28,Cloud Monitoring,Storage Standard Class A Operations,gcp-bg-2,us-east1,Google Cloud,84.74
+2026-03-28,Networking,Log Volume,gcp-bg-3,europe-west1,Google Cloud,362.82
+2026-03-29,Cloud Run,CPU Allocation Time (Always-On),platform-prod,us-central1,Google Cloud,1739.10
+2026-03-29,Compute Engine,SSD Capacity,gcp-bg-3,us-central1,Google Cloud,733.80
+2026-03-29,Cloud Storage,SSD Capacity,gcp-bg-1,asia-southeast1,Google Cloud,208.77
+2026-03-29,Cloud SQL,Query Analysis,gcp-bg-3,us-central1,Google Cloud,341.73
+2026-03-29,Kubernetes Engine,N1 Standard Core,gcp-bg-2,asia-southeast1,Google Cloud,382.09
+2026-03-29,Cloud Logging,N1 Standard Core,gcp-bg-1,europe-west1,Google Cloud,157.17
+2026-03-29,Cloud Monitoring,N1 Standard Core,gcp-bg-3,us-central1,Google Cloud,80.81
+2026-03-29,Networking,N1 Standard Core,gcp-bg-1,europe-west1,Google Cloud,485.29
+2026-03-30,Cloud Run,CPU Allocation Time (Always-On),platform-prod,us-central1,Google Cloud,1653.25
+2026-03-30,Compute Engine,Log Volume,gcp-bg-3,us-central1,Google Cloud,877.18
+2026-03-30,Cloud Storage,Storage Standard Class A Operations,gcp-bg-3,us-central1,Google Cloud,204.17
+2026-03-30,Cloud SQL,Query Analysis,gcp-bg-2,asia-southeast1,Google Cloud,334.24
+2026-03-30,Kubernetes Engine,SSD Capacity,gcp-bg-3,us-central1,Google Cloud,479.10
+2026-03-30,Cloud Logging,Network Egress,gcp-bg-1,us-east1,Google Cloud,200.84
+2026-03-30,Cloud Monitoring,Query Analysis,gcp-bg-2,us-central1,Google Cloud,91.73
+2026-03-30,Networking,N1 Standard Core,gcp-bg-3,asia-southeast1,Google Cloud,424.47
+2026-03-31,Cloud Run,CPU Allocation Time (Always-On),platform-prod,us-central1,Google Cloud,1742.40
+2026-03-31,Compute Engine,E2 Instance Core,gcp-bg-2,europe-west1,Google Cloud,774.49
+2026-03-31,Cloud Storage,Log Volume,gcp-bg-3,us-central1,Google Cloud,204.21
+2026-03-31,Cloud SQL,Storage Standard Class A Operations,gcp-bg-1,us-central1,Google Cloud,322.54
+2026-03-31,Kubernetes Engine,Storage Standard Class A Operations,gcp-bg-2,us-east1,Google Cloud,496.63
+2026-03-31,Cloud Logging,Network Egress,gcp-bg-3,us-central1,Google Cloud,168.86
+2026-03-31,Cloud Monitoring,N1 Standard Core,gcp-bg-2,us-east1,Google Cloud,95.85
+2026-03-31,Networking,Query Analysis,gcp-bg-2,us-central1,Google Cloud,451.54
+2026-04-01,Cloud Run,CPU Allocation Time (Always-On),platform-prod,us-central1,Google Cloud,1757.79
+2026-04-01,Compute Engine,E2 Instance Core,gcp-bg-1,us-central1,Google Cloud,747.24
+2026-04-01,Cloud Storage,N1 Standard Core,gcp-bg-3,us-central1,Google Cloud,226.31
+2026-04-01,Cloud SQL,SSD Capacity,gcp-bg-1,europe-west1,Google Cloud,263.02
+2026-04-01,Kubernetes Engine,N1 Standard Core,gcp-bg-3,asia-southeast1,Google Cloud,477.07
+2026-04-01,Cloud Logging,Storage Standard Class A Operations,gcp-bg-3,us-central1,Google Cloud,166.57
+2026-04-01,Cloud Monitoring,Network Egress,gcp-bg-3,us-east1,Google Cloud,79.26
+2026-04-01,Networking,N1 Standard Core,gcp-bg-3,europe-west1,Google Cloud,420.49
