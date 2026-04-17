@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.4] - 2026-04-17
+
+### Fixed
+- **`/spike N` no longer crashes mid-investigation** in the direct `ghosthunter investigate` path. The typed `AdvisorSpikeSwitch` exception was only caught by the chat REPL — the CLI path leaked it as a traceback. The advisor CLI now catches it, rebinds the target spike, and restarts the investigation cleanly. Also guards against pathological switch loops with a per-session cap.
+- **Commands proposed in advisor mode can now be copy-pasted without mangling.** The "Run this command in your own terminal" panel previously used a Rich `Panel` with Unicode box-drawing borders (`│ ─ ╭`). When a long command soft-wrapped inside the panel and the user triple-clicked or click-dragged to select it, the border characters came with — pasting into a shell produced `unrecognized arguments: │` and pasting into `bq query` produced `Illegal input character "\342"` (`\342` is the first byte of `│` in UTF-8). The command now renders as plain text between ASCII header/footer lines, with `soft_wrap=True` so long commands stay logically contiguous.
+- **`bq query` SQL with backticks around fully-qualified table references is no longer blocked.** BigQuery Standard SQL requires `FROM \`project.dataset.table\`` — but Layer 1's backtick check wasn't quote-aware, so every such query was rejected and Opus was producing un-runnable backtick-less SQL as a workaround. The new `has_unquoted_command_substitution` helper mirrors the existing `has_unquoted_redirect` pattern: backticks, `$(`, and `${` are allowed inside single-quoted strings (where bash treats them as literal) and still blocked everywhere bash would actually expand them.
+
+### Added
+- Regression test suite `tests/test_paste_safety_v1_0_4.py` — 24 tests covering the new quote-aware substitution logic, end-to-end validator behavior on the exact customer query that was failing, and assertions that the command panel output contains no clipboard-hostile characters (box-drawing glyphs or smart quotes).
+
 ## [1.0.3] - 2026-04-17
 
 ### Fixed
@@ -40,6 +50,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `investigate --active` no longer aborts with a raw `ProviderError` / traceback when an optional dependency is missing — the user is walked through installing it.
 
 [Unreleased]: https://github.com/avinash-matrixgard/ghosthunter/compare/v1.0.1...HEAD
+[1.0.4]: https://github.com/avinash-matrixgard/ghosthunter/releases/tag/v1.0.4
 [1.0.3]: https://github.com/avinash-matrixgard/ghosthunter/releases/tag/v1.0.3
 [1.0.2]: https://github.com/avinash-matrixgard/ghosthunter/releases/tag/v1.0.2
 [1.0.1]: https://github.com/avinash-matrixgard/ghosthunter/releases/tag/v1.0.1

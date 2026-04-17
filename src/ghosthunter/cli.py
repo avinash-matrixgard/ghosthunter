@@ -545,16 +545,62 @@ def _run_advisor_mode(
     if list_only:
         raise typer.Exit(0)
 
-    spike = _pick_spike(spikes, spike_index)
-    console.print(
-        f"\n[bold]Investigating[/bold] {spike.service} "
-        f"(${spike.current_cost:,.0f})"
-    )
-    _render_top_contributors(spike)
-    console.print()
+    # Mid-investigation spike switches (`/spike N` typed at an Opus
+    # question prompt) raise AdvisorSpikeSwitch, which the chat session
+    # catches and restarts on the new target. The direct CLI path
+    # didn't catch it pre-v1.0.4, so it leaked as an unhandled traceback.
+    # We now loop: each pass investigates one spike; AdvisorSpikeSwitch
+    # simply rebinds the target and starts fresh. A small cap on
+    # switches guards against any pathological loop.
+    current_index = spike_index
+    switch_cap = 20
+    switches_used = 0
 
-    investigator = _build_advisor_investigator(provider=provider)
-    result = asyncio.run(investigator.investigate(spike))
+    while True:
+        spike = _pick_spike(spikes, current_index)
+        console.print(
+            f"\n[bold]Investigating[/bold] {spike.service} "
+            f"(${spike.current_cost:,.0f})"
+        )
+        _render_top_contributors(spike)
+        console.print()
+
+        investigator = _build_advisor_investigator(provider=provider)
+        try:
+            result = asyncio.run(investigator.investigate(spike))
+        except Exception as exc:
+            # Lazy import — AdvisorSpikeSwitch lives in the advisor
+            # provider, which is an optional module.
+            try:
+                from ghosthunter.providers.advisor import AdvisorSpikeSwitch
+            except ImportError:
+                raise
+            if not isinstance(exc, AdvisorSpikeSwitch):
+                raise
+            switches_used += 1
+            if switches_used > switch_cap:
+                console.print(
+                    f"[yellow]Too many spike switches in one session "
+                    f"({switch_cap}). Start a fresh `ghosthunter "
+                    f"investigate` to continue.[/yellow]"
+                )
+                raise typer.Exit(1) from exc
+            if exc.target_index < 0 or exc.target_index >= len(spikes):
+                console.print(
+                    f"[yellow]No spike #{exc.target_index} — "
+                    f"valid range is 0..{len(spikes) - 1}. Staying on "
+                    f"{spike.service}.[/yellow]"
+                )
+                continue
+            console.print(
+                f"[dim]Switching to spike #{exc.target_index} "
+                f"({spikes[exc.target_index].service}) per your "
+                f"request…[/dim]"
+            )
+            current_index = exc.target_index
+            continue
+        break
+
     _render_result(result)
     _append_audit_log(result, extra={"provider": provider})
 

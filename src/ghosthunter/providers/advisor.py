@@ -208,15 +208,45 @@ class AdvisorProvider:
     # UI helpers
     # ------------------------------------------------------------------
     def _print_command_panel(self, command: str) -> None:
+        """Show the proposed command for copy-paste.
+
+        We deliberately do NOT use a Rich ``Panel`` here. Panels use
+        Unicode box-drawing characters (``│`` ``─`` ``╭``) as borders,
+        and when a long command wraps inside the panel those characters
+        end up in the user's clipboard if they triple-click or
+        click-drag to select. That has bitten us for real: a bq query
+        broke with ``Illegal input character "\342"`` because the user
+        pasted ``│`` straight into BigQuery.
+
+        The command now prints as a standalone line with plain ASCII
+        separators, so copying it picks up the command and nothing else.
+        Terminal soft-wrap handles long lines without inserting any
+        visible markers.
+        """
         self.console.print()
+        # Use Rich markup + print so the command itself is printed
+        # verbatim (markup=False on the command line — no accidental
+        # interpretation of [bold] if it happens to be in a SQL filter).
         self.console.print(
-            Panel(
-                command,
-                title="[bold]Run this command in your own terminal[/bold]",
-                border_style="bright_yellow",
-                expand=False,
-                subtitle="[dim]read-only · validated by 4 security layers[/dim]",
-            )
+            "[bold yellow]-- Run this command in your own terminal --"
+            "[/bold yellow]"
+        )
+        # ``markup=False`` is load-bearing: a real command could contain
+        # ``[`` / ``]`` (e.g. inside a jq filter or JSON payload) and we
+        # don't want Rich trying to parse those as style tags.
+        # ``highlight=False`` disables Rich's auto-highlighter, which
+        # otherwise recolors numbers/URLs and can inject reset codes.
+        # ``soft_wrap=True`` is the copy-paste bit: with hard wrapping,
+        # Rich inserts a newline at the terminal width and the user's
+        # clipboard gets a broken command; with soft wrap, Rich emits
+        # the string as-is and lets the terminal handle visual wrap so
+        # triple-click / click-drag selects the original contiguous
+        # command.
+        self.console.print(
+            command, markup=False, highlight=False, soft_wrap=True
+        )
+        self.console.print(
+            "[dim]read-only · validated by 4 security layers[/dim]"
         )
         self.console.print(
             "[dim]Paste the output (multi-line paste works), drop a "

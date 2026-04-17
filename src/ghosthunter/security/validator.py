@@ -14,7 +14,11 @@ from ghosthunter.security.allowlist import (
     matches_allowlist_for,
     validate_query_for,
 )
-from ghosthunter.security.blocklist import find_fast_reject, has_unquoted_redirect
+from ghosthunter.security.blocklist import (
+    find_fast_reject,
+    has_unquoted_command_substitution,
+    has_unquoted_redirect,
+)
 from ghosthunter.security.pipes import split_pipes, validate_pipes
 
 MAX_COMMAND_LENGTH = 2000
@@ -67,6 +71,12 @@ class SecurityValidator:
             return _deny(f"fast-reject pattern matched: {bad}", "L1")
         if has_unquoted_redirect(command):
             return _deny("unquoted redirect operator (< > >>)", "L1")
+        bad_subst = has_unquoted_command_substitution(command)
+        if bad_subst:
+            return _deny(
+                f"unquoted shell substitution: {bad_subst}",
+                "L1",
+            )
 
         # ---- Split pipes (quote-aware) ----
         segments = split_pipes(command)
