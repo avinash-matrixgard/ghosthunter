@@ -154,8 +154,8 @@ Controls during an investigation:
 | `/hypotheses` | Show current confidence bars |
 | `/skip` | Skip this command, ask Opus to try something else |
 | `/spike N` | Switch mid-flight to a different spike |
-| `/remember <fact>` | Save a fact to the memory palace (if installed) |
-| `/recall <query>` | Search memory palace for prior knowledge |
+| `/remember <fact>` | Save a fact to the memory palace *(requires MemPalace — `pip install mempalace mcp`; silently no-ops otherwise)* |
+| `/recall <query>` | Search memory palace for prior knowledge *(same requirement)* |
 | `/quit` | End this investigation, keep chatting |
 | `/exit` | Exit Ghosthunter |
 
@@ -202,10 +202,11 @@ have write permission.** Use paranoid mode instead.
 ## 5. Other commands
 
 ```bash
-ghosthunter audit                       # past investigations (~/.ghosthunter/audit.log)
+ghosthunter audit                       # past investigations (~/.ghosthunter/audit.log, default 20)
+ghosthunter audit --limit 50            # show the last 50 entries
 ghosthunter palace status               # check MemPalace memory integration
 ghosthunter billing-template            # GCP export recipe
-ghosthunter billing-template --provider=aws   # AWS export recipe (3 paths)
+ghosthunter billing-template --provider=aws   # AWS export recipe (4 paths: CE CSV, CE JSON, CUR, FOCUS)
 ```
 
 The audit table shows provider, service, result, command count (with CE
@@ -242,9 +243,13 @@ Security is in code, not prompts. Allowlist is the primary gate — if a
 command doesn't match an allowed pattern, it's blocked regardless of
 what the LLM claims.
 
-**Test suite: 860+ validator + provider + demo tests.**
-See `tests/test_security.py`, `tests/test_security_aws.py`,
-`tests/test_security_aws_full.py`.
+**Test suite: 1,000+ tests** covering the validator, both providers
+(GCP + AWS), billing-file parsing (GCP/AWS/FOCUS), investigator loop,
+CLI, advisor mode, memory palace, and demo replay.
+Notable files: `tests/test_security.py`, `tests/test_security_aws.py`,
+`tests/test_security_aws_full.py`, `tests/test_investigator.py`,
+`tests/test_advisor.py`, `tests/test_gcp_provider.py`,
+`tests/test_aws_provider.py`, `tests/test_api_retry.py`.
 
 ---
 
