@@ -559,6 +559,13 @@ def _build_initial_prompt(
         else "(none)"
     )
 
+    # Descriptions come from the billing file's ChargeDescription column
+    # (FOCUS 1.0) or lineItem/LineItemDescription (AWS CUR) and translate
+    # opaque SKU / UsageType codes into human language. If the file
+    # didn't have such a column, ``contributor_descriptions`` is empty
+    # and we fall back to showing just the ID.
+    descriptions = getattr(spike, "contributor_descriptions", {}) or {}
+
     contributors_block = ""
     if spike.top_contributors:
         lines: list[str] = []
@@ -567,7 +574,13 @@ def _build_initial_prompt(
                 continue
             lines.append(f"\nTop {dim}s in current period (driving the spike):")
             for name, cost in items:
-                lines.append(f"  - {name}: ${cost:,.2f}")
+                desc = descriptions.get(f"{dim}:{name}")
+                if desc:
+                    lines.append(
+                        f"  - {name}: ${cost:,.2f}  —  {desc}"
+                    )
+                else:
+                    lines.append(f"  - {name}: ${cost:,.2f}")
         contributors_block = "\n".join(lines)
 
     inference_block = ""

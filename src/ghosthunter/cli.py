@@ -770,15 +770,29 @@ def _resolve_provider(
 
 
 def _render_top_contributors(spike) -> None:
-    """Show the top SKUs/projects/locations driving a spike, if known."""
+    """Show the top SKUs/projects/locations driving a spike, if known.
+
+    When a contributor has a ``ChargeDescription`` (FOCUS 1.0 / CUR),
+    print the description on a second indented line — this is often
+    what actually tells the user (and the reasoner) what a cryptic SKU
+    ID is: e.g. ``4GQWNPC9K2PZAY97`` followed by ``$1.624 per On Demand
+    Linux g5.4xlarge Instance Hour``.
+    """
     if not spike.top_contributors:
         return
+    descriptions = getattr(spike, "contributor_descriptions", {}) or {}
     for dim, items in spike.top_contributors.items():
         if not items:
             continue
         console.print(f"[dim]Top {dim}s:[/dim]")
         for name, cost in items[:5]:
             console.print(f"  • {name:<60} ${cost:>12,.2f}")
+            desc = descriptions.get(f"{dim}:{name}")
+            if desc:
+                # Trim very long descriptions so the terminal stays tidy
+                # — Opus still gets the full text via the prompt.
+                display = desc if len(desc) <= 96 else desc[:93] + "…"
+                console.print(f"    [dim italic]{display}[/dim italic]")
 
 
 def _pick_spike(spikes, spike_index: int):

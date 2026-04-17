@@ -1097,12 +1097,17 @@ def _render_spike_table(console: Console, spikes: list[CostSpike]) -> None:
 def _render_top_contributors(console: Console, spike: CostSpike) -> None:
     if not spike.top_contributors:
         return
+    descriptions = getattr(spike, "contributor_descriptions", {}) or {}
     for dim, items in spike.top_contributors.items():
         if not items:
             continue
         console.print(f"[dim]Top {dim}s:[/dim]")
         for name, cost in items[:5]:
             console.print(f"  • {name:<60} ${cost:>12,.2f}")
+            desc = descriptions.get(f"{dim}:{name}")
+            if desc:
+                display = desc if len(desc) <= 96 else desc[:93] + "…"
+                console.print(f"    [dim italic]{display}[/dim italic]")
 
 
 def _render_hypotheses(console: Console, hypotheses: list[Hypothesis]) -> None:

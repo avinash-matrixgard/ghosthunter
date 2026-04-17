@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.3] - 2026-04-17
+
+### Fixed
+- **Advisor mode no longer asks the user to decode SKU codes the CSV already explains.** The billing parser now reads `ChargeDescription` (FOCUS 1.0) / `lineItem/LineItemDescription` (AWS CUR) and surfaces a representative description for each top SKU and UsageType contributor — so Opus sees `SKU 4GQWNPC9K2PZAY97 ($209.67) — "$1.624 per On Demand Linux g5.4xlarge Instance Hour"` instead of an opaque SKU ID. Shows up in both the initial prompt to Opus and the CLI's top-contributors display.
+- **Advisor mode no longer loops asking "can you look it up?" after the user says they can't.** Added an explicit rule to Opus's system prompt: when the user says they have no CLI access / no console access / "work with what you have", Opus must consolidate into a conclusion based only on the billing data rather than keep asking. Includes a specific template (root cause + honest confidence + `not_verified` list + actionable recommendations).
+
+### Added
+- `CostSpike.contributor_descriptions` — a new optional dict carrying `{dim}:{value} → description` mappings. Populated when the billing file has a description column; empty otherwise. Rendered inline in the investigator prompt and in both the CLI + chat renderers.
+- 9 new tests covering description column detection, threading through the parser, rendering in the prompt, and the full FOCUS 100K round-trip that motivated the fix.
+
 ## [1.0.2] - 2026-04-17
 
 ### Fixed
@@ -30,6 +40,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `investigate --active` no longer aborts with a raw `ProviderError` / traceback when an optional dependency is missing — the user is walked through installing it.
 
 [Unreleased]: https://github.com/avinash-matrixgard/ghosthunter/compare/v1.0.1...HEAD
+[1.0.3]: https://github.com/avinash-matrixgard/ghosthunter/releases/tag/v1.0.3
 [1.0.2]: https://github.com/avinash-matrixgard/ghosthunter/releases/tag/v1.0.2
 [1.0.1]: https://github.com/avinash-matrixgard/ghosthunter/releases/tag/v1.0.1
 

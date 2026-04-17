@@ -47,6 +47,15 @@ class CostSpike:
     # Cross-file inference: for a service-level spike, which projects/accounts
     # most likely host it (and vice versa). Each entry is (name, score, reason).
     likely_homes: list[tuple[str, int, str]] = field(default_factory=list)
+    # Human-readable charge descriptions for opaque identifier columns
+    # (SKU IDs, UsageType codes). Keyed by {dimension}:{value}, e.g.
+    # "sku:4GQWNPC9K2PZAY97" -> "$1.624 per On Demand Linux g5.4xlarge
+    # Instance Hour". Populated when the billing file has a
+    # ``ChargeDescription`` / ``LineItemDescription`` column (FOCUS 1.0
+    # and AWS CUR both do). Critical for advisor mode — without this,
+    # Opus sees only opaque SKU codes and has to ask the user to decode
+    # them, which is what the CSV already contains.
+    contributor_descriptions: dict[str, str] = field(default_factory=dict)
 
     @property
     def absolute_change(self) -> float:

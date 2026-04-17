@@ -188,6 +188,23 @@ PCT_CHANGE_KEYS = (
     "pct_change",
 )
 
+# Human-readable charge descriptions. When present, let the reasoner
+# see what an opaque SKU-ID or UsageType actually represents (e.g. a
+# g5.4xlarge GPU hour) without asking the user to decode it.
+#   - FOCUS 1.0: ``ChargeDescription`` — always present.
+#   - AWS CUR:   ``lineItem/LineItemDescription`` — always present.
+#   - GCP:       exports rarely carry per-row descriptions; not critical.
+DESCRIPTION_KEYS = (
+    "ChargeDescription",
+    "charge_description",
+    "Charge Description",
+    "lineItem/LineItemDescription",
+    "line_item_description",
+    "LineItemDescription",
+    "description",
+    "Description",
+)
+
 DIMENSION_KEY_GROUPS: dict[str, tuple[str, ...]] = {
     "service":    SERVICE_KEYS,
     "sku":        SKU_KEYS,
@@ -294,6 +311,7 @@ class NormalizedRow:
     location: str | None
     source: str
     pct_change: float | None = None  # period-over-period % from the file, if present
+    description: str | None = None   # ChargeDescription / LineItemDescription, if the file has it
 
 
 # ---------------------------------------------------------------------------
@@ -468,6 +486,7 @@ def _normalize_rows(
     grouping_key = dim_keys[grouping]
     date_key = _detect_optional_key(sample, DATE_KEYS)
     pct_key = _detect_optional_key(sample, PCT_CHANGE_KEYS)
+    desc_key = _detect_optional_key(sample, DESCRIPTION_KEYS)
 
     out: list[NormalizedRow] = []
     for raw in rows:
@@ -491,6 +510,7 @@ def _normalize_rows(
                 location=_clean_str(raw.get(dim_keys["location"])) if dim_keys["location"] else None,
                 source=source,
                 pct_change=_parse_pct(raw.get(pct_key)) if pct_key else None,
+                description=_clean_str(raw.get(desc_key)) if desc_key else None,
             )
         )
     return out, None
@@ -962,14 +982,31 @@ def _attach_top_contributors(
             if dim == spike.grouping:
                 continue  # don't show the spike's own dimension as a contributor
             totals: dict[str, float] = {}
+            # For opaque identifier dimensions (sku, usage_type), also
+            # collect a representative human-readable description so the
+            # reasoner and the user see "$1.624 per g5.4xlarge Instance
+            # Hour" next to a cryptic SKU ID. For each contributor value
+            # we keep the description from its highest-cost row.
+            descriptions_for_dim: dict[str, tuple[float, str]] = {}
             for r in matching:
                 value = getattr(r, dim)
                 if value is None:
                     continue
                 totals[value] = totals.get(value, 0.0) + r.cost
+                if dim in ("sku", "usage_type") and r.description:
+                    best = descriptions_for_dim.get(value)
+                    if best is None or r.cost > best[0]:
+                        descriptions_for_dim[value] = (r.cost, r.description)
             if not totals:
                 continue
             ranked = sorted(
                 totals.items(), key=lambda kv: kv[1], reverse=True
             )[:TOP_CONTRIBUTORS_LIMIT]
+            # Attach descriptions for the contributors we're actually showing.
+            for (contributor_name, _cost) in ranked:
+                desc_entry = descriptions_for_dim.get(contributor_name)
+                if desc_entry:
+                    spike.contributor_descriptions[
+                        f"{dim}:{contributor_name}"
+                    ] = desc_entry[1]
             spike.top_contributors[dim] = ranked
