@@ -1294,19 +1294,33 @@ def _render_spike_table(spikes) -> None:
 def _render_result(result) -> None:
     if result.succeeded and result.conclusion:
         c = result.conclusion
-        console.print("\n[bold]Root cause:[/bold]")
-        console.print(f"  {c.get('root_cause', '?')} "
-                      f"({c.get('confidence', '?')}%)")
+
+        # ---- FIX-FIRST LAYOUT ----
+        # Recommendations render first so the user's eye lands on "what
+        # do I do next?" not on a long prose paragraph. Commands inside
+        # recommendations print in the same paste-safe ASCII format as
+        # mid-investigation command proposals (no Unicode borders,
+        # soft_wrap, markup disabled) so triple-click copies cleanly.
+        if c.get("recommendations"):
+            console.print("\n[bold]What to do now[/bold]")
+            _render_recommendations(c["recommendations"])
+
+        # ---- Root cause + confidence ----
+        console.print("\n[bold]Root cause[/bold]")
+        console.print(
+            f"  {c.get('root_cause', '?')} "
+            f"[dim]({c.get('confidence', '?')}% confidence)[/dim]"
+        )
+
+        # ---- Evidence that supports the call ----
         if c.get("evidence_summary"):
-            console.print("\n[bold]Evidence:[/bold]")
+            console.print("\n[bold]Evidence[/bold]")
             for e in c["evidence_summary"]:
                 console.print(f"  • {e}")
-        if c.get("recommendations"):
-            console.print("\n[bold]Recommendations:[/bold]")
-            for r in c["recommendations"]:
-                console.print(f"  → {r}")
+
+        # ---- Honest gaps ----
         if c.get("not_verified"):
-            console.print("\n[bold]Not verified:[/bold]")
+            console.print("\n[bold]What we couldn't verify[/bold]")
             for n in c["not_verified"]:
                 console.print(f"  ? {n}")
 
@@ -1316,6 +1330,86 @@ def _render_result(result) -> None:
         f"Time: {result.budget.seconds_used:.0f}s/"
         f"{result.budget.max_seconds:.0f}s[/dim]"
     )
+
+
+# Urgency → short label shown to the user. Order matters (rendered in
+# this sequence regardless of the order Opus emitted them).
+_URGENCY_LABELS: dict[str, str] = {
+    "immediate": "[bold red]NOW[/bold red]",
+    "this_week": "[bold yellow]THIS WEEK[/bold yellow]",
+    "this_month": "[bold blue]THIS MONTH[/bold blue]",
+    "monitoring": "[bold cyan]MONITORING[/bold cyan]",
+}
+_URGENCY_ORDER = ("immediate", "this_week", "this_month", "monitoring")
+
+
+def _render_recommendations(items: list) -> None:
+    """Render a ``conclusion.recommendations`` list.
+
+    Each item is either a plain string (legacy v1.0.4-and-older shape,
+    still emitted by Opus if it slips schema) or an object:
+        {urgency, description, command?, verification?}
+
+    Structured items get an urgency label, the description, and a
+    paste-safe command block for both ``command`` and ``verification``
+    when present.
+    """
+    # Split into structured + legacy strings, then sort structured by
+    # canonical urgency order while preserving Opus's order within
+    # each bucket.
+    structured: list[dict] = []
+    legacy_strings: list[str] = []
+    for item in items:
+        if isinstance(item, dict):
+            structured.append(item)
+        elif isinstance(item, str):
+            legacy_strings.append(item)
+        else:
+            legacy_strings.append(str(item))
+
+    def _urgency_rank(item: dict) -> int:
+        urg = item.get("urgency", "monitoring")
+        try:
+            return _URGENCY_ORDER.index(urg)
+        except ValueError:
+            return len(_URGENCY_ORDER)
+
+    # Python's sort is stable, so items with the same urgency preserve
+    # the order Opus emitted them.
+    structured.sort(key=_urgency_rank)
+
+    for item in structured:
+        urgency = item.get("urgency", "monitoring")
+        label = _URGENCY_LABELS.get(urgency, urgency.upper())
+        description = item.get("description", "") or "(no description)"
+        console.print(f"\n  {label}  {description}")
+
+        command = item.get("command")
+        verification = item.get("verification")
+
+        if command:
+            # Same paste-safe layout as the mid-investigation command
+            # proposals. No borders, no Rich markup parsing on the
+            # command itself, soft_wrap so the terminal handles visual
+            # wrap without breaking the string.
+            console.print("    [dim]-- Run this command --[/dim]")
+            console.print(
+                "      " + command,
+                markup=False,
+                highlight=False,
+                soft_wrap=True,
+            )
+        if verification:
+            console.print("    [dim]-- Verify with --[/dim]")
+            console.print(
+                "      " + verification,
+                markup=False,
+                highlight=False,
+                soft_wrap=True,
+            )
+
+    for s in legacy_strings:
+        console.print(f"  → {s}")
 
 
 def _append_audit_log(result, extra: dict | None = None) -> None:

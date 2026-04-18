@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.5] - 2026-04-17
+
+### Changed
+- **Fix-first conclusion layout.** When Ghosthunter converges on a root cause, the `What to do now` block now renders before the root-cause paragraph, evidence list, and unverified gaps. Users asked for "suggest fixes, not just find the cause and leave" — the recommendations were always there but buried below a long analysis. They now lead.
+- **Structured remediations with copy-paste-safe commands.** Each recommendation is tagged with an urgency bucket (`NOW` / `THIS WEEK` / `THIS MONTH` / `MONITORING`), its description, and — where an exact command can make the fix — a command block that renders in the same plain-ASCII format as mid-investigation commands (no Unicode borders, `soft_wrap=True`, triple-click-safe). A separate `Verify with` block shows how to confirm the fix worked.
+
+### Added
+- Opus's `investigation_step` tool schema now accepts either a plain string (legacy v1.0.4 shape, still honored) OR a structured object `{urgency, description, command?, verification?}` for each recommendation. The reasoner prompt guides Opus to prefer the object form heavily and to OMIT `command` rather than invent one when the fix is a console click or vendor decision — preserving the authenticity rule.
+- 11 new tests covering fix-first layout ordering, structured rendering, urgency sort (canonical order regardless of Opus's emission order), legacy string back-compat, mixed-shape lists, and a schema-level guard against scenario-specific content sneaking into the tool definition.
+
 ## [1.0.4] - 2026-04-17
 
 ### Fixed
@@ -50,6 +60,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `investigate --active` no longer aborts with a raw `ProviderError` / traceback when an optional dependency is missing — the user is walked through installing it.
 
 [Unreleased]: https://github.com/avinash-matrixgard/ghosthunter/compare/v1.0.1...HEAD
+[1.0.5]: https://github.com/avinash-matrixgard/ghosthunter/releases/tag/v1.0.5
 [1.0.4]: https://github.com/avinash-matrixgard/ghosthunter/releases/tag/v1.0.4
 [1.0.3]: https://github.com/avinash-matrixgard/ghosthunter/releases/tag/v1.0.3
 [1.0.2]: https://github.com/avinash-matrixgard/ghosthunter/releases/tag/v1.0.2

@@ -43,6 +43,43 @@ which environment, what changed recently, what the team was doing — set
 DO NOT propose a command that rediscovers information the user already
 knows. Just ask them.
 
+## HOW TO WRITE RECOMMENDATIONS WHEN YOU CONCLUDE
+
+When you set `next_action.type = "conclude"`, the `recommendations` array
+is where the user looks to decide what to do next. Most users don't
+read prose — they scan for "what do I run?". Give them concrete actions.
+
+Each recommendation SHOULD be an object with these fields:
+  - `urgency`: one of "immediate" | "this_week" | "this_month" | "monitoring"
+      - "immediate"  — do it in the next hour; it's currently costing
+                       money or leaking data
+      - "this_week"  — schedule it on this sprint; harden posture
+      - "this_month" — architectural change worth doing but not urgent
+      - "monitoring" — a permanent alert / budget / dashboard to set up
+                       so this type of issue surfaces earlier next time
+  - `description`: one crisp sentence about WHAT this does and WHY.
+      No fluff. Read like a change ticket summary.
+  - `command`: the exact shell command to run, when a command can make
+      the change. Use the same provider CLI conventions you've been
+      using in commands this turn. If the fix is a console click,
+      policy decision, or vendor call, OMIT `command` rather than
+      invent one.
+  - `verification`: the exact command (or clear check) that proves the
+      fix worked. Same format as `command`. OMIT if no programmatic
+      verification is possible.
+
+Use prose-string recommendations (no object structure) ONLY for advice
+that genuinely has no actionable command form — things like "talk to
+the owning team" or "open a ticket with your vendor."
+
+Prefer object form heavily. A good conclusion has 3–6 recommendations,
+at least half of them with `command` populated.
+
+DO NOT invent commands. If you're not certain of the exact syntax for a
+fix, describe the action in `description` and leave `command` empty —
+that's honest. The user would rather copy your description and search
+the docs than paste your guess and have it fail.
+
 ## WHEN THE USER CAN'T RUN COMMANDS OR FIND MORE DATA
 
 If the user explicitly tells you they have no access to run commands, no
@@ -188,9 +225,40 @@ INVESTIGATION_TOOL: dict[str, Any] = {
                                 "type": "array",
                                 "items": {"type": "string"},
                             },
+                            # Each recommendation can be either a plain
+                            # prose string (back-compat, any existing
+                            # caller) or a structured object so the CLI
+                            # can render the command in a paste-safe
+                            # block and show a verification step
+                            # alongside. Object form is preferred.
                             "recommendations": {
                                 "type": "array",
-                                "items": {"type": "string"},
+                                "items": {
+                                    "oneOf": [
+                                        {"type": "string"},
+                                        {
+                                            "type": "object",
+                                            "properties": {
+                                                "urgency": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "immediate",
+                                                        "this_week",
+                                                        "this_month",
+                                                        "monitoring",
+                                                    ],
+                                                },
+                                                "description": {"type": "string"},
+                                                "command": {"type": "string"},
+                                                "verification": {"type": "string"},
+                                            },
+                                            "required": [
+                                                "urgency",
+                                                "description",
+                                            ],
+                                        },
+                                    ]
+                                },
                             },
                         },
                     },
