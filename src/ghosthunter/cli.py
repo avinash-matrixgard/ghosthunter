@@ -46,6 +46,7 @@ from ghosthunter.providers.billing_file import (
     load_spikes_from_files,
 )
 from ghosthunter.providers.gcp import GCPProvider
+from ghosthunter.ui import render_command_blocked
 from ghosthunter.security.validator import SecurityValidator
 
 app = typer.Typer(
@@ -1164,9 +1165,11 @@ class _InvestigationRenderer:
             return
 
         if kind == "command_blocked":
-            self.console.print(
-                f"[red]✗ blocked ({event.payload['layer']}):[/red] "
-                f"{event.payload['reason']}"
+            render_command_blocked(
+                self.console,
+                command=event.payload.get("command"),
+                layer=event.payload.get("layer", "?"),
+                reason=event.payload.get("reason", "(no reason given)"),
             )
             return
 
@@ -1378,6 +1381,18 @@ def _render_recommendations(items: list) -> None:
     # the order Opus emitted them.
     structured.sort(key=_urgency_rank)
 
+    # If there's exactly one recommendation with a command, we push it
+    # onto the clipboard via OSC 52 so terminals that support it give
+    # the user the "done" action ready to paste. When multiple
+    # recommendations have commands, auto-copying one would be
+    # arbitrary — users run /copy on the investigation's last proposed
+    # command, or select manually. So: only auto-copy when
+    # unambiguous.
+    commands_in_recs = [
+        it.get("command") for it in structured
+        if it.get("command")
+    ]
+
     for item in structured:
         urgency = item.get("urgency", "monitoring")
         label = _URGENCY_LABELS.get(urgency, urgency.upper())
@@ -1407,6 +1422,23 @@ def _render_recommendations(items: list) -> None:
                 highlight=False,
                 soft_wrap=True,
             )
+
+    if len(commands_in_recs) == 1:
+        # Exactly one remediation command — auto-copy it. Multiple
+        # commands → don't guess which the user wants, they pick
+        # manually.
+        try:
+            from ghosthunter.clipboard import write_osc52
+            if write_osc52(
+                commands_in_recs[0],
+                stream=getattr(console, "file", None),
+            ):
+                console.print(
+                    "\n[dim italic]The single remediation command "
+                    "above has been placed on your clipboard.[/dim italic]"
+                )
+        except Exception:
+            pass
 
     for s in legacy_strings:
         console.print(f"  → {s}")

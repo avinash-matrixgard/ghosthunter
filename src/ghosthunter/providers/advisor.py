@@ -48,6 +48,7 @@ SLASH_HYPOTHESES = "/hypotheses"
 SLASH_PASTE = "/paste"
 SLASH_SPIKE = "/spike"
 SLASH_LIST = "/list"
+SLASH_COPY = "/copy"
 
 
 class AdvisorAborted(GCPProviderError):
@@ -106,6 +107,10 @@ class AdvisorProvider:
         # state and switch spikes mid-investigation.
         self.on_show_hypotheses = on_show_hypotheses
         self.on_list_spikes = on_list_spikes
+        # Most-recent command Opus proposed in this session. Tracked so
+        # `/copy` has something to put on the clipboard even if the user
+        # scrolled past the panel. Cleared on ``/quit``.
+        self._last_proposed_command: str | None = None
 
     # ------------------------------------------------------------------
     # Conversational API (used when Opus emits next_action.type=need_info)
@@ -223,6 +228,10 @@ class AdvisorProvider:
         Terminal soft-wrap handles long lines without inserting any
         visible markers.
         """
+        # Remember this command so ``/copy`` can re-push it to the
+        # clipboard later if OSC 52 didn't land.
+        self._last_proposed_command = command
+
         self.console.print()
         # Use Rich markup + print so the command itself is printed
         # verbatim (markup=False on the command line — no accidental
@@ -247,6 +256,37 @@ class AdvisorProvider:
         )
         self.console.print(
             "[dim]read-only · validated by 4 security layers[/dim]"
+        )
+
+        # OSC 52 auto-copy: silently push the command onto the user's
+        # clipboard if their terminal supports it (iTerm2, Kitty,
+        # WezTerm, tmux with set-clipboard on, …). Gated by
+        # GHOSTHUNTER_NO_CLIPBOARD for users who don't want this.
+        # We write directly to the console's underlying file rather
+        # than via ``console.print`` because the OSC 52 sequence must
+        # not be rewrapped, styled, or logged.
+        osc52_attempted = False
+        try:
+            from ghosthunter.clipboard import write_osc52
+            osc52_attempted = write_osc52(
+                command, stream=getattr(self.console, "file", None)
+            )
+        except Exception:
+            osc52_attempted = False
+
+        # Prompt hint. Includes ``/copy`` so users whose terminal
+        # didn't honour OSC 52 still have a documented one-keystroke
+        # way to put the command on their clipboard.
+        if osc52_attempted:
+            hint_prefix = (
+                "[dim italic]command placed on your clipboard (OSC 52). "
+            )
+        else:
+            hint_prefix = "[dim italic]"
+        self.console.print(
+            hint_prefix
+            + f"type [bold]{SLASH_COPY}[/bold] to copy this command."
+            + "[/dim italic]"
         )
         self.console.print(
             "[dim]Paste the output (multi-line paste works), drop a "
@@ -418,6 +458,42 @@ class AdvisorProvider:
                 )
             return
 
+        if cmd == SLASH_COPY:
+            # Puts the most-recent proposed command on the user's
+            # clipboard via the best available mechanism: OS-native
+            # tool (pbcopy / wl-copy / xclip / clip.exe) then OSC 52
+            # as a fallback for SSH / tmux / unusual shells.
+            if not self._last_proposed_command:
+                self.console.print(
+                    "[yellow]Nothing to copy yet — Opus hasn't proposed "
+                    "a command this turn.[/yellow]"
+                )
+                return
+            from ghosthunter.clipboard import copy_to_clipboard
+            ok, mech = copy_to_clipboard(
+                self._last_proposed_command,
+                stream=getattr(self.console, "file", None),
+            )
+            if ok:
+                self.console.print(
+                    f"[green]✓ copied to clipboard[/green] "
+                    f"[dim]({mech})[/dim]"
+                )
+            elif mech == "skipped":
+                self.console.print(
+                    "[yellow]Clipboard disabled via "
+                    "GHOSTHUNTER_NO_CLIPBOARD — unset to re-enable."
+                    "[/yellow]"
+                )
+            else:
+                self.console.print(
+                    "[yellow]Couldn't reach your clipboard. "
+                    "Install pbcopy (macOS), xclip / wl-copy (Linux), "
+                    "or use a terminal with OSC 52 support (iTerm2, "
+                    "Kitty, WezTerm, tmux).[/yellow]"
+                )
+            return
+
         # Unknown slash command
         self.console.print(
             f"[yellow]Unknown command '{cmd}'. Type /help for options.[/yellow]"
@@ -445,6 +521,7 @@ class AdvisorProvider:
                     f"  [cyan]{SLASH_HYPOTHESES}[/cyan]             show current hypothesis state\n"
                     f"  [cyan]{SLASH_LIST}[/cyan]                   reshow the spike table\n"
                     f"  [cyan]{SLASH_SPIKE} N[/cyan]               abandon this and investigate spike N instead\n"
+                    f"  [cyan]{SLASH_COPY}[/cyan]                   put the last proposed command on your clipboard\n"
                     f"  [cyan]{SLASH_SKIP}[/cyan]                   skip this command, let Opus try a different angle\n"
                     f"  [cyan]{SLASH_PASTE}[/cyan]                  legacy paste mode (ends with ###)\n"
                     f"  [cyan]{SLASH_QUIT}[/cyan]                   end investigation, back to spike picker\n"

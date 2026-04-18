@@ -21,6 +21,77 @@ from ghosthunter.investigator import InvestigationEvent, PendingCommand
 from ghosthunter.providers.gcp import CommandResult, CostSpike
 
 # ---------------------------------------------------------------------------
+# Shared event renderers — used by every UI surface (cli, chat, ui.py's
+# own EventRenderer) so the display is consistent.
+# ---------------------------------------------------------------------------
+# Short human-readable descriptions of each security layer. Shown dim-
+# italic below a blocked-command line as an answer to "WHY did L2 care?"
+# without requiring the user to go read the source.
+_LAYER_EXPLANATIONS: dict[str, str] = {
+    "L1": "fast-reject patterns (chaining, redirects, unquoted shell substitution)",
+    "L2": "allowlist (this CLI verb / subcommand isn't on the read-only list)",
+    "L3": "flag check (a blocked or unrecognized flag was used)",
+    "L4": "input hygiene (empty command / too long / suspicious encoding)",
+    "L5": "budget (commands/cost/time cap exceeded)",
+    "L6": "semantic check (Sonnet rejected as unsafe or off-hypothesis)",
+    "L7": "sandbox (execution-time safety trip)",
+}
+
+
+def render_command_blocked(
+    console: Console,
+    *,
+    command: str | None,
+    layer: str,
+    reason: str,
+) -> None:
+    """Emit a blocked-command notice that shows WHAT got blocked and
+    WHY — not just the layer code.
+
+    The old one-liner — ``✗ blocked (L2): command not in allowlist`` —
+    forced the user to guess what command Opus had tried and why the
+    allowlist cared. That guessing sent several real investigations off
+    track; in advisor mode the user can't see the command otherwise
+    because nothing gets run or echoed. We now print:
+
+        ✗ blocked at L2 — command not in allowlist
+          tried: gcloud monitoring time-series list dns.googleapis.com/...
+          layer L2 meaning: allowlist (verb/subcommand isn't on the
+          read-only list)
+
+    The extra lines render dim so they don't steal attention from the
+    main error. The command itself is printed with ``markup=False``
+    (Rich doesn't reinterpret any ``[...]`` inside it) and with
+    ``soft_wrap=True`` (the terminal handles visual wrap without
+    splicing newlines into the command).
+    """
+    header_style = "red"
+    layer_label = layer or "?"
+    console.print(
+        f"[{header_style}]✗ blocked at {layer_label}[/{header_style}] "
+        f"— {reason}"
+    )
+
+    # The command Opus proposed — muted, indented, one line tag. Even a
+    # None command falls through without raising so callers that lose
+    # the command field don't explode.
+    if command:
+        prefix = Text("  tried: ", style="dim")
+        body = Text(command, style="dim")
+        console.print(
+            Text.assemble(prefix, body),
+            soft_wrap=True,
+        )
+
+    explanation = _LAYER_EXPLANATIONS.get(layer_label)
+    if explanation:
+        console.print(
+            f"  [dim italic]layer {layer_label} meaning: {explanation}"
+            f"[/dim italic]"
+        )
+
+
+# ---------------------------------------------------------------------------
 # Color helpers
 # ---------------------------------------------------------------------------
 def _confidence_color(confidence: int) -> str:
@@ -185,8 +256,11 @@ class RichStreamRenderer:
             self.console.print(render_pending_command(payload["pending"]))
 
         elif kind == "command_blocked":
-            self.console.print(
-                f"[red]✗ blocked at {payload['layer']}: {payload['reason']}[/red]"
+            render_command_blocked(
+                self.console,
+                command=payload.get("command"),
+                layer=payload.get("layer", "?"),
+                reason=payload.get("reason", "(no reason given)"),
             )
 
         elif kind == "command_rejected_by_user":

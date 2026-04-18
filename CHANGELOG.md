@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.6] - 2026-04-17
+
+### Added
+- **One-gesture command copy.** When Ghosthunter proposes a command in advisor mode it now pushes the command onto the user's system clipboard via the OSC 52 terminal escape sequence — no triple-click, no click-drag, no wrestling with soft-wrapped long commands. Works in iTerm2 (default-on), Kitty, WezTerm, Ghostty, Alacritty (opt-in), and tmux with `set-clipboard on`. Silently no-ops in terminals that don't honour the sequence.
+- **`/copy` slash command** as the explicit path when OSC 52 isn't available. At the advisor-mode prompt, type `/copy` to re-put the most recent proposed command on the clipboard. Uses OS-native tools first (pbcopy on macOS, wl-copy / xclip / xsel on Linux, clip.exe on Windows), then OSC 52 as a fallback. Works under SSH, inside tmux, and over other remote sessions.
+- **`GHOSTHUNTER_NO_CLIPBOARD` env var** — set to `1` / `true` / `yes` / `on` to disable both paths for users who don't want their clipboard mutated by a tool they didn't explicitly invoke.
+- **Clipboard auto-copy also applies to remediation commands** in the conclusion, but only when there's exactly one command across all recommendations — multiple commands would mean guessing which the user wants to run first, and we don't guess.
+- New `src/ghosthunter/clipboard.py` module with `write_osc52` and `copy_to_clipboard` helpers. 26 new tests covering OSC 52 emission, non-tty safety, env opt-out, OS-native tool selection, fallback to OSC 52 when native tools are missing, `/copy` slash behaviour, command tracking across turns, and the blocked-command renderer upgrade.
+
+### Changed
+- **Blocked-command display now shows WHAT was blocked and WHY, not just the layer code.** Previously `✗ blocked (L2): command not in allowlist` gave users no way to know which command Opus had tried. Now we print the command (dim, indented) and a one-line layer explanation below the error. Applies consistently across `ghosthunter investigate`, the `chat` REPL, and the shared UI renderer via a new `ui.render_command_blocked` helper.
+- **Prompt hint line now mentions `/copy`** so the feature is discoverable without reading `/help`. When OSC 52 emission succeeded, the hint also says so — otherwise it's just the `/copy` pointer.
+
 ## [1.0.5] - 2026-04-17
 
 ### Changed
@@ -60,6 +73,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `investigate --active` no longer aborts with a raw `ProviderError` / traceback when an optional dependency is missing — the user is walked through installing it.
 
 [Unreleased]: https://github.com/avinash-matrixgard/ghosthunter/compare/v1.0.1...HEAD
+[1.0.6]: https://github.com/avinash-matrixgard/ghosthunter/releases/tag/v1.0.6
 [1.0.5]: https://github.com/avinash-matrixgard/ghosthunter/releases/tag/v1.0.5
 [1.0.4]: https://github.com/avinash-matrixgard/ghosthunter/releases/tag/v1.0.4
 [1.0.3]: https://github.com/avinash-matrixgard/ghosthunter/releases/tag/v1.0.3

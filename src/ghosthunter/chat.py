@@ -943,8 +943,12 @@ async def _on_event(session: ChatSession, event: InvestigationEvent) -> None:
         pass
 
     elif kind == "command_blocked":
-        c.print(
-            f"[red]✗ blocked at {payload['layer']}: {payload['reason']}[/red]"
+        from ghosthunter.ui import render_command_blocked
+        render_command_blocked(
+            c,
+            command=payload.get("command"),
+            layer=payload.get("layer", "?"),
+            reason=payload.get("reason", "(no reason given)"),
         )
 
     elif kind == "command_proposed":
