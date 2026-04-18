@@ -32,7 +32,33 @@ sa-key*.json
 !.env.example
 
 # Billing exports (sensitive)
+#
+# Never commit customer billing data. The patterns below cover every
+# way a real bill could land in the tree:
+#   - `bills/` is the canonical scratch dir for user-supplied exports
+#   - `Billing Account for*.csv` matches the default Console export name
+#   - `*_billing_*.csv` / `*billing-export*` catches BigQuery export file
+#     names produced by `bq extract`
+# If you need to add a new safe fixture (anonymized, redistributable),
+# put it under `benchmarks/real_world/` and explicitly allowlist it —
+# see the FOCUS samples below.
+bills/
 Billing Account for*.csv
+*_billing_*.csv
+*billing-export*
+
+# FOCUS Sandbox sample data (FinOps Foundation, CC BY 4.0).
+# The small 738 KB file is checked in and sufficient for the skippable
+# test in tests/test_focus_sandbox.py. The 7 MB and 73 MB variants are
+# large enough to bloat every clone, so they stay untracked —
+# contributors who want them run the curl snippet in
+# benchmarks/real_world/README.md.
+benchmarks/real_world/focus_sample_10000.csv
+benchmarks/real_world/focus_sample_100000.csv
+
+# Second working clone some contributors keep alongside the main
+# checkout. Always untracked regardless of location.
+/ghosthunter/
 
 # Internal dev notes — never commit.
 # These files contain personal/work-context that shouldn't live in a
