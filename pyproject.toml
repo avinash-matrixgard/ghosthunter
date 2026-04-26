@@ -81,7 +81,9 @@ all = ["google-cloud-bigquery", "google-cloud-logging", "boto3"]
 # pytest >= 9.0.3 fixes GHSA-6w46-j5rx-g56g (tmpdir handling vuln,
 # medium severity, dev-only). Pre-9.0.3 versions fail pip-audit CI.
 pytest = "^9.0.3"
-pytest-asyncio = "^0.23.0"
+# pytest-asyncio < 1.0 has incompatible collector hooks for pytest 9
+# (`'Package' object has no attribute 'obj'`). 1.0+ adds proper support.
+pytest-asyncio = "^1.0.0"
 ruff = "^0.4.0"
 
 [tool.poetry.scripts]
