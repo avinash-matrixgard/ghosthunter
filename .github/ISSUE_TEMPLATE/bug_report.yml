@@ -1,0 +1,108 @@
+name: Bug report
+description: Something doesn't behave the way the docs say it should
+title: "[bug] "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to file a bug.
+
+        **For security vulnerabilities, please do NOT use this template.** See [SECURITY.md](../../SECURITY.md) — Ghosthunter executes shell commands proposed by an LLM, so security reports are particularly sensitive and go through a private channel.
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Describe the unexpected behavior
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect to happen?
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Reproduction steps
+      description: Minimal command sequence + input. Redact account IDs, ARNs, and any billing data.
+      placeholder: |
+        1. ghosthunter init --provider gcp
+        2. ghosthunter advisor --bill ./sample.csv
+        3. ...
+      render: bash
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Ghosthunter version
+      description: Output of `ghosthunter --version` or git SHA
+      placeholder: "1.0.6 or 07c5abe"
+    validations:
+      required: true
+
+  - type: input
+    id: python-version
+    attributes:
+      label: Python version
+      description: Output of `python --version`
+      placeholder: "3.12.4"
+    validations:
+      required: true
+
+  - type: input
+    id: os
+    attributes:
+      label: OS
+      placeholder: "macOS 15.1 / Ubuntu 24.04 / Windows 11"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: provider
+    attributes:
+      label: Provider
+      options:
+        - gcp
+        - aws
+        - billing-file
+        - n/a
+    validations:
+      required: true
+
+  - type: dropdown
+    id: mode
+    attributes:
+      label: Mode
+      options:
+        - paranoid (advisor) — default
+        - active
+        - demo
+        - audit
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant transcript / logs
+      description: Paste the CLI transcript or error output. **Redact account IDs, ARNs, and any secret-shaped values.**
+      render: shell
+
+  - type: checkboxes
+    id: confirmations
+    attributes:
+      label: Pre-flight checks
+      options:
+        - label: I have searched existing issues and didn't find a duplicate
+          required: true
+        - label: I have redacted account IDs / ARNs / billing data / secrets from logs
+          required: true
+        - label: This is NOT a security vulnerability (those go via SECURITY.md)
+          required: true

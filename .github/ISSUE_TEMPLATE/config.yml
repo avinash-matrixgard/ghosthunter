@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/avinash-matrixgard/ghosthunter/security/advisories/new
+    about: Report a security vulnerability privately. Please do NOT open a public issue for security disclosures.
+  - name: Discussions
+    url: https://github.com/avinash-matrixgard/ghosthunter/discussions
+    about: For open questions, use-case discussions, or proposals not yet ready as bugs / features.
+  - name: MatrixGard cloud audit (paid)
+    url: https://matrixgard.com/book
+    about: Want a real human to investigate your cloud bill or security posture? Book a free 20-minute review at matrixgard.com.

@@ -1,0 +1,71 @@
+name: Feature request
+description: Propose a new provider, validator improvement, or capability
+title: "[feat] "
+labels: ["enhancement", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the suggestion.
+
+        Ghosthunter is opinionated about what it does and doesn't do — the security model is the product. Use this template to propose; we'll discuss before any code is written.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does this solve?
+      description: Real investigation scenario preferred. What couldn't you find / explain / answer with the current tool?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed change
+      description: |
+        What would you add / remove / change?
+
+        For new commands or providers: include the full proposed CLI surface, the validator allowlist additions, and the worst-case behavior if the LLM misuses it.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Why not solve this in user code? Why does it belong in core?
+
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Scope
+      options:
+        - "New provider (add cloud / billing source)"
+        - "Validator change (allowlist / fast-reject / sandbox)"
+        - "New mode (advisor / active / audit / etc.)"
+        - "CLI ergonomics"
+        - "Documentation"
+        - "Tests / fixtures"
+        - "CI / tooling"
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: security
+    attributes:
+      label: Security considerations
+      options:
+        - label: This proposal does NOT relax the validator's reject-by-default posture
+          required: true
+        - label: If this adds new shell-executable surface, I can describe the worst-case behavior if the LLM hallucinates
+          required: false
+
+  - type: checkboxes
+    id: confirmations
+    attributes:
+      label: Pre-flight checks
+      options:
+        - label: I have searched existing issues and didn't find a duplicate
+          required: true
+        - label: I have read CONTRIBUTING.md
+          required: true
