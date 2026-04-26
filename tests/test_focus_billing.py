@@ -10,11 +10,10 @@ exports, so Ghosthunter's alias tuples needed to learn them.
 These tests lock down that the FOCUS 1.0 CSV shape parses end-to-end
 and produces the expected spike breakdown.
 """
+
 from __future__ import annotations
 
 from pathlib import Path
-
-import pytest
 
 from ghosthunter.providers.billing_file import (
     ACCOUNT_KEYS,
@@ -26,10 +25,7 @@ from ghosthunter.providers.billing_file import (
     load_spikes_from_file,
 )
 
-
-FIXTURE = (
-    Path(__file__).parent / "fixtures" / "aws" / "focus_sample_small.csv"
-)
+FIXTURE = Path(__file__).parent / "fixtures" / "aws" / "focus_sample_small.csv"
 
 
 class TestFocusColumnAliases:
@@ -65,9 +61,7 @@ class TestFocusSampleParse:
         assert FIXTURE.exists(), f"FOCUS fixture missing: {FIXTURE}"
 
     def test_parses_and_detects_ec2_spike(self):
-        spikes = load_spikes_from_file(
-            FIXTURE, min_change_percent=20, min_absolute_change=10
-        )
+        spikes = load_spikes_from_file(FIXTURE, min_change_percent=20, min_absolute_change=10)
         assert spikes, "Expected at least one spike from the FOCUS fixture"
 
         # The fixture is shaped so EC2 goes from ~$12/day in January to
@@ -81,9 +75,7 @@ class TestFocusSampleParse:
         )
 
     def test_flat_service_not_in_spike_list(self):
-        spikes = load_spikes_from_file(
-            FIXTURE, min_change_percent=20, min_absolute_change=10
-        )
+        spikes = load_spikes_from_file(FIXTURE, min_change_percent=20, min_absolute_change=10)
         # S3 in the fixture goes from $5.20 to $5.30 — no material spike.
         names = [s.service for s in spikes]
         assert "Amazon Simple Storage Service" not in names, (

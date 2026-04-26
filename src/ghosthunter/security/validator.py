@@ -8,6 +8,7 @@ The validator is provider-aware: pass `provider="gcp"` (default) or
 `"aws"` to constrain allowlist + semantic checks to that provider.
 No-arg construction keeps the GCP-only behavior existing callers depend on.
 """
+
 from dataclasses import dataclass
 
 from ghosthunter.security.allowlist import (

@@ -3,11 +3,12 @@
 Optional. If `mcp` and `mempalace` aren't installed, `get_palace()`
 still works — it just returns a client whose methods are no-ops.
 """
+
 from ghosthunter.memory.palace import (
+    PALACE_ROOT,
     MemoryHit,
     PalaceClient,
     PalaceStatus,
-    PALACE_ROOT,
     default_wing_for_files,
     is_available,
     parse_wing_from_filename,

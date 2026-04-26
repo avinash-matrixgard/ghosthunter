@@ -5,6 +5,7 @@ Confidence is the source of truth. Status is derived:
   <=  5  -> eliminated
   else   -> active
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field

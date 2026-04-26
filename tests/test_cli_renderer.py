@@ -19,6 +19,7 @@ the spinner.
 
 Every other event stops the spinner before rendering its own output.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -27,8 +28,8 @@ import pytest
 from rich.console import Console
 
 from ghosthunter.cli import (
-    _InvestigationRenderer,
     _fmt_bytes,
+    _InvestigationRenderer,
     _preview_command,
 )
 from ghosthunter.investigator import InvestigationEvent
@@ -53,9 +54,7 @@ class TestSpinnerLifecycle:
     def test_step_started_starts_spinner(self, renderer_pair):
         renderer, _ = renderer_pair
         asyncio.run(renderer(InvestigationEvent("step_started", {})))
-        assert renderer._status is not None, (
-            "step_started should start the spinner"
-        )
+        assert renderer._status is not None, "step_started should start the spinner"
         # Clean up so pytest doesn't leave a Live display running.
         renderer._stop_spin()
 
@@ -92,9 +91,7 @@ class TestSpinnerLifecycle:
         class _P:
             command = "aws ec2 describe-instances --region us-east-1"
 
-        asyncio.run(
-            renderer(InvestigationEvent("command_proposed", {"pending": _P()}))
-        )
+        asyncio.run(renderer(InvestigationEvent("command_proposed", {"pending": _P()})))
         assert renderer._status is not None
         renderer._stop_spin()
 
@@ -122,9 +119,7 @@ class TestSpinnerLifecycle:
             await renderer(InvestigationEvent("step_started", {}))
             assert renderer._status is not None
             first_status = renderer._status
-            await renderer(
-                InvestigationEvent("command_proposed", {"pending": _P()})
-            )
+            await renderer(InvestigationEvent("command_proposed", {"pending": _P()}))
             # A new Status object replaces the old one.
             assert renderer._status is not None
             assert renderer._status is not first_status
@@ -137,9 +132,7 @@ class TestSpinnerLifecycle:
 
         async def go():
             await renderer(InvestigationEvent("step_started", {}))
-            await renderer(
-                InvestigationEvent("concluded", {"conclusion": {"root_cause": "x"}})
-            )
+            await renderer(InvestigationEvent("concluded", {"conclusion": {"root_cause": "x"}}))
 
         asyncio.run(go())
         assert renderer._status is None
@@ -193,11 +186,7 @@ class TestStaticRenders:
     def test_reasoning_renders_opus_panel(self, renderer_pair):
         renderer, console = renderer_pair
         asyncio.run(
-            renderer(
-                InvestigationEvent(
-                    "reasoning", {"text": "Evidence favors H1 strongly."}
-                )
-            )
+            renderer(InvestigationEvent("reasoning", {"text": "Evidence favors H1 strongly."}))
         )
         out = console.export_text()
         assert "Opus" in out
@@ -230,31 +219,19 @@ class TestStaticRenders:
             id = "E1"
             summary = "5 NAT gateways found; one owns 78% of VPC traffic."
 
-        asyncio.run(
-            renderer(
-                InvestigationEvent("evidence_added", {"evidence": _Evidence()})
-            )
-        )
+        asyncio.run(renderer(InvestigationEvent("evidence_added", {"evidence": _Evidence()})))
         out = console.export_text()
         assert "E1" in out
         assert "NAT gateways" in out
 
     def test_concluded_prints_success_line(self, renderer_pair):
         renderer, console = renderer_pair
-        asyncio.run(
-            renderer(
-                InvestigationEvent("concluded", {"conclusion": {"root_cause": "x"}})
-            )
-        )
+        asyncio.run(renderer(InvestigationEvent("concluded", {"conclusion": {"root_cause": "x"}})))
         assert "concluded" in console.export_text().lower()
 
     def test_aborted_prints_reason(self, renderer_pair):
         renderer, console = renderer_pair
-        asyncio.run(
-            renderer(
-                InvestigationEvent("aborted", {"reason": "user quit"})
-            )
-        )
+        asyncio.run(renderer(InvestigationEvent("aborted", {"reason": "user quit"})))
         out = console.export_text()
         assert "Aborted" in out
         assert "user quit" in out
@@ -276,9 +253,7 @@ class TestSilentEvents:
     def test_no_output_and_no_spinner(self, renderer_pair, kind, payload):
         renderer, console = renderer_pair
         asyncio.run(renderer(InvestigationEvent(kind, payload)))
-        assert console.export_text().strip() == "", (
-            f"renderer should be silent on {kind!r}"
-        )
+        assert console.export_text().strip() == "", f"renderer should be silent on {kind!r}"
         assert renderer._status is None
 
 
@@ -301,10 +276,10 @@ class TestDetailLineHelpers:
     @pytest.mark.parametrize(
         "n,expected_suffix",
         [
-            (0,     "B"),
-            (512,   "B"),
-            (1023,  "B"),
-            (1024,  "KB"),
+            (0, "B"),
+            (512, "B"),
+            (1023, "B"),
+            (1024, "KB"),
             (18400, "KB"),
             (2 * 1024 * 1024, "MB"),
         ],
@@ -334,9 +309,7 @@ class TestSpinnerContextEnrichment:
         class _P:
             command = "aws ec2 describe-instances --region us-east-1"
 
-        asyncio.run(
-            renderer(InvestigationEvent("command_proposed", {"pending": _P()}))
-        )
+        asyncio.run(renderer(InvestigationEvent("command_proposed", {"pending": _P()})))
         text = _spinner_text(renderer)
         assert "aws ec2 describe-instances" in text
         assert "validating" in text.lower()
@@ -384,7 +357,12 @@ class TestSpinnerContextEnrichment:
                         "hypotheses": [
                             {"id": "H1", "status": "active", "confidence": 60, "description": "A"},
                             {"id": "H2", "status": "active", "confidence": 30, "description": "B"},
-                            {"id": "H3", "status": "eliminated", "confidence": 4, "description": "C"},
+                            {
+                                "id": "H3",
+                                "status": "eliminated",
+                                "confidence": 4,
+                                "description": "C",
+                            },
                         ]
                     },
                 )

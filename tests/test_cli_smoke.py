@@ -19,6 +19,7 @@ Uses Typer's ``CliRunner`` to invoke in-process. ``CONFIG_PATH`` and
 ``AUDIT_LOG_PATH`` get monkeypatched to ``tmp_path`` so tests never
 touch ``~/.ghosthunter/``.
 """
+
 from __future__ import annotations
 
 import json
@@ -29,8 +30,7 @@ from typer.testing import CliRunner
 
 from ghosthunter import cli
 from ghosthunter.cli import app
-from ghosthunter.config import AWSConfig, BudgetConfig, Config
-
+from ghosthunter.config import Config
 
 runner = CliRunner()
 
@@ -47,6 +47,7 @@ def isolated_config(monkeypatch, tmp_path):
     monkeypatch.setattr(cli, "AUDIT_LOG_PATH", audit)
     # Config module has its own module-level constants used by Config.load.
     from ghosthunter import config as cfg_mod
+
     monkeypatch.setattr(cfg_mod, "CONFIG_PATH", cfg)
     monkeypatch.setattr(cfg_mod, "AUDIT_LOG_PATH", audit)
     return cfg, audit
@@ -89,9 +90,7 @@ def fake_audit_log(isolated_config):
             "ce_api_calls": 1,
         },
     ]
-    audit_path.write_text(
-        "\n".join(json.dumps(e) for e in entries) + "\n"
-    )
+    audit_path.write_text("\n".join(json.dumps(e) for e in entries) + "\n")
     return audit_path
 
 
@@ -99,25 +98,33 @@ def fake_audit_log(isolated_config):
 # --help for every command
 # ---------------------------------------------------------------------------
 class TestHelpSurfaces:
-    @pytest.mark.parametrize("command", [
-        "--help",
-        "init --help",
-        "investigate --help",
-        "chat --help",
-        "billing-template --help",
-        "demo --help",
-        "audit --help",
-        "palace --help",
-    ])
+    @pytest.mark.parametrize(
+        "command",
+        [
+            "--help",
+            "init --help",
+            "investigate --help",
+            "chat --help",
+            "billing-template --help",
+            "demo --help",
+            "audit --help",
+            "palace --help",
+        ],
+    )
     def test_help_exits_zero(self, command):
         result = runner.invoke(app, command.split())
-        assert result.exit_code == 0, (
-            f"`ghosthunter {command}` failed:\n{result.output}"
-        )
+        assert result.exit_code == 0, f"`ghosthunter {command}` failed:\n{result.output}"
         # Top-level --help should list all commands we claim to ship.
         if command == "--help":
-            for sub in ["init", "investigate", "chat", "billing-template",
-                        "demo", "audit", "palace"]:
+            for sub in [
+                "init",
+                "investigate",
+                "chat",
+                "billing-template",
+                "demo",
+                "audit",
+                "palace",
+            ]:
                 assert sub in result.output
 
 
@@ -130,12 +137,14 @@ class TestInit:
         cfg_path, _ = isolated_config
 
         # Script the interactive prompts in order.
-        responses = iter([
-            "gcp",                         # provider
-            "30",                          # lookback_days
-            "my-proj",                     # GCP project ID
-            "my-proj.billing_export",      # billing dataset
-        ])
+        responses = iter(
+            [
+                "gcp",  # provider
+                "30",  # lookback_days
+                "my-proj",  # GCP project ID
+                "my-proj.billing_export",  # billing dataset
+            ]
+        )
         monkeypatch.setattr(
             "rich.prompt.Prompt.ask",
             lambda *a, **k: next(responses),
@@ -155,13 +164,15 @@ class TestInit:
 
     def test_init_aws_writes_config(self, isolated_config, monkeypatch):
         cfg_path, _ = isolated_config
-        responses = iter([
-            "aws",                   # provider
-            "30",                    # lookback_days
-            "dev-sandbox",           # AWS profile
-            "us-west-2",             # AWS region
-            "111122223333",          # account id
-        ])
+        responses = iter(
+            [
+                "aws",  # provider
+                "30",  # lookback_days
+                "dev-sandbox",  # AWS profile
+                "us-west-2",  # AWS region
+                "111122223333",  # account id
+            ]
+        )
         monkeypatch.setattr(
             "rich.prompt.Prompt.ask",
             lambda *a, **k: next(responses),
@@ -179,9 +190,7 @@ class TestInit:
         # GCP fields default to empty string.
         assert cfg.project_id == ""
 
-    def test_init_refuses_to_overwrite_without_confirm(
-        self, isolated_config, monkeypatch
-    ):
+    def test_init_refuses_to_overwrite_without_confirm(self, isolated_config, monkeypatch):
         """Existing config + user declines overwrite → early exit, file untouched."""
         cfg_path, _ = isolated_config
         # Pre-existing config.
@@ -209,14 +218,10 @@ class TestInit:
 # ---------------------------------------------------------------------------
 class TestInvestigateList:
     def test_list_renders_spike_table_for_aws_ce_csv(self, isolated_config):
-        fixture = (
-            Path(__file__).parent / "fixtures" / "aws" / "ce_by_service.csv"
-        )
+        fixture = Path(__file__).parent / "fixtures" / "aws" / "ce_by_service.csv"
         assert fixture.exists(), "AWS CE fixture missing"
 
-        result = runner.invoke(
-            app, ["investigate", "--list", str(fixture)]
-        )
+        result = runner.invoke(app, ["investigate", "--list", str(fixture)])
         assert result.exit_code == 0, result.output
         # Provider auto-sniffed as AWS.
         assert "aws" in result.output.lower()
@@ -224,22 +229,13 @@ class TestInvestigateList:
         assert "EC2" in result.output or "Lambda" in result.output
 
     def test_list_renders_spike_table_for_focus_csv(self, isolated_config):
-        fixture = (
-            Path(__file__).parent
-            / "fixtures"
-            / "aws"
-            / "focus_sample_small.csv"
-        )
+        fixture = Path(__file__).parent / "fixtures" / "aws" / "focus_sample_small.csv"
         assert fixture.exists(), "FOCUS fixture missing"
-        result = runner.invoke(
-            app, ["investigate", "--list", str(fixture)]
-        )
+        result = runner.invoke(app, ["investigate", "--list", str(fixture)])
         assert result.exit_code == 0, result.output
 
     def test_missing_file_errors_cleanly(self, isolated_config):
-        result = runner.invoke(
-            app, ["investigate", "--list", "/tmp/does-not-exist-12345.csv"]
-        )
+        result = runner.invoke(app, ["investigate", "--list", "/tmp/does-not-exist-12345.csv"])
         # Non-zero exit; message should mention the file.
         assert result.exit_code != 0 or "not found" in result.output.lower()
 
@@ -249,19 +245,12 @@ class TestInvestigateList:
         monkeypatch.setenv("ANTHROPIC_API_KEY", "fake-key-for-gate")
         result = runner.invoke(app, ["investigate"])
         assert result.exit_code != 0
-        assert (
-            "billing file" in result.output.lower()
-            or "at least one" in result.output.lower()
-        )
+        assert "billing file" in result.output.lower() or "at least one" in result.output.lower()
 
     def test_active_and_files_are_mutually_exclusive(self, isolated_config, monkeypatch):
         monkeypatch.setenv("ANTHROPIC_API_KEY", "fake-key-for-gate")
-        fixture = (
-            Path(__file__).parent / "fixtures" / "aws" / "ce_by_service.csv"
-        )
-        result = runner.invoke(
-            app, ["investigate", "--active", "-f", str(fixture)]
-        )
+        fixture = Path(__file__).parent / "fixtures" / "aws" / "ce_by_service.csv"
+        result = runner.invoke(app, ["investigate", "--active", "-f", str(fixture)])
         assert result.exit_code != 0
         assert "not both" in result.output.lower() or "either" in result.output.lower()
 
@@ -279,9 +268,7 @@ class TestBillingTemplate:
         assert "console" in lower or "reports" in lower
 
     def test_aws_template_renders(self):
-        result = runner.invoke(
-            app, ["billing-template", "--provider=aws"]
-        )
+        result = runner.invoke(app, ["billing-template", "--provider=aws"])
         assert result.exit_code == 0, result.output
         lower = result.output.lower()
         # Three AWS paths (CE CSV, CE JSON, CUR) should all be mentioned.

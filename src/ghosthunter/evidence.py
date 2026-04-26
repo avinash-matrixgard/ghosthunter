@@ -4,6 +4,7 @@ Each piece of evidence is a compressed observation produced by Sonnet from
 a command's output. Evidence is linked to the hypotheses it supports or
 refutes, with a numeric weight that drives confidence updates.
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -86,8 +87,4 @@ class EvidenceChain:
         return None
 
     def all_for(self, hypothesis_id: str) -> list[Evidence]:
-        return [
-            e
-            for e in self._items
-            if e.supports(hypothesis_id) or e.refutes(hypothesis_id)
-        ]
+        return [e for e in self._items if e.supports(hypothesis_id) or e.refutes(hypothesis_id)]

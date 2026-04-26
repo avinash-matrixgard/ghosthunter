@@ -17,6 +17,7 @@ Provider-neutral types (`CostSpike`, `CommandResult`) and errors
 now. They're re-exported below so existing imports of the form
 ``from ghosthunter.providers.gcp import CostSpike`` keep working.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -37,6 +38,7 @@ from ghosthunter.security.validator import SecurityValidator
 # Optional import: BigQuery client is heavy and not needed for demo mode.
 try:
     from google.cloud import bigquery  # type: ignore
+
     _BQ_AVAILABLE = True
 except ImportError:
     _BQ_AVAILABLE = False
@@ -103,13 +105,9 @@ class GCPProvider(BaseProvider):
         OR the absolute change exceeds its threshold.
         """
         if not _BQ_AVAILABLE:
-            raise GCPProviderError(
-                "google-cloud-bigquery is not installed; cannot fetch billing"
-            )
+            raise GCPProviderError("google-cloud-bigquery is not installed; cannot fetch billing")
         if not self.billing_dataset:
-            raise GCPProviderError(
-                "billing_dataset is required for fetch_billing_spikes"
-            )
+            raise GCPProviderError("billing_dataset is required for fetch_billing_spikes")
 
         client = bigquery.Client(project=self.project_id)
 
@@ -143,19 +141,13 @@ class GCPProvider(BaseProvider):
         """
         job_config = bigquery.QueryJobConfig(
             query_parameters=[
-                bigquery.ScalarQueryParameter(
-                    "current_start", "DATE", current_start
-                ),
-                bigquery.ScalarQueryParameter(
-                    "previous_start", "DATE", previous_start
-                ),
+                bigquery.ScalarQueryParameter("current_start", "DATE", current_start),
+                bigquery.ScalarQueryParameter("previous_start", "DATE", previous_start),
             ]
         )
 
         rows = list(client.query(query, job_config=job_config).result())
-        return self._rows_to_spikes(
-            rows, min_change_percent, min_absolute_change
-        )
+        return self._rows_to_spikes(rows, min_change_percent, min_absolute_change)
 
     @staticmethod
     def _rows_to_spikes(
@@ -172,8 +164,7 @@ class GCPProvider(BaseProvider):
             entry[row["window"]] = float(row["total_cost"])
             if row["window"] == "current":
                 entry["daily"] = [
-                    {"day": str(d["day"]), "cost": float(d["cost"])}
-                    for d in row["daily"]
+                    {"day": str(d["day"]), "cost": float(d["cost"])} for d in row["daily"]
                 ]
 
         spikes: list[CostSpike] = []
@@ -186,10 +177,7 @@ class GCPProvider(BaseProvider):
                 pct = float("inf") if current > 0 else 0.0
             absolute = current - previous
 
-            material = (
-                abs(pct) >= min_change_percent
-                or abs(absolute) >= min_absolute_change
-            )
+            material = abs(pct) >= min_change_percent or abs(absolute) >= min_absolute_change
             if not material:
                 continue
 

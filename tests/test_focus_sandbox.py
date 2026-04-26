@@ -39,6 +39,7 @@ These are intentionally loose smoke checks, not a benchmark. The
 synthetic benchmark (benchmarks/run_benchmark.py) is where we score
 correctness.
 """
+
 from __future__ import annotations
 
 import math
@@ -47,7 +48,6 @@ from pathlib import Path
 import pytest
 
 from ghosthunter.providers.billing_file import load_spikes_from_file
-
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 SAMPLE_DIR = REPO_ROOT / "benchmarks" / "real_world"
@@ -73,9 +73,7 @@ def test_focus_small_sample_parses():
     assert spikes, "parser returned zero spikes on the FOCUS sample"
 
     top = spikes[0]
-    assert top.service and top.service.strip(), (
-        f"top spike has empty service name: {top!r}"
-    )
+    assert top.service and top.service.strip(), f"top spike has empty service name: {top!r}"
 
     # All costs must be finite (no NaN). change_percent may be inf for
     # services that didn't exist in the previous period — that's valid.
@@ -98,14 +96,8 @@ def test_focus_small_sample_is_multi_cloud():
     """
     spikes = load_spikes_from_file(SAMPLE_SMALL)
     service_names = " ".join(s.service for s in spikes).lower()
-    saw_aws = any(
-        tag in service_names
-        for tag in ("amazon", "aws ", "cloudwatch", "ec2")
-    )
-    saw_azure = any(
-        tag in service_names
-        for tag in ("azure", "microsoft", "virtual machines")
-    )
+    saw_aws = any(tag in service_names for tag in ("amazon", "aws ", "cloudwatch", "ec2"))
+    saw_azure = any(tag in service_names for tag in ("azure", "microsoft", "virtual machines"))
     assert saw_aws, f"no AWS-looking services in top spikes: {[s.service for s in spikes[:10]]}"
     assert saw_azure, f"no Azure-looking services in top spikes: {[s.service for s in spikes[:10]]}"
 
@@ -137,9 +129,7 @@ def test_focus_small_sample_uses_date_split():
 )
 def test_focus_10k_sample_parses():
     spikes = load_spikes_from_file(SAMPLE_10K)
-    assert len(spikes) >= 10, (
-        f"expected >= 10 spikes on 10K-row sample, got {len(spikes)}"
-    )
+    assert len(spikes) >= 10, f"expected >= 10 spikes on 10K-row sample, got {len(spikes)}"
 
 
 @pytest.mark.skipif(

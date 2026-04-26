@@ -15,11 +15,11 @@ gap with two paths:
 Also upgraded the blocked-command renderer to show WHAT got blocked
 and WHY, not just the layer code.
 """
+
 from __future__ import annotations
 
 import base64
 import io
-import os
 import re
 from unittest.mock import MagicMock, patch
 
@@ -39,6 +39,7 @@ from ghosthunter.ui import render_command_blocked
 # ---------------------------------------------------------------------------
 class _FakeTTY(io.StringIO):
     """StringIO that lies about being a tty so OSC 52 will emit."""
+
     def isatty(self) -> bool:
         return True
 
@@ -166,9 +167,7 @@ class TestCopySlashCommand:
         from ghosthunter.providers.advisor import AdvisorProvider
 
         buf = io.StringIO()
-        console = Console(
-            file=buf, force_terminal=False, width=120
-        )
+        console = Console(file=buf, force_terminal=False, width=120)
         advisor = AdvisorProvider(console=console)
         return advisor, buf
 
@@ -217,14 +216,10 @@ class TestCopySlashCommand:
 # Blocked-command renderer
 # ---------------------------------------------------------------------------
 class TestBlockedCommandRender:
-    def _render(
-        self, *, command: str | None, layer: str, reason: str
-    ) -> str:
+    def _render(self, *, command: str | None, layer: str, reason: str) -> str:
         buf = io.StringIO()
         console = Console(file=buf, force_terminal=False, width=120)
-        render_command_blocked(
-            console, command=command, layer=layer, reason=reason
-        )
+        render_command_blocked(console, command=command, layer=layer, reason=reason)
         return buf.getvalue()
 
     def test_shows_the_blocked_command(self):
@@ -247,9 +242,7 @@ class TestBlockedCommandRender:
     def test_shows_layer_explanation(self):
         """L2 users shouldn't need to read the source to learn what
         L2 means."""
-        out = self._render(
-            command="gcloud foo", layer="L2", reason="not in allowlist"
-        )
+        out = self._render(command="gcloud foo", layer="L2", reason="not in allowlist")
         assert "allowlist" in out.lower()
 
     def test_handles_missing_command_gracefully(self):
@@ -267,12 +260,11 @@ class TestBlockedCommandRender:
             "bq query --use_legacy_sql=false --format=prettyjson "
             "--project_id=test "
             "'SELECT DATE(usage_start_time) AS d, SUM(cost) AS c "
-            "FROM `p.d.t` WHERE s = \"X\" GROUP BY d ORDER BY d'"
+            'FROM `p.d.t` WHERE s = "X" GROUP BY d ORDER BY d\''
         )
         out = self._render(command=long_cmd, layer="L1", reason="test")
         assert long_cmd in out, (
-            "long blocked command was mangled in rendering — "
-            "copy-paste would break"
+            "long blocked command was mangled in rendering — copy-paste would break"
         )
 
 
@@ -281,8 +273,9 @@ class TestBlockedCommandRender:
 # ---------------------------------------------------------------------------
 def test_clipboard_module_has_no_scenario_specific_content():
     """No pattern-shortcut strings accumulate in the clipboard module."""
-    import ghosthunter.clipboard as clip_mod
     import inspect
+
+    import ghosthunter.clipboard as clip_mod
 
     source = inspect.getsource(clip_mod).lower()
     forbidden = [
@@ -293,6 +286,4 @@ def test_clipboard_module_has_no_scenario_specific_content():
         "scenario",
     ]
     offenders = [f for f in forbidden if f in source]
-    assert not offenders, (
-        f"clipboard module contains scenario-specific strings: {offenders}"
-    )
+    assert not offenders, f"clipboard module contains scenario-specific strings: {offenders}"

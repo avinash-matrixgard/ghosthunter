@@ -5,6 +5,7 @@ turns them into terminal output. Keep this module free of business logic
 so it can be swapped out (e.g. for a JSON streamer) without touching
 the investigator.
 """
+
 from __future__ import annotations
 
 from typing import Any
@@ -67,10 +68,7 @@ def render_command_blocked(
     """
     header_style = "red"
     layer_label = layer or "?"
-    console.print(
-        f"[{header_style}]✗ blocked at {layer_label}[/{header_style}] "
-        f"— {reason}"
-    )
+    console.print(f"[{header_style}]✗ blocked at {layer_label}[/{header_style}] — {reason}")
 
     # The command Opus proposed — muted, indented, one line tag. Even a
     # None command falls through without raising so callers that lose
@@ -85,10 +83,7 @@ def render_command_blocked(
 
     explanation = _LAYER_EXPLANATIONS.get(layer_label)
     if explanation:
-        console.print(
-            f"  [dim italic]layer {layer_label} meaning: {explanation}"
-            f"[/dim italic]"
-        )
+        console.print(f"  [dim italic]layer {layer_label} meaning: {explanation}[/dim italic]")
 
 
 # ---------------------------------------------------------------------------
@@ -138,11 +133,11 @@ def render_hypotheses(hypotheses: list[Hypothesis]) -> Panel:
         return Panel("(no hypotheses yet)", title="Hypotheses", border_style="cyan")
 
     table = Table.grid(padding=(0, 1), expand=True)
-    table.add_column(width=4)              # ID
-    table.add_column(width=12)             # status
-    table.add_column(width=20)             # bar
+    table.add_column(width=4)  # ID
+    table.add_column(width=12)  # status
+    table.add_column(width=20)  # bar
     table.add_column(width=5, justify="right")  # %
-    table.add_column(ratio=1)              # description
+    table.add_column(ratio=1)  # description
 
     for h in hypotheses:
         bar = ProgressBar(
@@ -264,9 +259,7 @@ class RichStreamRenderer:
             )
 
         elif kind == "command_rejected_by_user":
-            self.console.print(
-                f"[yellow]→ rejected by user: {payload['command']}[/yellow]"
-            )
+            self.console.print(f"[yellow]→ rejected by user: {payload['command']}[/yellow]")
 
         elif kind == "command_executed":
             self.console.print(render_command_result(payload["result"]))

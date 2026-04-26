@@ -7,13 +7,13 @@ only ``python benchmarks/run_benchmark.py`` runs by hand.
 The benchmark itself is parser-only (no network, ~200 ms) so the cost
 of this test is negligible.
 """
+
 from __future__ import annotations
 
 import sys
 from pathlib import Path
 
 import pytest
-
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 BENCH_DIR = REPO_ROOT / "benchmarks"
@@ -25,6 +25,7 @@ def benchmark_runner():
     if str(BENCH_DIR) not in sys.path:
         sys.path.insert(0, str(BENCH_DIR))
     import run_benchmark  # type: ignore[import-not-found]
+
     return run_benchmark
 
 
@@ -60,8 +61,7 @@ def test_benchmark_mean_score_is_100(benchmark_runner):
     results = [benchmark_runner._run_one(sid) for sid in ids]
     mean = sum(r.score for r in results) / max(len(results), 1)
     assert mean == pytest.approx(100.0), (
-        f"Mean benchmark score dropped to {mean:.1f}/100 — "
-        f"a scenario is losing points"
+        f"Mean benchmark score dropped to {mean:.1f}/100 — a scenario is losing points"
     )
 
 

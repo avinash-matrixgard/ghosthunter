@@ -22,10 +22,10 @@ Allowlist philosophy:
   secrets (``aws ec2 get-password-data``, ``aws secretsmanager
   get-secret-value``, ``aws kms decrypt``, ...).
 """
+
 from __future__ import annotations
 
 import re
-
 
 # ---------------------------------------------------------------------------
 # Base read-verb rule
@@ -46,7 +46,6 @@ ALLOWED_PATTERNS: list[str] = [
     # ---- S3 (aws s3 ls uses the higher-level CLI, not s3api) ----
     r"^aws\s+s3\s+ls\b",
     # aws s3 ls s3://bucket — still ls, handled by the above.
-
     # ---- Cost Explorer / Budgets ----
     r"^aws\s+ce\s+get-cost-and-usage\b",
     r"^aws\s+ce\s+get-dimension-values\b",
@@ -59,11 +58,9 @@ ALLOWED_PATTERNS: list[str] = [
     r"^aws\s+budgets\s+describe-budgets\b",
     r"^aws\s+budgets\s+describe-budget\b",
     r"^aws\s+cur\s+describe-report-definitions\b",
-
     # ---- STS (caller identity — used for sanity checks) ----
     r"^aws\s+sts\s+get-caller-identity\b",
     r"^aws\s+sts\s+decode-authorization-message\b",
-
     # ---- Read-only verbs that don't fit the describe/list/get pattern ----
     # (BASE_READ_RULE below catches everything that does.)
     #
@@ -129,7 +126,6 @@ ALLOWED_PATTERNS: list[str] = [
     r"^aws\s+support\s+describe-trusted-advisor-checks\b",
     r"^aws\s+support\s+describe-trusted-advisor-check-result\b",
     r"^aws\s+support\s+describe-trusted-advisor-check-summaries\b",
-
     # ---- The base read rule picks up everything else that fits the
     #      describe-/list-/get- pattern across every service.
     BASE_READ_RULE,
@@ -173,7 +169,6 @@ WRITE_DISGUISED_AS_READ: list[str] = [
     r"^aws\s+rds\s+reboot-db-instance\b",
     r"^aws\s+logs\s+start-query\b",  # CloudWatch Logs Insights — starts a query job
     r"^aws\s+logs\s+start-live-tail\b",
-
     # ---- Credential / secret exfiltration ----
     r"^aws\s+secretsmanager\s+get-secret-value\b",
     r"^aws\s+secretsmanager\s+get-random-password\b",
@@ -187,26 +182,23 @@ WRITE_DISGUISED_AS_READ: list[str] = [
     r"^aws\s+kms\s+generate-data-key-without-plaintext\b",
     r"^aws\s+kms\s+generate-mac\b",
     r"^aws\s+kms\s+generate-random\b",
-    r"^aws\s+sts\s+get-session-token\b",       # mints temporary credentials
-    r"^aws\s+sts\s+get-federation-token\b",    # mints temporary credentials
-    r"^aws\s+sts\s+assume-role\b",             # mints temporary credentials
+    r"^aws\s+sts\s+get-session-token\b",  # mints temporary credentials
+    r"^aws\s+sts\s+get-federation-token\b",  # mints temporary credentials
+    r"^aws\s+sts\s+assume-role\b",  # mints temporary credentials
     r"^aws\s+sts\s+assume-role-with-saml\b",
     r"^aws\s+sts\s+assume-role-with-web-identity\b",
-    r"^aws\s+iam\s+get-credential-report\b",   # can contain sensitive data
+    r"^aws\s+iam\s+get-credential-report\b",  # can contain sensitive data
     r"^aws\s+iam\s+get-access-key-last-used\b",  # leaks usage patterns
-
     # ---- Signing / signatures (could forge JWTs etc.) ----
     r"^aws\s+signer\s+sign-payload\b",
-
     # ---- Cognito / auth flows that mint tokens ----
     r"^aws\s+cognito-idp\s+initiate-auth\b",
     r"^aws\s+cognito-idp\s+admin-initiate-auth\b",
-    r"^aws\s+cognito-idp\s+get-id\b",   # cognito-identity mints temporary creds
+    r"^aws\s+cognito-idp\s+get-id\b",  # cognito-identity mints temporary creds
     r"^aws\s+cognito-identity\s+get-id\b",
     r"^aws\s+cognito-identity\s+get-credentials-for-identity\b",
     r"^aws\s+cognito-identity\s+get-open-id-token\b",
     r"^aws\s+cognito-identity\s+get-open-id-token-for-developer-identity\b",
-
     # ---- Lambda / model invocation (spends money, causes side effects) ----
     r"^aws\s+bedrock-runtime\s+invoke-model\b",
     r"^aws\s+bedrock-runtime\s+invoke-model-with-response-stream\b",
@@ -217,43 +209,34 @@ WRITE_DISGUISED_AS_READ: list[str] = [
     r"^aws\s+sagemaker-runtime\s+invoke-endpoint\b",
     r"^aws\s+sagemaker-runtime\s+invoke-endpoint-async\b",
     r"^aws\s+sagemaker-runtime\s+invoke-endpoint-with-response-stream\b",
-
     # ---- CloudWatch Synthetics — trigger canaries (costs money, can hit user URLs) ----
     r"^aws\s+synthetics\s+start-canary\b",
-
     # ---- S3 data egress — CAN leak data, but also essential for cost forensics.
     # We allow these but warn via the reasoner prompt; block only the bulk
     # presigned-URL path that could be chained into automated exfil.
     r"^aws\s+s3\s+presign\b",
     r"^aws\s+s3api\s+get-object-attributes\b",  # metadata only, BUT cheap path to enumerate buckets
-
     # ---- EC2 VPC endpoint / network side effects ----
-    r"^aws\s+ec2\s+send-diagnostic-interrupt\b",   # reboots instance via NMI
+    r"^aws\s+ec2\s+send-diagnostic-interrupt\b",  # reboots instance via NMI
     r"^aws\s+ec2\s+reset-image-attribute\b",
-
     # ---- AWS Config — select-resource-config starts an ad-hoc SQL-ish query ----
     r"^aws\s+configservice\s+select-resource-config\b",
     r"^aws\s+configservice\s+select-aggregate-resource-config\b",
-
     # ---- QuickSight — get-dashboard-embed-url mints shareable URLs ----
     r"^aws\s+quicksight\s+get-dashboard-embed-url\b",
     r"^aws\s+quicksight\s+generate-embed-url-for-anonymous-user\b",
     r"^aws\s+quicksight\s+generate-embed-url-for-registered-user\b",
-
     # ---- Support case creation / comment (user-visible side effects) ----
     # "create-case" doesn't match BASE_READ_RULE anyway; listed for clarity.
     # No entry needed — kept in mind for future expansion.
-
     # ---- AWS CLI v2 stream readers that also run code ----
-    r"^aws\s+rds-data\s+execute-statement\b",   # runs SQL against RDS Data API
+    r"^aws\s+rds-data\s+execute-statement\b",  # runs SQL against RDS Data API
     r"^aws\s+rds-data\s+batch-execute-statement\b",
-    r"^aws\s+timestream-query\s+query\b",        # runs Timestream queries (costs money)
+    r"^aws\s+timestream-query\s+query\b",  # runs Timestream queries (costs money)
 ]
 
 
-_COMPILED_ALLOW: list[re.Pattern[str]] = [
-    re.compile(p, re.IGNORECASE) for p in ALLOWED_PATTERNS
-]
+_COMPILED_ALLOW: list[re.Pattern[str]] = [re.compile(p, re.IGNORECASE) for p in ALLOWED_PATTERNS]
 _COMPILED_BLOCK: list[re.Pattern[str]] = [
     re.compile(p, re.IGNORECASE) for p in WRITE_DISGUISED_AS_READ
 ]
@@ -292,8 +275,7 @@ def validate_query_aws(command: str) -> tuple[bool, str]:
     if _SSM_WITH_DECRYPTION.search(stripped):
         return (
             False,
-            "aws ssm get-parameter* with --with-decryption is blocked "
-            "(would leak secrets)",
+            "aws ssm get-parameter* with --with-decryption is blocked (would leak secrets)",
         )
     return True, ""
 

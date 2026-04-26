@@ -13,14 +13,13 @@ commands weren't easy to copy-paste. We:
 3. Render structured recommendations with the same paste-safe ASCII
    command block used for mid-investigation commands.
 """
+
 from __future__ import annotations
 
 import io
-import re
 from dataclasses import dataclass, field
 from typing import Any
 
-import pytest
 from rich.console import Console
 
 
@@ -109,8 +108,7 @@ class TestLayoutOrder:
         assert idx_fix != -1, "missing 'What to do now' header"
         assert idx_root != -1, "missing 'Root cause' header"
         assert idx_fix < idx_root, (
-            "recommendations should render BEFORE root cause in v1.0.5 "
-            "(fix-first layout)"
+            "recommendations should render BEFORE root cause in v1.0.5 (fix-first layout)"
         )
 
     def test_evidence_comes_after_root_cause(self):
@@ -142,12 +140,14 @@ class TestStructuredRecommendations:
         )
 
     def test_urgency_labels_shown(self):
-        out = self._render_recs([
-            {"urgency": "immediate", "description": "Do the thing NOW"},
-            {"urgency": "this_week", "description": "Schedule it"},
-            {"urgency": "this_month", "description": "Plan a project"},
-            {"urgency": "monitoring", "description": "Set an alert"},
-        ])
+        out = self._render_recs(
+            [
+                {"urgency": "immediate", "description": "Do the thing NOW"},
+                {"urgency": "this_week", "description": "Schedule it"},
+                {"urgency": "this_month", "description": "Plan a project"},
+                {"urgency": "monitoring", "description": "Set an alert"},
+            ]
+        )
         assert "NOW" in out
         assert "THIS WEEK" in out
         assert "THIS MONTH" in out
@@ -162,34 +162,33 @@ class TestStructuredRecommendations:
             "--security-policy=acme-block --action=deny-403 "
             "--description='block example DNS flooders'"
         )
-        out = self._render_recs([
-            {
-                "urgency": "immediate",
-                "description": "Drop flood traffic at the edge",
-                "command": cmd,
-            }
-        ])
-        assert cmd in out, (
-            "command was mangled in remediation rendering — "
-            "copy-paste would break"
+        out = self._render_recs(
+            [
+                {
+                    "urgency": "immediate",
+                    "description": "Drop flood traffic at the edge",
+                    "command": cmd,
+                }
+            ]
         )
+        assert cmd in out, "command was mangled in remediation rendering — copy-paste would break"
         # No box-drawing chars anywhere in the output.
         banned = "│─╭╮╰╯┃━┏┓┗┛┌┐└┘"
         offenders = [c for c in banned if c in out]
-        assert not offenders, (
-            f"remediation output contains Unicode borders: {offenders}"
-        )
+        assert not offenders, f"remediation output contains Unicode borders: {offenders}"
 
     def test_verification_command_rendered_separately(self):
         verify = "gcloud compute security-policies describe acme-block --format=json"
-        out = self._render_recs([
-            {
-                "urgency": "immediate",
-                "description": "Create the policy",
-                "command": "gcloud compute security-policies create acme-block",
-                "verification": verify,
-            }
-        ])
+        out = self._render_recs(
+            [
+                {
+                    "urgency": "immediate",
+                    "description": "Create the policy",
+                    "command": "gcloud compute security-policies create acme-block",
+                    "verification": verify,
+                }
+            ]
+        )
         assert "Run this command" in out
         assert "Verify with" in out
         assert verify in out
@@ -197,12 +196,14 @@ class TestStructuredRecommendations:
     def test_description_without_command_still_renders(self):
         """Opus is explicitly told to omit ``command`` when it's not
         sure of the exact syntax — the description stands alone."""
-        out = self._render_recs([
-            {
-                "urgency": "this_week",
-                "description": "Open a ticket with GCP support about the upstream resolver pattern",
-            },
-        ])
+        out = self._render_recs(
+            [
+                {
+                    "urgency": "this_week",
+                    "description": "Open a ticket with GCP support about the upstream resolver pattern",
+                },
+            ]
+        )
         assert "ticket with GCP support" in out
         # No "Run this command" header since no command.
         assert "Run this command" not in out
@@ -210,19 +211,20 @@ class TestStructuredRecommendations:
     def test_urgency_sorted_canonically(self):
         """Regardless of the order Opus emits them, we render in
         immediate → week → month → monitoring order."""
-        out = self._render_recs([
-            {"urgency": "monitoring", "description": "Z monitoring task"},
-            {"urgency": "this_month", "description": "Y monthly task"},
-            {"urgency": "immediate", "description": "A urgent task"},
-            {"urgency": "this_week", "description": "B weekly task"},
-        ])
+        out = self._render_recs(
+            [
+                {"urgency": "monitoring", "description": "Z monitoring task"},
+                {"urgency": "this_month", "description": "Y monthly task"},
+                {"urgency": "immediate", "description": "A urgent task"},
+                {"urgency": "this_week", "description": "B weekly task"},
+            ]
+        )
         ia = out.find("A urgent task")
         ib = out.find("B weekly task")
         iy = out.find("Y monthly task")
         iz = out.find("Z monitoring task")
         assert 0 <= ia < ib < iy < iz, (
-            f"urgency ordering wrong: immediate={ia}, week={ib}, "
-            f"month={iy}, monitoring={iz}"
+            f"urgency ordering wrong: immediate={ia}, week={ib}, month={iy}, monitoring={iz}"
         )
 
 

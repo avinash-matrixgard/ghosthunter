@@ -50,6 +50,7 @@ need to be confirmed by running ``ghosthunter palace tools`` once
 MemPalace is installed. ``_RESOLVED_TOOL_NAMES`` is populated at runtime
 by caching the first successful ``list_tools`` call.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -63,6 +64,7 @@ from typing import Any, Iterable
 try:
     from mcp import ClientSession, StdioServerParameters  # type: ignore
     from mcp.client.stdio import stdio_client  # type: ignore
+
     _HAS_MCP = True
 except ImportError:
     _HAS_MCP = False
@@ -77,6 +79,7 @@ PALACE_ROOT = Path.home() / ".ghosthunter" / "palace"
 @dataclass
 class MemoryHit:
     """One result from a palace search."""
+
     content: str
     wing: str | None = None
     room: str | None = None
@@ -139,6 +142,7 @@ def is_available() -> bool:
     # Cheap check: can we import the mempalace package?
     try:
         import importlib.util
+
         return importlib.util.find_spec("mempalace") is not None
     except Exception:
         return False
@@ -230,8 +234,7 @@ class PalaceClient:
             return PalaceStatus(
                 available=False,
                 reason=(
-                    "mempalace and/or mcp not installed. "
-                    "Run: .venv/bin/pip install mempalace mcp"
+                    "mempalace and/or mcp not installed. Run: .venv/bin/pip install mempalace mcp"
                 ),
                 storage_path=self.storage_path,
             )
@@ -273,9 +276,7 @@ class PalaceClient:
         if not is_available() or not content.strip():
             return False
         try:
-            return asyncio.run(
-                self._remember_once(content, wing, room, hall, source)
-            )
+            return asyncio.run(self._remember_once(content, wing, room, hall, source))
         except Exception:
             return False
 

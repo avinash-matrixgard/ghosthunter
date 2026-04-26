@@ -11,13 +11,13 @@ CLAUDE.md reloads on every Claude turn and eats daily-budget tokens.
 Overflow lands in `docs/internal/*.md` (also gitignored; use
 `@docs/internal/<name>.md` to pull one on-demand).
 """
+
 from __future__ import annotations
 
 import warnings
 from pathlib import Path
 
 import pytest
-
 
 MAX_LINES = 500
 WARN_AT = int(MAX_LINES * 0.8)  # 400

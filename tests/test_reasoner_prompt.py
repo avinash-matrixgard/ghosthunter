@@ -12,6 +12,7 @@ same way — the test here enforces the invariants:
   - Reasoner(provider="aws") composes the system string with the AWS
     block baked in.
 """
+
 from __future__ import annotations
 
 from unittest.mock import MagicMock
@@ -33,7 +34,9 @@ class TestPromptComposition:
     def test_core_prompt_is_provider_agnostic(self):
         core = REASONER_CORE_PROMPT
         # Core stays cloud-neutral — no gcloud / bq / aws mentions.
-        assert "gcloud" not in core.lower() or True  # core doesn't ban words explicitly; assert below
+        assert (
+            "gcloud" not in core.lower() or True
+        )  # core doesn't ban words explicitly; assert below
         # Invariants that actually matter:
         assert "hypothesis" in core.lower()
         assert "next_action" in core or "next_action.type" in core
@@ -118,6 +121,7 @@ class TestReasonerWiresProviderPrompt:
 
         r = Reasoner(client=client, provider=provider)
         import asyncio
+
         asyncio.run(r.step(messages=[{"role": "user", "content": "go"}]))
 
         sent_system = _fake_create.captured["system"]

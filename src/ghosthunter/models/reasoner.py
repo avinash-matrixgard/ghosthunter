@@ -3,6 +3,7 @@
 Opus NEVER sees raw command output — only Sonnet's compressed summaries.
 This keeps Opus focused on reasoning, not parsing JSON.
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -139,6 +140,7 @@ def _load_provider_rules() -> dict[str, str]:
     # providers.* at module-load time.
     from ghosthunter.providers.aws import AWS_REASONER_RULES
     from ghosthunter.providers.gcp import GCP_REASONER_RULES
+
     return {"gcp": GCP_REASONER_RULES, "aws": AWS_REASONER_RULES}
 
 
@@ -317,15 +319,12 @@ class InvestigationStep:
              shapes so the investigator can retry once with a nudge.
         """
         if not isinstance(payload, dict):
-            raise ReasonerSchemaError(
-                f"payload is not a dict (got {type(payload).__name__})"
-            )
+            raise ReasonerSchemaError(f"payload is not a dict (got {type(payload).__name__})")
 
         raw_hypotheses = payload.get("hypotheses", [])
         if not isinstance(raw_hypotheses, list):
             raise ReasonerSchemaError(
-                f"hypotheses is not a list "
-                f"(got {type(raw_hypotheses).__name__})",
+                f"hypotheses is not a list (got {type(raw_hypotheses).__name__})",
                 raw_payload=payload,
             )
 
@@ -342,8 +341,7 @@ class InvestigationStep:
         #     schema slip; raise so the investigator can retry.
         if raw_hypotheses and not hypotheses:
             raise ReasonerSchemaError(
-                f"no valid hypotheses could be parsed from "
-                f"{len(raw_hypotheses)} items",
+                f"no valid hypotheses could be parsed from {len(raw_hypotheses)} items",
                 raw_payload=payload,
             )
 
@@ -446,8 +444,7 @@ def _coerce_next_action(raw: Any, *, fallback_reasoning: str = "") -> NextAction
         return NextAction(
             type="need_info",
             rationale=(
-                fallback_reasoning
-                or f"(Opus returned unknown next_action.type={action_type!r})"
+                fallback_reasoning or f"(Opus returned unknown next_action.type={action_type!r})"
             ),
         )
 
@@ -458,7 +455,9 @@ def _coerce_next_action(raw: Any, *, fallback_reasoning: str = "") -> NextAction
     return NextAction(
         type=action_type,  # type: ignore[arg-type]
         command=raw.get("command") if isinstance(raw.get("command"), str) else None,
-        tests_hypothesis=raw.get("tests_hypothesis") if isinstance(raw.get("tests_hypothesis"), str) else None,
+        tests_hypothesis=raw.get("tests_hypothesis")
+        if isinstance(raw.get("tests_hypothesis"), str)
+        else None,
         rationale=raw.get("rationale") if isinstance(raw.get("rationale"), str) else None,
         conclusion=conclusion,
     )
@@ -483,9 +482,7 @@ class ReasonerSchemaError(ReasonerError):
         raw_payload: The offending payload (or None), for diagnostics.
     """
 
-    def __init__(
-        self, detail: str, raw_payload: dict[str, Any] | None = None
-    ) -> None:
+    def __init__(self, detail: str, raw_payload: dict[str, Any] | None = None) -> None:
         super().__init__(detail)
         self.detail = detail
         self.raw_payload = raw_payload
@@ -508,6 +505,7 @@ class Reasoner:
     ) -> None:
         if client is None:
             from anthropic import AsyncAnthropic  # lazy import
+
             client = AsyncAnthropic()
         self.client = client
         self.model = model
@@ -515,9 +513,7 @@ class Reasoner:
         self.provider = provider
         self.system_prompt = build_system_prompt(provider)
 
-    async def step(
-        self, messages: list[dict[str, Any]]
-    ) -> InvestigationStep:
+    async def step(self, messages: list[dict[str, Any]]) -> InvestigationStep:
         """Run one reasoning turn and return the structured step.
 
         Transient Anthropic API failures (429 rate limit, 529 overloaded,
@@ -544,6 +540,4 @@ class Reasoner:
             if getattr(block, "type", None) == "tool_use" and block.name == "investigation_step":
                 return InvestigationStep.from_tool_input(block.input)
 
-        raise ReasonerError(
-            "Opus did not return an investigation_step tool call"
-        )
+        raise ReasonerError("Opus did not return an investigation_step tool call")

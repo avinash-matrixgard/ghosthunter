@@ -4,6 +4,7 @@ Moved verbatim from the old flat `allowlist.py` as part of the provider
 split. The dispatcher in `allowlist.py` routes GCP commands here; AWS
 commands go to `allowlist_aws`.
 """
+
 from __future__ import annotations
 
 import re
@@ -19,7 +20,6 @@ ALLOWED_PATTERNS: list[str] = [
     r"^bq\s+show\b",
     r"^bq\s+head\b",
     r"^bq\s+query\s+.*['\"]\s*SELECT\b",  # SELECT only; flexible flag ordering
-
     # ---- Compute Engine ----
     r"^gcloud\s+compute\s+instances\s+list\b",
     r"^gcloud\s+compute\s+instances\s+describe\b",
@@ -33,7 +33,6 @@ ALLOWED_PATTERNS: list[str] = [
     r"^gcloud\s+compute\s+images\s+list\b",
     r"^gcloud\s+compute\s+zones\s+list\b",
     r"^gcloud\s+compute\s+regions\s+list\b",
-
     # ---- Networking ----
     r"^gcloud\s+compute\s+networks\s+list\b",
     r"^gcloud\s+compute\s+networks\s+describe\b",
@@ -54,7 +53,6 @@ ALLOWED_PATTERNS: list[str] = [
     r"^gcloud\s+compute\s+url-maps\s+list\b",
     r"^gcloud\s+compute\s+vpn-gateways\s+list\b",
     r"^gcloud\s+compute\s+vpn-tunnels\s+list\b",
-
     # ---- GKE ----
     r"^gcloud\s+container\s+clusters\s+list\b",
     r"^gcloud\s+container\s+clusters\s+describe\b",
@@ -62,7 +60,6 @@ ALLOWED_PATTERNS: list[str] = [
     r"^gcloud\s+container\s+node-pools\s+describe\b",
     r"^gcloud\s+container\s+operations\s+list\b",
     r"^gcloud\s+container\s+images\s+list\b",
-
     # ---- Cloud Storage (metadata only) ----
     r"^gcloud\s+storage\s+buckets\s+list\b",
     r"^gcloud\s+storage\s+buckets\s+describe\b",
@@ -70,14 +67,12 @@ ALLOWED_PATTERNS: list[str] = [
     r"^gsutil\s+ls\b",
     r"^gsutil\s+du\b",
     r"^gsutil\s+stat\b",
-
     # ---- Cloud SQL ----
     r"^gcloud\s+sql\s+instances\s+list\b",
     r"^gcloud\s+sql\s+instances\s+describe\b",
     r"^gcloud\s+sql\s+databases\s+list\b",
     r"^gcloud\s+sql\s+backups\s+list\b",
     r"^gcloud\s+sql\s+operations\s+list\b",
-
     # ---- Cloud Functions / Run ----
     r"^gcloud\s+functions\s+list\b",
     r"^gcloud\s+functions\s+describe\b",
@@ -85,7 +80,6 @@ ALLOWED_PATTERNS: list[str] = [
     r"^gcloud\s+run\s+services\s+list\b",
     r"^gcloud\s+run\s+services\s+describe\b",
     r"^gcloud\s+run\s+revisions\s+list\b",
-
     # ---- Logging ----
     r"^gcloud\s+logging\s+read\b",
     r"^gcloud\s+logging\s+logs\s+list\b",
@@ -93,7 +87,6 @@ ALLOWED_PATTERNS: list[str] = [
     r"^gcloud\s+logging\s+metrics\s+describe\b",
     r"^gcloud\s+logging\s+sinks\s+list\b",
     r"^gcloud\s+logging\s+resource-descriptors\s+list\b",
-
     # ---- Monitoring ----
     r"^gcloud\s+monitoring\s+dashboards\s+list\b",
     r"^gcloud\s+monitoring\s+dashboards\s+describe\b",
@@ -101,13 +94,11 @@ ALLOWED_PATTERNS: list[str] = [
     r"^gcloud\s+monitoring\s+channels\s+list\b",
     r"^gcloud\s+monitoring\s+policies\s+list\b",
     r"^gcloud\s+monitoring\s+policies\s+describe\b",
-
     # ---- DNS ----
     r"^gcloud\s+dns\s+managed-zones\s+list\b",
     r"^gcloud\s+dns\s+managed-zones\s+describe\b",
     r"^gcloud\s+dns\s+record-sets\s+list\b",
     r"^gcloud\s+dns\s+policies\s+list\b",
-
     # ---- IAM (read-only) ----
     r"^gcloud\s+iam\s+service-accounts\s+list\b",
     r"^gcloud\s+iam\s+service-accounts\s+describe\b",
@@ -116,13 +107,11 @@ ALLOWED_PATTERNS: list[str] = [
     r"^gcloud\s+projects\s+get-iam-policy\b",
     r"^gcloud\s+projects\s+list\b",
     r"^gcloud\s+projects\s+describe\b",
-
     # ---- Pub/Sub ----
     r"^gcloud\s+pubsub\s+topics\s+list\b",
     r"^gcloud\s+pubsub\s+topics\s+describe\b",
     r"^gcloud\s+pubsub\s+subscriptions\s+list\b",
     r"^gcloud\s+pubsub\s+subscriptions\s+describe\b",
-
     # ---- Config / Auth ----
     r"^gcloud\s+config\s+list\b",
     r"^gcloud\s+config\s+get-value\b",
@@ -141,8 +130,16 @@ def matches_allowlist_gcp(command_head: str) -> bool:
 
 # Keywords that may not appear anywhere in a `bq query` payload.
 BQ_FORBIDDEN_KEYWORDS = (
-    "INSERT", "UPDATE", "DELETE", "DROP", "CREATE",
-    "ALTER", "TRUNCATE", "GRANT", "REVOKE", "MERGE",
+    "INSERT",
+    "UPDATE",
+    "DELETE",
+    "DROP",
+    "CREATE",
+    "ALTER",
+    "TRUNCATE",
+    "GRANT",
+    "REVOKE",
+    "MERGE",
 )
 
 

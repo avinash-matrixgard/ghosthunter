@@ -14,6 +14,7 @@ Provider-neutral data types (`CostSpike`, `CommandResult`) and the shared
 error hierarchy live here. Concrete provider modules import from `.base`
 and re-export these for back-compat with existing import sites.
 """
+
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
@@ -35,6 +36,7 @@ class CostSpike:
     Populated by the billing-file provider when extra columns are present;
     empty in pure single-file mode.
     """
+
     service: str
     current_cost: float
     previous_cost: float
@@ -65,6 +67,7 @@ class CostSpike:
 @dataclass
 class CommandResult:
     """Result of executing a shell command in the sandbox."""
+
     command: str
     stdout: str
     stderr: str

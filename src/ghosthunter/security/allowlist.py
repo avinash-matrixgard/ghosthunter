@@ -10,6 +10,7 @@ Backward-compatible: the original module-level names `matches_allowlist`,
 resolve to the GCP ruleset, so existing callers and tests keep working
 without edits.
 """
+
 from __future__ import annotations
 
 from ghosthunter.security.allowlist_aws import (

@@ -29,19 +29,12 @@ Inside an investigation, the AdvisorProvider's prompt also accepts:
     /hypotheses      show current hypothesis state
     /quit            end investigation, return to spike picker
 """
+
 from __future__ import annotations
 
 import asyncio
 import glob as glob_mod
 import shlex
-
-from ghosthunter.chat_io import read_line
-from ghosthunter.memory import (
-    MemoryHit,
-    default_wing_for_files,
-    get_palace,
-    is_available as palace_is_available,
-)
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
@@ -51,6 +44,7 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
+from ghosthunter.chat_io import read_line
 from ghosthunter.evidence import Evidence
 from ghosthunter.hypothesis import Hypothesis
 from ghosthunter.investigator import (
@@ -59,6 +53,14 @@ from ghosthunter.investigator import (
     InvestigationResult,
     Investigator,
     PendingCommand,
+)
+from ghosthunter.memory import (
+    MemoryHit,
+    default_wing_for_files,
+    get_palace,
+)
+from ghosthunter.memory import (
+    is_available as palace_is_available,
 )
 from ghosthunter.models.executor import Executor
 from ghosthunter.models.reasoner import Reasoner
@@ -230,9 +232,7 @@ def _print_mode_picker(console: Console) -> None:
         console.print(f"     [{desc_style}]{mode.description}[/{desc_style}]")
         console.print()
 
-    console.print(
-        f"  [dim]q.[/dim]  Quit"
-    )
+    console.print("  [dim]q.[/dim]  Quit")
     console.print()
 
 
@@ -251,15 +251,11 @@ def _pick_mode(console: Console) -> ModeOption | None:
         try:
             idx = int(answer) - 1
         except ValueError:
-            console.print(
-                f"[yellow]Not a number: '{answer}'. Pick 1-{len(MODES)} or q.[/yellow]\n"
-            )
+            console.print(f"[yellow]Not a number: '{answer}'. Pick 1-{len(MODES)} or q.[/yellow]\n")
             continue
 
         if idx < 0 or idx >= len(MODES):
-            console.print(
-                f"[yellow]Out of range. Pick 1-{len(MODES)} or q.[/yellow]\n"
-            )
+            console.print(f"[yellow]Out of range. Pick 1-{len(MODES)} or q.[/yellow]\n")
             continue
 
         mode = MODES[idx]
@@ -298,14 +294,17 @@ def run_chat(
             return
         if mode.key == "demo":
             from ghosthunter.demo import run_demo
+
             asyncio.run(run_demo(console))
             return
         if mode.key == "audit":
             from ghosthunter.cli import _render_audit_table
+
             _render_audit_table(console)
             return
         if mode.key == "active":
             from ghosthunter.cli import _run_active_mode_interactive
+
             _run_active_mode_interactive(console)
             return
         chosen_mode_key = mode.key
@@ -375,27 +374,21 @@ def _dispatch_slash(session: ChatSession, line: str) -> None:
             return
         expanded = _expand_paths(args)
         if not expanded:
-            session.console.print(
-                f"[red]No files matched: {' '.join(args)}[/red]"
-            )
+            session.console.print(f"[red]No files matched: {' '.join(args)}[/red]")
             return
         _cmd_load(session, expanded)
         return
 
     if cmd == "/list":
         if not session.spikes:
-            session.console.print(
-                "[yellow]No spikes loaded. Use /load FILE first.[/yellow]"
-            )
+            session.console.print("[yellow]No spikes loaded. Use /load FILE first.[/yellow]")
             return
         _render_spike_table(session.console, session.spikes)
         return
 
     if cmd == "/spike":
         if not session.spikes:
-            session.console.print(
-                "[yellow]No spikes loaded. Use /load FILE first.[/yellow]"
-            )
+            session.console.print("[yellow]No spikes loaded. Use /load FILE first.[/yellow]")
             return
         if not args:
             session.console.print("[yellow]Usage: /spike N[/yellow]")
@@ -407,7 +400,7 @@ def _dispatch_slash(session: ChatSession, line: str) -> None:
             return
         if n < 0 or n >= len(session.spikes):
             session.console.print(
-                f"[yellow]Spike index out of range (0-{len(session.spikes)-1})[/yellow]"
+                f"[yellow]Spike index out of range (0-{len(session.spikes) - 1})[/yellow]"
             )
             return
         _cmd_investigate(session, session.spikes[n])
@@ -439,9 +432,7 @@ def _dispatch_slash(session: ChatSession, line: str) -> None:
         _cmd_palace_status(session)
         return
 
-    session.console.print(
-        f"[yellow]Unknown command '{cmd}'. Type /help.[/yellow]"
-    )
+    session.console.print(f"[yellow]Unknown command '{cmd}'. Type /help.[/yellow]")
 
 
 # ---------------------------------------------------------------------------
@@ -464,9 +455,7 @@ def _cmd_recall(session: ChatSession, query: str) -> None:
         return
     session.console.print(
         Panel(
-            "\n".join(
-                f"• {_format_hit(h)}" for h in hits
-            ),
+            "\n".join(f"• {_format_hit(h)}" for h in hits),
             title=f"[cyan]recall[/cyan]  '{query}'  —  wing: {session.wing}",
             border_style="cyan",
         )
@@ -490,9 +479,7 @@ def _cmd_remember(session: ChatSession, text: str) -> None:
             f"[green]✓[/green] remembered in wing [bold]{session.wing}[/bold]: {text}"
         )
     else:
-        session.console.print(
-            "[red]failed to save memory — run /palace to check status[/red]"
-        )
+        session.console.print("[red]failed to save memory — run /palace to check status[/red]")
 
 
 def _cmd_palace_status(session: ChatSession) -> None:
@@ -523,8 +510,7 @@ def _cmd_palace_status(session: ChatSession) -> None:
 
 def _print_palace_unavailable(session: ChatSession) -> None:
     session.console.print(
-        "[yellow]Memory palace is not available. "
-        "Run /palace for details.[/yellow]"
+        "[yellow]Memory palace is not available. Run /palace for details.[/yellow]"
     )
 
 
@@ -567,8 +553,7 @@ def _render_startup_recall(session: ChatSession) -> None:
     session.console.print(
         Panel(
             "\n".join(lines),
-            title=f"[cyan]Palace recall[/cyan]  wing: {session.wing}  "
-                  f"({len(hits)} hits)",
+            title=f"[cyan]Palace recall[/cyan]  wing: {session.wing}  ({len(hits)} hits)",
             border_style="cyan",
             subtitle="[dim]use /recall <query> to search for more[/dim]",
         )
@@ -601,6 +586,7 @@ def _expand_paths(args: list[str]) -> list[Path]:
         expanded = str(Path(raw).expanduser())
         # Also expand environment variables
         import os
+
         expanded = os.path.expandvars(expanded)
 
         if any(ch in expanded for ch in "*?["):
@@ -633,6 +619,7 @@ def _cmd_load(session: ChatSession, files: list[Path]) -> None:
     # cycles in import order). If all files signal AWS, switch the session;
     # otherwise leave provider as whatever the mode picker set.
     from ghosthunter.cli import _sniff_provider_from_file
+
     sniffed = {_sniff_provider_from_file(f) for f in files}
     sniffed.discard(None)
     if sniffed == {"aws"} and session.provider != "aws":
@@ -653,9 +640,7 @@ def _cmd_load(session: ChatSession, files: list[Path]) -> None:
     )
 
 
-def _build_billing_context(
-    session: ChatSession, spike: CostSpike | None = None
-) -> str:
+def _build_billing_context(session: ChatSession, spike: CostSpike | None = None) -> str:
     """Describe the data Opus has up front. Important: tells Opus what's
     knowable from the billing files vs. what it has to ask the user.
 
@@ -668,8 +653,7 @@ def _build_billing_context(
     groupings = sorted({getattr(s, "grouping", "service") for s in session.spikes})
 
     parts = [
-        f"The user uploaded {len(session.loaded_files)} billing file(s):\n"
-        f"{file_list}\n",
+        f"The user uploaded {len(session.loaded_files)} billing file(s):\n{file_list}\n",
         f"From these files, Ghosthunter detected {len(session.spikes)} spikes "
         f"grouped by: {', '.join(groupings)}.\n",
         "IMPORTANT: separate Console-export files cannot be joined. If a row "
@@ -689,9 +673,7 @@ def _build_billing_context(
     return "\n".join(parts)
 
 
-def _recall_memories_for_spike(
-    session: ChatSession, spike: CostSpike
-) -> str | None:
+def _recall_memories_for_spike(session: ChatSession, spike: CostSpike) -> str | None:
     """Query the palace for prior knowledge about this spike, return
     a block suitable for appending to the initial Opus prompt."""
     palace = get_palace()
@@ -724,9 +706,7 @@ def _recall_memories_for_spike(
     return "\n".join(lines)
 
 
-def _save_conclusion_to_palace(
-    session: ChatSession, spike: CostSpike, result
-) -> None:
+def _save_conclusion_to_palace(session: ChatSession, spike: CostSpike, result) -> None:
     """Auto-save the conclusion of a successful investigation."""
     if not session.memory_enabled:
         return
@@ -760,9 +740,7 @@ def _save_conclusion_to_palace(
         source="auto-save on conclude",
     )
     if ok:
-        session.console.print(
-            f"[dim]✓ conclusion saved to palace wing '{session.wing}'[/dim]"
-        )
+        session.console.print(f"[dim]✓ conclusion saved to palace wing '{session.wing}'[/dim]")
 
 
 def _cmd_investigate(session: ChatSession, spike: CostSpike) -> None:
@@ -776,8 +754,7 @@ def _cmd_investigate(session: ChatSession, spike: CostSpike) -> None:
         label = f"[{getattr(spike, 'grouping', 'service')}] {spike.service}"
         session.console.print(
             Panel(
-                f"[bold]Investigating[/bold] {label}\n"
-                f"Current cost: ${spike.current_cost:,.2f}",
+                f"[bold]Investigating[/bold] {label}\nCurrent cost: ${spike.current_cost:,.2f}",
                 border_style="bright_yellow",
             )
         )
@@ -800,16 +777,14 @@ def _cmd_investigate(session: ChatSession, spike: CostSpike) -> None:
             if target < 0 or target >= len(session.spikes):
                 session.console.print(
                     f"[red]Spike index {target} out of range "
-                    f"(0-{len(session.spikes)-1}). Staying here.[/red]"
+                    f"(0-{len(session.spikes) - 1}). Staying here.[/red]"
                 )
                 # Resume the previous investigation? No — it's already
                 # been torn down. Drop back to the chat prompt.
                 return
             new_spike = session.spikes[target]
             new_label = f"[{getattr(new_spike, 'grouping', 'service')}] {new_spike.service}"
-            session.console.print(
-                f"[cyan]→ switching to spike {target}: {new_label}[/cyan]\n"
-            )
+            session.console.print(f"[cyan]→ switching to spike {target}: {new_label}[/cyan]\n")
             spike = new_spike
             continue
         except Exception as exc:  # noqa: BLE001 — show and recover
@@ -847,9 +822,7 @@ def _make_memory_hook(session: ChatSession, spike: CostSpike):
                 source=source,
             )
             if ok:
-                session.console.print(
-                    f"[dim]✓ saved to palace ({hall})[/dim]"
-                )
+                session.console.print(f"[dim]✓ saved to palace ({hall})[/dim]")
         except Exception:
             pass
 
@@ -944,6 +917,7 @@ async def _on_event(session: ChatSession, event: InvestigationEvent) -> None:
 
     elif kind == "command_blocked":
         from ghosthunter.ui import render_command_blocked
+
         render_command_blocked(
             c,
             command=payload.get("command"),
@@ -959,8 +933,7 @@ async def _on_event(session: ChatSession, event: InvestigationEvent) -> None:
     elif kind == "command_executed":
         result = payload["result"]
         c.print(
-            f"[dim]received {len(result.stdout):,} chars in "
-            f"{result.duration_seconds:.1f}s[/dim]"
+            f"[dim]received {len(result.stdout):,} chars in {result.duration_seconds:.1f}s[/dim]"
         )
 
     elif kind == "evidence_added":
@@ -976,9 +949,7 @@ async def _on_event(session: ChatSession, event: InvestigationEvent) -> None:
         )
 
     elif kind == "user_note":
-        c.print(
-            f"[cyan]→ note sent to Opus:[/cyan] {payload['note']}"
-        )
+        c.print(f"[cyan]→ note sent to Opus:[/cyan] {payload['note']}")
 
     elif kind == "command_rejected_by_user":
         c.print("[yellow]→ command skipped[/yellow]")
@@ -1120,9 +1091,12 @@ def _render_hypotheses(console: Console, hypotheses: list[Hypothesis]) -> None:
     console.print()
     for h in hypotheses:
         confidence_color = (
-            "bright_green" if h.confidence >= 85
-            else "green" if h.confidence >= 60
-            else "yellow" if h.confidence >= 30
+            "bright_green"
+            if h.confidence >= 85
+            else "green"
+            if h.confidence >= 60
+            else "yellow"
+            if h.confidence >= 30
             else "red"
         )
         bar_full = h.confidence // 5
@@ -1139,8 +1113,7 @@ def _render_result(console: Console, result: InvestigationResult) -> None:
     if result.succeeded and result.conclusion:
         c = result.conclusion
         body_parts = [
-            f"[bold]Root cause:[/bold] [bright_green]"
-            f"{c.get('root_cause', '?')}[/bright_green]",
+            f"[bold]Root cause:[/bold] [bright_green]{c.get('root_cause', '?')}[/bright_green]",
             f"[bold]Confidence:[/bold] {c.get('confidence', '?')}%",
         ]
         if c.get("evidence_summary"):
@@ -1179,9 +1152,7 @@ def _render_result(console: Console, result: InvestigationResult) -> None:
     )
 
 
-def _render_history(
-    console: Console, history: list[SessionHistoryEntry]
-) -> None:
+def _render_history(console: Console, history: list[SessionHistoryEntry]) -> None:
     if not history:
         console.print("[dim]No investigations yet this session.[/dim]")
         return
@@ -1205,9 +1176,7 @@ def _render_history(
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
-def _record_history(
-    session: ChatSession, label: str, result: InvestigationResult
-) -> None:
+def _record_history(session: ChatSession, label: str, result: InvestigationResult) -> None:
     summary = (
         result.conclusion.get("root_cause", "—")
         if result.succeeded and result.conclusion

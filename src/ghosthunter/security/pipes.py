@@ -3,6 +3,7 @@
 After the leading command is matched against the allowlist, any pipe
 segments must target a known-safe utility (head, wc, jq, grep, ...).
 """
+
 import re
 
 SAFE_PIPE_TARGETS: list[str] = [
@@ -23,9 +24,24 @@ _COMPILED = [re.compile(p) for p in SAFE_PIPE_TARGETS]
 # Explicitly forbidden pipe targets — listed for clarity even though
 # anything not in SAFE_PIPE_TARGETS is rejected by default.
 BLOCKED_PIPE_TARGETS = {
-    "curl", "wget", "nc", "netcat", "bash", "sh", "zsh",
-    "python", "python3", "node", "xargs", "tee", "dd",
-    "mail", "sendmail", "ssh", "scp", "eval",
+    "curl",
+    "wget",
+    "nc",
+    "netcat",
+    "bash",
+    "sh",
+    "zsh",
+    "python",
+    "python3",
+    "node",
+    "xargs",
+    "tee",
+    "dd",
+    "mail",
+    "sendmail",
+    "ssh",
+    "scp",
+    "eval",
 }
 
 

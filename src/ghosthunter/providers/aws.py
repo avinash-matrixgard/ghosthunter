@@ -15,6 +15,7 @@ Phase 4 will fill ``fetch_billing_spikes()`` with a boto3 Cost Explorer
 implementation. Until then the method raises a clear NotImplementedError
 pointing at advisor mode.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -36,6 +37,7 @@ from ghosthunter.security.validator import SecurityValidator
 # AWS users should be able to run Ghosthunter without boto3 installed.
 try:
     import boto3  # type: ignore
+
     _BOTO3_AVAILABLE = True
 except ImportError:
     _BOTO3_AVAILABLE = False
@@ -145,10 +147,7 @@ class AWSProvider(BaseProvider):
             else:
                 pct = float("inf") if cur > 0 else 0.0
             absolute = cur - prev
-            material = (
-                abs(pct) >= min_change_percent
-                or abs(absolute) >= min_absolute_change
-            )
+            material = abs(pct) >= min_change_percent or abs(absolute) >= min_absolute_change
             if not material:
                 continue
             spikes.append(
@@ -169,7 +168,10 @@ class AWSProvider(BaseProvider):
         # calls ($0.01 each) on noise.
         if followup_usage_type:
             for spike in spikes:
-                if spike.previous_cost < min_absolute_change and spike.current_cost < min_absolute_change * 2:
+                if (
+                    spike.previous_cost < min_absolute_change
+                    and spike.current_cost < min_absolute_change * 2
+                ):
                     continue
                 try:
                     breakdown = self._ce_usage_type_for_service(
@@ -208,9 +210,7 @@ class AWSProvider(BaseProvider):
         # default region (us-west-2 etc.) without confusing CE.
         return session.client("ce", region_name="us-east-1")
 
-    def _ce_service_totals(
-        self, ce: Any, start: date, end: date
-    ) -> dict[str, float]:
+    def _ce_service_totals(self, ce: Any, start: date, end: date) -> dict[str, float]:
         """Return {service_name: unblended_cost} aggregated over the window."""
         self._notify_ce_call(
             "get_cost_and_usage_by_service",
@@ -232,9 +232,7 @@ class AWSProvider(BaseProvider):
                         continue
                     service = keys[0]
                     metrics = group.get("Metrics") or {}
-                    amt_str = (
-                        metrics.get("UnblendedCost", {}).get("Amount") or "0"
-                    )
+                    amt_str = metrics.get("UnblendedCost", {}).get("Amount") or "0"
                     try:
                         amt = float(amt_str)
                     except (TypeError, ValueError):
@@ -243,9 +241,7 @@ class AWSProvider(BaseProvider):
             next_token = response.get("NextPageToken")
             if not next_token:
                 break
-            response = ce.get_cost_and_usage(
-                **{**params, "NextPageToken": next_token}
-            )
+            response = ce.get_cost_and_usage(**{**params, "NextPageToken": next_token})
         return totals
 
     def _ce_usage_type_for_service(
@@ -279,9 +275,7 @@ class AWSProvider(BaseProvider):
                         continue
                     usage = keys[0]
                     metrics = group.get("Metrics") or {}
-                    amt_str = (
-                        metrics.get("UnblendedCost", {}).get("Amount") or "0"
-                    )
+                    amt_str = metrics.get("UnblendedCost", {}).get("Amount") or "0"
                     try:
                         amt = float(amt_str)
                     except (TypeError, ValueError):
@@ -290,9 +284,7 @@ class AWSProvider(BaseProvider):
             next_token = response.get("NextPageToken")
             if not next_token:
                 break
-            response = ce.get_cost_and_usage(
-                **{**params, "NextPageToken": next_token}
-            )
+            response = ce.get_cost_and_usage(**{**params, "NextPageToken": next_token})
         ranked = sorted(totals.items(), key=lambda kv: kv[1], reverse=True)
         return ranked[:limit]
 

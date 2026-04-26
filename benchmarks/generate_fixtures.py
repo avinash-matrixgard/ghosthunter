@@ -15,6 +15,7 @@ CSV schema (FOCUS 1.0 — cross-cloud):
     ChargePeriodStart, ServiceName, SkuId, SubAccountId, RegionId,
     ProviderName, BilledCost
 """
+
 from __future__ import annotations
 
 import csv
@@ -25,7 +26,6 @@ from datetime import date, timedelta
 from pathlib import Path
 
 from scenarios import SCENARIOS, Scenario
-
 
 FIXTURES_DIR = Path(__file__).parent / "spikes"
 BASELINE_DAYS = 30
@@ -42,14 +42,24 @@ PROVIDER_NAMES = {
 # SKUs to sprinkle on the non-target "background" services so the CSV has
 # variety. Deterministic via the seeded RNG.
 _GCP_BACKGROUND_SKUS = (
-    "E2 Instance Core", "N1 Standard Core", "SSD Capacity",
-    "Storage Standard Class A Operations", "Network Egress", "Log Volume",
-    "Query Analysis", "Shared VPC",
+    "E2 Instance Core",
+    "N1 Standard Core",
+    "SSD Capacity",
+    "Storage Standard Class A Operations",
+    "Network Egress",
+    "Log Volume",
+    "Query Analysis",
+    "Shared VPC",
 )
 _AWS_BACKGROUND_SKUS = (
-    "BoxUsage:t3.medium", "BoxUsage:m5.large", "TimedStorage-ByteHrs",
-    "DataTransfer-Out-Bytes", "InvokeRequest", "DataProcessing-Bytes",
-    "RunInstances:0002", "Requests-Tier1",
+    "BoxUsage:t3.medium",
+    "BoxUsage:m5.large",
+    "TimedStorage-ByteHrs",
+    "DataTransfer-Out-Bytes",
+    "InvokeRequest",
+    "DataProcessing-Bytes",
+    "RunInstances:0002",
+    "Requests-Tier1",
 )
 _REGIONS = {
     "gcp": ("us-central1", "us-east1", "europe-west1", "asia-southeast1"),
@@ -74,10 +84,7 @@ def _rows_for(scenario: Scenario) -> list[dict[str, str]]:
     rng = random.Random(_seed_for(scenario.id))
     provider = PROVIDER_NAMES[scenario.provider]
     region_pool = _REGIONS[scenario.provider]
-    bg_skus = (
-        _GCP_BACKGROUND_SKUS if scenario.provider == "gcp"
-        else _AWS_BACKGROUND_SKUS
-    )
+    bg_skus = _GCP_BACKGROUND_SKUS if scenario.provider == "gcp" else _AWS_BACKGROUND_SKUS
 
     target_sku = scenario.sku or "Usage"
     target_region = scenario.region or region_pool[0]
@@ -86,8 +93,7 @@ def _rows_for(scenario: Scenario) -> list[dict[str, str]]:
     # Background services: filter out any that collide with the target
     # service name so we don't double-book.
     background = [
-        (name, cost) for (name, cost) in scenario.other_services
-        if name != scenario.spike.service
+        (name, cost) for (name, cost) in scenario.other_services if name != scenario.spike.service
     ]
 
     rows: list[dict[str, str]] = []
@@ -107,28 +113,32 @@ def _rows_for(scenario: Scenario) -> list[dict[str, str]]:
             scenario.baseline_daily_cost * target_multiplier,
             NOISE_SPIKE,
         )
-        rows.append({
-            "ChargePeriodStart": day.isoformat(),
-            "ServiceName": scenario.spike.service,
-            "SkuId": target_sku,
-            "SubAccountId": target_account,
-            "RegionId": target_region,
-            "ProviderName": provider,
-            "BilledCost": f"{target_cost:.2f}",
-        })
+        rows.append(
+            {
+                "ChargePeriodStart": day.isoformat(),
+                "ServiceName": scenario.spike.service,
+                "SkuId": target_sku,
+                "SubAccountId": target_account,
+                "RegionId": target_region,
+                "ProviderName": provider,
+                "BilledCost": f"{target_cost:.2f}",
+            }
+        )
 
         # -- background services (flat ±10%)
-        for (bg_name, bg_base) in background:
+        for bg_name, bg_base in background:
             bg_cost = _noisy(rng, bg_base, NOISE_BASELINE)
-            rows.append({
-                "ChargePeriodStart": day.isoformat(),
-                "ServiceName": bg_name,
-                "SkuId": rng.choice(bg_skus),
-                "SubAccountId": f"{scenario.provider}-bg-{rng.randint(1, 3)}",
-                "RegionId": rng.choice(region_pool),
-                "ProviderName": provider,
-                "BilledCost": f"{bg_cost:.2f}",
-            })
+            rows.append(
+                {
+                    "ChargePeriodStart": day.isoformat(),
+                    "ServiceName": bg_name,
+                    "SkuId": rng.choice(bg_skus),
+                    "SubAccountId": f"{scenario.provider}-bg-{rng.randint(1, 3)}",
+                    "RegionId": rng.choice(region_pool),
+                    "ProviderName": provider,
+                    "BilledCost": f"{bg_cost:.2f}",
+                }
+            )
 
     return rows
 
@@ -140,13 +150,9 @@ def _ground_truth(scenario: Scenario) -> dict:
     # from the CSV, not these predicted figures.
     if scenario.spike.direction == "up":
         expected_previous = scenario.baseline_daily_cost * BASELINE_DAYS
-        expected_current = (
-            scenario.baseline_daily_cost * scenario.spike_factor * SPIKE_DAYS
-        )
+        expected_current = scenario.baseline_daily_cost * scenario.spike_factor * SPIKE_DAYS
     else:
-        expected_previous = (
-            scenario.baseline_daily_cost * scenario.spike_factor * BASELINE_DAYS
-        )
+        expected_previous = scenario.baseline_daily_cost * scenario.spike_factor * BASELINE_DAYS
         expected_current = scenario.baseline_daily_cost * SPIKE_DAYS
     return {
         "id": scenario.id,
@@ -163,7 +169,8 @@ def _ground_truth(scenario: Scenario) -> dict:
             "expected_previous_cost_approx": round(expected_previous, 2),
             "expected_current_cost_approx": round(expected_current, 2),
         },
-        "root_cause": asdict(scenario.root_cause) | {
+        "root_cause": asdict(scenario.root_cause)
+        | {
             "evidence_keywords": list(scenario.root_cause.evidence_keywords),
         },
     }

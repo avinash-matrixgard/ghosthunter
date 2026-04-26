@@ -39,23 +39,23 @@ Coverage:
 - Output truncation at ``max_output_bytes``.
 - Legacy ``/paste`` block terminated by ``###``.
 """
+
 from __future__ import annotations
 
 import asyncio
 import io
-from pathlib import Path
 from unittest.mock import MagicMock
 
 import pytest
 from rich.console import Console
 
 from ghosthunter.providers.advisor import (
+    EOF_MARKER,
     AdvisorAborted,
     AdvisorNote,
     AdvisorProvider,
     AdvisorSkipped,
     AdvisorSpikeSwitch,
-    EOF_MARKER,
 )
 from ghosthunter.providers.base import (
     CommandRejectedError,
@@ -213,21 +213,24 @@ class TestExecuteCommandSlashExceptions:
 # _looks_like_command_output heuristic
 # ---------------------------------------------------------------------------
 class TestLooksLikeCommandOutput:
-    @pytest.mark.parametrize("text,expected", [
-        # Positives
-        ("line1\nline2", True),                  # multi-line
-        ("x" * 301, True),                       # long
-        ("{ \"key\": \"val\" }", True),           # JSON object
-        ("[1, 2, 3]", True),                     # JSON array
-        ("a|b|c|d|e", True),                     # 4 pipes
-        ("foo\tbar\tbaz", True),                 # 2 tabs
-        # Negatives
-        ("short prose", False),
-        ("what's the region?", False),
-        ("it's broken", False),
-        ("a|b", False),                          # only 1 pipe
-        ("", False),
-    ])
+    @pytest.mark.parametrize(
+        "text,expected",
+        [
+            # Positives
+            ("line1\nline2", True),  # multi-line
+            ("x" * 301, True),  # long
+            ('{ "key": "val" }', True),  # JSON object
+            ("[1, 2, 3]", True),  # JSON array
+            ("a|b|c|d|e", True),  # 4 pipes
+            ("foo\tbar\tbaz", True),  # 2 tabs
+            # Negatives
+            ("short prose", False),
+            ("what's the region?", False),
+            ("it's broken", False),
+            ("a|b", False),  # only 1 pipe
+            ("", False),
+        ],
+    )
     def test_heuristic(self, text, expected):
         assert AdvisorProvider._looks_like_command_output(text) is expected
 
@@ -353,13 +356,16 @@ class TestAskUser:
 class TestLegacyPasteBlock:
     def test_paste_block_terminated_by_marker(self, monkeypatch):
         advisor = _make_advisor()
-        _script_prompt(monkeypatch, [
-            "/paste",
-            "line a",
-            "line b",
-            "line c",
-            EOF_MARKER,
-        ])
+        _script_prompt(
+            monkeypatch,
+            [
+                "/paste",
+                "line a",
+                "line b",
+                "line c",
+                EOF_MARKER,
+            ],
+        )
         result = asyncio.run(advisor.execute_command("aws ec2 describe-instances"))
         assert "line a" in result.stdout
         assert "line b" in result.stdout

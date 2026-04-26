@@ -6,6 +6,7 @@ Commands:
     demo        — replay a bundled investigation (no API calls, no GCP)
     audit       — show the audit log of past investigations
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -14,7 +15,7 @@ import os
 import time
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 import typer
 from rich.console import Console
@@ -40,14 +41,14 @@ from ghosthunter.investigator import (
 from ghosthunter.models.executor import Executor
 from ghosthunter.models.reasoner import Reasoner
 from ghosthunter.providers.advisor import AdvisorProvider
-from ghosthunter.providers.aws import AWSProvider, AWS_BILLING_TEMPLATE
+from ghosthunter.providers.aws import AWS_BILLING_TEMPLATE, AWSProvider
 from ghosthunter.providers.billing_file import (
     BillingFileError,
     load_spikes_from_files,
 )
 from ghosthunter.providers.gcp import GCPProvider
-from ghosthunter.ui import render_command_blocked
 from ghosthunter.security.validator import SecurityValidator
+from ghosthunter.ui import render_command_blocked
 
 app = typer.Typer(
     name="ghosthunter",
@@ -79,22 +80,16 @@ def init() -> None:
     console.print("[bold cyan]Ghosthunter setup[/bold cyan]\n")
 
     if CONFIG_PATH.exists():
-        if not Confirm.ask(
-            f"Config already exists at {CONFIG_PATH}. Overwrite?", default=False
-        ):
+        if not Confirm.ask(f"Config already exists at {CONFIG_PATH}. Overwrite?", default=False):
             console.print("[yellow]Cancelled.[/yellow]")
             raise typer.Exit(0)
 
-    provider = Prompt.ask(
-        "Cloud provider", choices=["gcp", "aws"], default="gcp"
-    )
+    provider = Prompt.ask("Cloud provider", choices=["gcp", "aws"], default="gcp")
     lookback_days = int(Prompt.ask("Lookback days", default="30"))
 
     if provider == "gcp":
         project_id = Prompt.ask("GCP project ID")
-        billing_dataset = Prompt.ask(
-            "Billing export dataset (e.g. my-proj.billing_export)"
-        )
+        billing_dataset = Prompt.ask("Billing export dataset (e.g. my-proj.billing_export)")
         cfg = Config(
             provider="gcp",
             project_id=project_id,
@@ -103,9 +98,7 @@ def init() -> None:
             budget=BudgetConfig(),
         )
     else:  # aws
-        aws_profile = Prompt.ask(
-            "AWS named profile (blank = default credential chain)", default=""
-        )
+        aws_profile = Prompt.ask("AWS named profile (blank = default credential chain)", default="")
         aws_region = Prompt.ask("AWS region", default="us-east-1")
         account_id = Prompt.ask("AWS account ID (12 digits, optional)", default="")
         cfg = Config(
@@ -123,8 +116,7 @@ def init() -> None:
     console.print(f"\n[green]✓[/green] Saved config to {CONFIG_PATH}")
     if not os.environ.get("ANTHROPIC_API_KEY"):
         console.print(
-            "[yellow]![/yellow] Set ANTHROPIC_API_KEY in your shell to run "
-            "investigations."
+            "[yellow]![/yellow] Set ANTHROPIC_API_KEY in your shell to run investigations."
         )
 
 
@@ -137,30 +129,30 @@ def investigate(
         None,
         metavar="[FILES...]",
         help="One or more billing CSV/JSON files. Shell globs work: "
-             "`ghosthunter investigate *.csv`. Equivalent to passing "
-             "each file with -f.",
+        "`ghosthunter investigate *.csv`. Equivalent to passing "
+        "each file with -f.",
     ),
     billing_file: list[Path] = typer.Option(
         [],
         "--billing-file",
         "-f",
         help="Path to a billing CSV/JSON you exported yourself. "
-             "Pass -f multiple times to merge several breakdowns "
-             "(by service + by SKU + by project, etc.). "
-             "Enables advisor mode (no cloud credentials needed).",
+        "Pass -f multiple times to merge several breakdowns "
+        "(by service + by SKU + by project, etc.). "
+        "Enables advisor mode (no cloud credentials needed).",
     ),
     active: bool = typer.Option(
         False,
         "--active",
         help="Use active mode: Ghosthunter directly queries the cloud and "
-             "runs commands. Requires read-only credentials and "
-             "~/.ghosthunter/config.toml.",
+        "runs commands. Requires read-only credentials and "
+        "~/.ghosthunter/config.toml.",
     ),
     provider: str = typer.Option(
         "auto",
         "--provider",
         help="Cloud provider: 'gcp', 'aws', or 'auto' (sniff from billing "
-             "files / config). Default: auto.",
+        "files / config). Default: auto.",
     ),
     spike_index: int = typer.Option(
         0,
@@ -190,9 +182,7 @@ def investigate(
     all_files: list[Path] = list(files or []) + list(billing_file or [])
 
     if active and all_files:
-        console.print(
-            "[red]Use either --active or billing files, not both.[/red]"
-        )
+        console.print("[red]Use either --active or billing files, not both.[/red]")
         raise typer.Exit(1)
 
     resolved_provider = _resolve_provider(provider, all_files, for_active=active)
@@ -230,9 +220,9 @@ def chat(
         None,
         metavar="[FILES...]",
         help="Optional billing files to /load on startup. "
-             "Shell globs work: `ghosthunter chat *.csv`. "
-             "When files are provided, the mode picker is skipped and you "
-             "go straight into paranoid (advisor) mode.",
+        "Shell globs work: `ghosthunter chat *.csv`. "
+        "When files are provided, the mode picker is skipped and you "
+        "go straight into paranoid (advisor) mode.",
     ),
 ) -> None:
     """Open the interactive chat orchestrator (recommended).
@@ -290,7 +280,6 @@ def billing_template(
                 "   GROUP BY service, sku, project, location, usage_start_date\n"
                 "   ORDER BY usage_start_date' > billing.csv[/dim]\n\n"
                 "Then: [bold]ghosthunter investigate -f billing.csv[/bold]\n\n"
-
                 "[bold cyan]Option B — Console downloads (no BQ needed)[/bold cyan]\n"
                 "Console only lets you download one grouping at a time, so do\n"
                 "two or three downloads and merge them with multiple -f flags.\n\n"
@@ -302,7 +291,6 @@ def billing_template(
                 "  6. (optional) Group by [bold]Project[/bold] → Download CSV → save as by-project.csv\n\n"
                 "Then: [bold]ghosthunter investigate \\\n"
                 "        -f by-service.csv -f by-sku.csv -f by-project.csv[/bold]\n\n"
-
                 "[dim]Recognized columns (case-insensitive, multiple aliases per field):[/dim]\n"
                 "  • [bold]service[/bold]  (required) — service / Service description / service.description\n"
                 "  • [bold]cost[/bold]     (required) — cost / Cost ($) / Subtotal ($) / amount\n"
@@ -370,20 +358,12 @@ def _build_audit_table(lines: list[str]) -> Table:
     for line in lines:
         entry = json.loads(line)
         provider = entry.get("provider") or "gcp"
-        provider_label = _AUDIT_PROVIDER_STYLES.get(
-            provider, f"[dim]{provider}[/dim]"
-        )
-        result_label = (
-            "[green]concluded[/green]"
-            if entry["succeeded"]
-            else "[red]aborted[/red]"
-        )
+        provider_label = _AUDIT_PROVIDER_STYLES.get(provider, f"[dim]{provider}[/dim]")
+        result_label = "[green]concluded[/green]" if entry["succeeded"] else "[red]aborted[/red]"
         # `conclusion` can be None for aborted/failed runs, not just absent —
         # `entry.get("conclusion", {})` would return None and break .get().
         summary = (
-            (entry.get("conclusion") or {}).get("root_cause")
-            or entry.get("aborted_reason")
-            or "—"
+            (entry.get("conclusion") or {}).get("root_cause") or entry.get("aborted_reason") or "—"
         )
         cmd_cell = str(entry["commands_used"])
         ce_calls = entry.get("ce_api_calls")
@@ -411,9 +391,7 @@ def _render_audit_table(console_arg: Console) -> None:
     console_arg.print(_build_audit_table(lines[-50:]))
 
 
-def _run_active_mode(
-    spike_index: int, list_only: bool, provider: str = "gcp"
-) -> None:
+def _run_active_mode(spike_index: int, list_only: bool, provider: str = "gcp") -> None:
     """Active mode: Ghosthunter directly queries the cloud and runs commands."""
     from ghosthunter.preflight import run_preflight_aws, run_preflight_gcp
 
@@ -430,9 +408,7 @@ def _run_active_mode(
     # check list per provider.
     preflight_runner = run_preflight_aws if provider == "aws" else run_preflight_gcp
     if not preflight_runner(cfg, console):
-        console.print(
-            "[yellow]Preflight aborted — fix the issue above and re-run.[/yellow]"
-        )
+        console.print("[yellow]Preflight aborted — fix the issue above and re-run.[/yellow]")
         raise typer.Exit(1)
 
     if provider == "aws":
@@ -484,8 +460,7 @@ def _run_active_mode(
         label = cfg.project_id
 
     console.print(
-        f"[cyan]Fetching billing data for {label} "
-        f"(last {cfg.lookback_days} days)...[/cyan]"
+        f"[cyan]Fetching billing data for {label} (last {cfg.lookback_days} days)...[/cyan]"
     )
     spikes = prov.fetch_billing_spikes(lookback_days=cfg.lookback_days)
     if not spikes:
@@ -528,9 +503,7 @@ def _run_advisor_mode(
         )
     )
     if len(billing_files) > 1:
-        console.print(
-            f"[dim]Merging {len(billing_files)} billing files…[/dim]"
-        )
+        console.print(f"[dim]Merging {len(billing_files)} billing files…[/dim]")
 
     try:
         spikes = load_spikes_from_files(billing_files)
@@ -559,10 +532,7 @@ def _run_advisor_mode(
 
     while True:
         spike = _pick_spike(spikes, current_index)
-        console.print(
-            f"\n[bold]Investigating[/bold] {spike.service} "
-            f"(${spike.current_cost:,.0f})"
-        )
+        console.print(f"\n[bold]Investigating[/bold] {spike.service} (${spike.current_cost:,.0f})")
         _render_top_contributors(spike)
         console.print()
 
@@ -768,9 +738,7 @@ def _sniff_focus_rows(rows: list[dict[str, Any]]) -> str | None:
     return None
 
 
-def _resolve_provider(
-    flag_value: str, files: list[Path], for_active: bool
-) -> str:
+def _resolve_provider(flag_value: str, files: list[Path], for_active: bool) -> str:
     """Pick 'gcp' or 'aws' based on --provider, billing files, and config.
 
     Precedence:
@@ -784,9 +752,7 @@ def _resolve_provider(
         return value
 
     if value != "auto":
-        console.print(
-            f"[red]Unknown provider '{flag_value}'. Use 'gcp', 'aws', or 'auto'.[/red]"
-        )
+        console.print(f"[red]Unknown provider '{flag_value}'. Use 'gcp', 'aws', or 'auto'.[/red]")
         raise typer.Exit(1)
 
     # --- Auto: sniff ---
@@ -844,9 +810,7 @@ def _render_top_contributors(spike) -> None:
 
 def _pick_spike(spikes, spike_index: int):
     if spike_index >= len(spikes):
-        console.print(
-            f"[red]Spike index {spike_index} out of range (have {len(spikes)}).[/red]"
-        )
+        console.print(f"[red]Spike index {spike_index} out of range (have {len(spikes)}).[/red]")
         raise typer.Exit(1)
     return spikes[spike_index]
 
@@ -860,15 +824,15 @@ def demo(
         None,
         "--scenario",
         help="Scenario id to replay (random if omitted). "
-             "GCP: dns_cache_bypass, nat_egress_runaway, bigquery_full_scan, "
-             "orphaned_disks, gke_autoscaler_loop. "
-             "AWS: aws_nat_gateway_runaway, aws_s3_lifecycle_miss.",
+        "GCP: dns_cache_bypass, nat_egress_runaway, bigquery_full_scan, "
+        "orphaned_disks, gke_autoscaler_loop. "
+        "AWS: aws_nat_gateway_runaway, aws_s3_lifecycle_miss.",
     ),
     provider: Optional[str] = typer.Option(
         None,
         "--provider",
         help="Only pick scenarios for this provider: 'gcp' or 'aws'. "
-             "Random choice across all providers if omitted.",
+        "Random choice across all providers if omitted.",
     ),
 ) -> None:
     """Replay a bundled investigation. No API calls, no setup."""
@@ -886,8 +850,8 @@ def palace(
         "status",
         metavar="[status|tools|install-check]",
         help="status = show availability; "
-             "tools = list MCP tools from the server; "
-             "install-check = diagnose why palace isn't available.",
+        "tools = list MCP tools from the server; "
+        "install-check = diagnose why palace isn't available.",
     ),
 ) -> None:
     """Inspect the MemPalace memory integration.
@@ -961,6 +925,7 @@ def palace(
 
 def _module_exists(name: str) -> bool:
     import importlib.util
+
     try:
         return importlib.util.find_spec(name) is not None
     except Exception:
@@ -997,15 +962,11 @@ def _require_config() -> Config:
 
 def _require_api_key() -> None:
     if not os.environ.get("ANTHROPIC_API_KEY"):
-        console.print(
-            "[red]ANTHROPIC_API_KEY is not set. Export it and try again.[/red]"
-        )
+        console.print("[red]ANTHROPIC_API_KEY is not set. Export it and try again.[/red]")
         raise typer.Exit(1)
 
 
-def _build_active_investigator(
-    provider_obj, cfg: Config, provider: str = "gcp"
-) -> Investigator:
+def _build_active_investigator(provider_obj, cfg: Config, provider: str = "gcp") -> Investigator:
     budget = Budget(
         max_commands=cfg.budget.max_commands,
         max_cost_usd=cfg.budget.max_cost_usd,
@@ -1031,9 +992,7 @@ async def _auto_approve(_: PendingCommand) -> str:
 def _build_advisor_investigator(provider: str = "gcp") -> Investigator:
     """Investigator with AdvisorProvider — never touches the cloud."""
     validator = SecurityValidator(provider=provider)
-    advisor = AdvisorProvider(
-        validator=validator, console=console, provider_key=provider
-    )
+    advisor = AdvisorProvider(validator=validator, console=console, provider_key=provider)
     return Investigator(
         provider=advisor,  # type: ignore[arg-type]
         reasoner=Reasoner(provider=provider),
@@ -1119,9 +1078,7 @@ class _InvestigationRenderer:
             byte_count = int(event.payload.get("bytes") or 0)
             preview = _preview_command(cmd)
             size = _fmt_bytes(byte_count)
-            self._spin(
-                f"Sonnet is compressing · {size} from '{preview}'"
-            )
+            self._spin(f"Sonnet is compressing · {size} from '{preview}'")
             return
 
         # Every other event terminates whatever was spinning before it.
@@ -1129,9 +1086,7 @@ class _InvestigationRenderer:
 
         if kind == "hypotheses_updated":
             hyps = event.payload["hypotheses"]
-            self._active_hypotheses = sum(
-                1 for h in hyps if h.get("status") == "active"
-            )
+            self._active_hypotheses = sum(1 for h in hyps if h.get("status") == "active")
             self.console.print("\n[bold]Hypotheses:[/bold]")
             for h in hyps:
                 bar = "█" * (h["confidence"] // 5)
@@ -1159,9 +1114,7 @@ class _InvestigationRenderer:
             # Sonnet validation passed. The AdvisorProvider is about to
             # take over and ask the user to paste output. A single dim
             # line tells the user *why* we're paused.
-            self.console.print(
-                "[dim]  ✓ command passed Layer-6 validation[/dim]"
-            )
+            self.console.print("[dim]  ✓ command passed Layer-6 validation[/dim]")
             return
 
         if kind == "command_blocked":
@@ -1184,9 +1137,7 @@ class _InvestigationRenderer:
             if result is not None:
                 size = _fmt_bytes(len(getattr(result, "stdout", "") or ""))
                 dur = getattr(result, "duration_seconds", 0)
-                self.console.print(
-                    f"[dim]  ← received {size} in {dur:.1f}s[/dim]"
-                )
+                self.console.print(f"[dim]  ← received {size} in {dur:.1f}s[/dim]")
             return
 
         if kind == "evidence_added":
@@ -1198,21 +1149,15 @@ class _InvestigationRenderer:
         if kind == "user_note":
             note = (event.payload.get("note") or "").strip()
             if note:
-                self.console.print(
-                    f"[dim]  → note to Opus: {note[:80]}[/dim]"
-                )
+                self.console.print(f"[dim]  → note to Opus: {note[:80]}[/dim]")
             return
 
         if kind == "concluded":
-            self.console.print(
-                "\n[bold green]✓ Investigation concluded[/bold green]"
-            )
+            self.console.print("\n[bold green]✓ Investigation concluded[/bold green]")
             return
 
         if kind == "aborted":
-            self.console.print(
-                f"\n[bold red]✗ Aborted:[/bold red] {event.payload['reason']}"
-            )
+            self.console.print(f"\n[bold red]✗ Aborted:[/bold red] {event.payload['reason']}")
             return
 
         # spike_selected / opus_asks are handled by the AdvisorProvider's
@@ -1311,8 +1256,7 @@ def _render_result(result) -> None:
         # ---- Root cause + confidence ----
         console.print("\n[bold]Root cause[/bold]")
         console.print(
-            f"  {c.get('root_cause', '?')} "
-            f"[dim]({c.get('confidence', '?')}% confidence)[/dim]"
+            f"  {c.get('root_cause', '?')} [dim]({c.get('confidence', '?')}% confidence)[/dim]"
         )
 
         # ---- Evidence that supports the call ----
@@ -1388,10 +1332,7 @@ def _render_recommendations(items: list) -> None:
     # arbitrary — users run /copy on the investigation's last proposed
     # command, or select manually. So: only auto-copy when
     # unambiguous.
-    commands_in_recs = [
-        it.get("command") for it in structured
-        if it.get("command")
-    ]
+    commands_in_recs = [it.get("command") for it in structured if it.get("command")]
 
     for item in structured:
         urgency = item.get("urgency", "monitoring")
@@ -1429,6 +1370,7 @@ def _render_recommendations(items: list) -> None:
         # manually.
         try:
             from ghosthunter.clipboard import write_osc52
+
             if write_osc52(
                 commands_in_recs[0],
                 stream=getattr(console, "file", None),

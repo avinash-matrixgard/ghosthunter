@@ -5,12 +5,14 @@ Fixtures under tests/fixtures/aws/ mirror real AWS exports:
   - ce_get_cost_and_usage.json `aws ce get-cost-and-usage` raw output
   - cur_line_items.csv         CUR CSV with lineItem/* columns
 """
+
 from __future__ import annotations
 
 from pathlib import Path
 
 import pytest
 
+from ghosthunter.memory.palace import parse_wing_from_filename
 from ghosthunter.providers.billing_file import (
     ACCOUNT_KEYS,
     GROUPING_PRIORITY,
@@ -20,7 +22,6 @@ from ghosthunter.providers.billing_file import (
     _flatten_ce_json,
     load_spikes_from_file,
 )
-from ghosthunter.memory.palace import parse_wing_from_filename
 
 FIXTURES = Path(__file__).parent / "fixtures" / "aws"
 
@@ -64,9 +65,7 @@ class TestCostExplorerCSV:
             min_absolute_change=50,
         )
         names = [s.service for s in spikes[:3]]
-        assert "EC2 - Other" in names, (
-            f"Expected EC2 - Other in top 3 spikes; got {names}"
-        )
+        assert "EC2 - Other" in names, f"Expected EC2 - Other in top 3 spikes; got {names}"
 
     def test_grouping_is_service(self):
         spikes = load_spikes_from_file(FIXTURES / "ce_by_service.csv")
@@ -185,6 +184,7 @@ class TestCURLineItems:
         p = tmp_path / "cur.parquet"
         p.write_bytes(b"parquet-magic")
         from ghosthunter.providers.billing_file import BillingFileError
+
         with pytest.raises(BillingFileError, match="Parquet"):
             load_spikes_from_file(p)
 

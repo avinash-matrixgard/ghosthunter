@@ -20,10 +20,10 @@ What we're locking down:
 The real boto3 / google-auth / subprocess paths are mocked — these tests
 never hit the network and never shell out.
 """
+
 from __future__ import annotations
 
-import os
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 from rich.console import Console
@@ -38,8 +38,8 @@ from ghosthunter.preflight import (
     _check_billing_dataset,
     _check_boto3,
     _check_cost_explorer_access,
-    _check_gcp_credentials,
     _check_gcloud_cli,
+    _check_gcp_credentials,
     run_preflight,
     run_preflight_aws,
     run_preflight_gcp,
@@ -51,6 +51,7 @@ from ghosthunter.preflight import (
 # ---------------------------------------------------------------------------
 def _silent_console() -> Console:
     import io
+
     return Console(file=io.StringIO(), record=True, width=120, force_terminal=False)
 
 
@@ -87,6 +88,7 @@ class TestBoto3Check:
         pytest.importorskip("boto3")
         # Clear any fake that might have leaked from a sibling test.
         import sys
+
         sys.modules.pop("boto3", None)
         sys.modules.pop("botocore", None)
         sys.modules.pop("botocore.exceptions", None)
@@ -95,6 +97,7 @@ class TestBoto3Check:
     def test_missing_returns_issue_with_fix(self, monkeypatch):
         # Simulate missing import by intercepting `import boto3`.
         import builtins
+
         real_import = builtins.__import__
 
         def fake_import(name, *args, **kwargs):
@@ -209,7 +212,9 @@ class TestAwsCredentialsCheck:
         assert _check_aws_credentials(cfg) is None
         # Identity stashed on cfg.aws for the CLI to render.
         assert cfg.aws._last_sts_identity == {
-            "Account": "999888", "Arn": "arn:x", "UserId": "y",
+            "Account": "999888",
+            "Arn": "arn:x",
+            "UserId": "y",
         }
 
     def test_no_credentials(self, monkeypatch):
@@ -265,9 +270,7 @@ def _install_fake_boto3_for_ce(monkeypatch, *, ce_response=None, ce_raises_code=
             c = MagicMock()
             if ce_raises_code is not None:
                 c.get_cost_and_usage.side_effect = ClientError(
-                    response={
-                        "Error": {"Code": ce_raises_code, "Message": "mocked"}
-                    }
+                    response={"Error": {"Code": ce_raises_code, "Message": "mocked"}}
                 )
             else:
                 c.get_cost_and_usage.return_value = ce_response or {"ResultsByTime": []}
@@ -285,9 +288,7 @@ class TestCostExplorerCheck:
         assert _check_cost_explorer_access(_make_cfg_aws()) is None
 
     def test_access_denied_returns_iam_fix_snippet(self, monkeypatch):
-        _install_fake_boto3_for_ce(
-            monkeypatch, ce_raises_code="AccessDeniedException"
-        )
+        _install_fake_boto3_for_ce(monkeypatch, ce_raises_code="AccessDeniedException")
         issue = _check_cost_explorer_access(_make_cfg_aws())
         assert issue is not None
         assert "Cost Explorer permission" in issue.label
@@ -328,8 +329,11 @@ class TestGcpCredentialsCheck:
 
         fake_auth_exc = types.ModuleType("google.auth.exceptions")
 
-        class _Base(Exception): pass
-        class DefaultCredentialsError(_Base): pass
+        class _Base(Exception):
+            pass
+
+        class DefaultCredentialsError(_Base):
+            pass
 
         fake_auth_exc.DefaultCredentialsError = DefaultCredentialsError
 
@@ -384,7 +388,8 @@ class TestRunPreflight:
     def test_first_failure_auto_fix_declined_returns_false(self, monkeypatch):
         console = _silent_console()
         issue = PreflightIssue(
-            label="needs x", detail="x missing",
+            label="needs x",
+            detail="x missing",
             fix_callable=lambda: None,
         )
 
@@ -401,7 +406,8 @@ class TestRunPreflight:
             raise RuntimeError("pip died")
 
         issue = PreflightIssue(
-            label="needs x", detail="x missing",
+            label="needs x",
+            detail="x missing",
             fix_callable=_broken_fix,
         )
 

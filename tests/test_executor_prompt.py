@@ -28,6 +28,7 @@ This file locks down that:
   - Back-compat alias SEMANTIC_VALIDATION_SYSTEM still equals the GCP
     prompt for pre-split import sites.
 """
+
 from __future__ import annotations
 
 import asyncio

@@ -12,12 +12,12 @@ Covers:
   - Audit-log entries carry the provider column and ce_api_calls field
     when written via _append_audit_log (as of Phase 4).
 """
+
 from __future__ import annotations
 
 import json
 from pathlib import Path
 
-import pytest
 import tomli
 
 from ghosthunter.config import (
@@ -26,7 +26,6 @@ from ghosthunter.config import (
     Config,
     migrate_config_in_place,
 )
-
 
 # ---------------------------------------------------------------------------
 # Legacy (pre-provider) configs
@@ -182,23 +181,24 @@ class TestAuditLogProviderField:
 
     def test_audit_entry_carries_provider(self, tmp_path, monkeypatch):
         from ghosthunter import cli
+
         audit_path = tmp_path / "audit.log"
         monkeypatch.setattr(cli, "AUDIT_LOG_PATH", audit_path)
 
         class _FakeResult:
             class _Spike:
                 service = "Amazon EC2"
+
             class _Budget:
                 commands_used = 3
+
             spike = _Spike()
             succeeded = True
             budget = _Budget()
             conclusion = {"root_cause": "NAT gateway data transfer"}
             aborted_reason = None
 
-        cli._append_audit_log(
-            _FakeResult(), extra={"provider": "aws", "ce_api_calls": 4}
-        )
+        cli._append_audit_log(_FakeResult(), extra={"provider": "aws", "ce_api_calls": 4})
         lines = audit_path.read_text().splitlines()
         assert len(lines) == 1
         entry = json.loads(lines[0])
@@ -210,14 +210,17 @@ class TestAuditLogProviderField:
 
     def test_audit_entry_without_extra_has_no_provider(self, tmp_path, monkeypatch):
         from ghosthunter import cli
+
         audit_path = tmp_path / "audit.log"
         monkeypatch.setattr(cli, "AUDIT_LOG_PATH", audit_path)
 
         class _R:
             class _S:
                 service = "x"
+
             class _B:
                 commands_used = 0
+
             spike = _S()
             succeeded = False
             budget = _B()

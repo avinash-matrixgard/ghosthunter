@@ -12,6 +12,7 @@ Assertions worth noting:
   * In Phase 1 the AWS allowlist is empty, so every AWS command is also
     rejected under `provider="aws"`. Phase 2 fills it in.
 """
+
 from __future__ import annotations
 
 import pytest
@@ -24,9 +25,17 @@ from ghosthunter.providers.base import (
 )
 from ghosthunter.providers.gcp import (
     CommandRejectedError as GCP_CommandRejectedError,
+)
+from ghosthunter.providers.gcp import (
     CommandResult as GCP_CommandResult,
+)
+from ghosthunter.providers.gcp import (
     CommandTimeoutError as GCP_CommandTimeoutError,
+)
+from ghosthunter.providers.gcp import (
     CostSpike as GCP_CostSpike,
+)
+from ghosthunter.providers.gcp import (
     GCPProvider,
     GCPProviderError,
 )
@@ -36,13 +45,6 @@ from ghosthunter.security.allowlist import (
     matches_allowlist_for,
     validate_bq_query,
     validate_query_for,
-)
-from ghosthunter.security.allowlist_aws import (
-    ALLOWED_PATTERNS as AWS_PATTERNS,
-    matches_allowlist_aws,
-)
-from ghosthunter.security.allowlist_gcp import (
-    matches_allowlist_gcp,
 )
 from ghosthunter.security.validator import SecurityValidator
 
@@ -76,29 +78,19 @@ class TestAllowlistFor:
 
     def test_gcp_command_rejected_under_aws(self):
         # Cross-provider isolation: gcloud asked under aws provider fails
-        assert not matches_allowlist_for(
-            "gcloud compute instances list", "aws"
-        )
+        assert not matches_allowlist_for("gcloud compute instances list", "aws")
 
     def test_aws_command_rejected_under_gcp(self):
-        assert not matches_allowlist_for(
-            "aws ec2 describe-instances", "gcp"
-        )
+        assert not matches_allowlist_for("aws ec2 describe-instances", "gcp")
 
     def test_aws_read_command_allowed_under_aws_post_phase2(self):
         # Phase 2: core allowlist populated. Read-shaped aws commands pass
         # under provider=aws. Still rejected under provider=gcp (isolation).
-        assert matches_allowlist_for(
-            "aws ec2 describe-instances", "aws"
-        )
-        assert not matches_allowlist_for(
-            "aws ec2 describe-instances", "gcp"
-        )
+        assert matches_allowlist_for("aws ec2 describe-instances", "aws")
+        assert not matches_allowlist_for("aws ec2 describe-instances", "gcp")
 
     def test_unknown_provider_rejects_everything(self):
-        assert not matches_allowlist_for(
-            "gcloud compute instances list", "azure"
-        )
+        assert not matches_allowlist_for("gcloud compute instances list", "azure")
 
 
 # ---------------------------------------------------------------------------
@@ -110,9 +102,7 @@ class TestValidateQueryFor:
         assert ok
 
     def test_gcp_bq_insert_rejected(self):
-        ok, reason = validate_query_for(
-            "bq query 'INSERT INTO t VALUES(1)'", "gcp"
-        )
+        ok, reason = validate_query_for("bq query 'INSERT INTO t VALUES(1)'", "gcp")
         assert not ok
         assert "INSERT" in reason
 
@@ -170,9 +160,7 @@ class TestValidatorProviderScoping:
         # WRITE_DISGUISED_AS_READ is checked BEFORE the generated read rule.
         v = SecurityValidator(provider="aws")
         assert not v.is_allowed("aws lambda invoke --function-name x").allowed
-        assert not v.is_allowed(
-            "aws secretsmanager get-secret-value --secret-id x"
-        ).allowed
+        assert not v.is_allowed("aws secretsmanager get-secret-value --secret-id x").allowed
 
 
 # ---------------------------------------------------------------------------
@@ -205,8 +193,9 @@ class TestTypeReexports:
         # real provider-neutral classes from providers.base.
         assert GCP_CostSpike is CostSpike
         assert GCP_CommandResult is CommandResult
-        assert GCP_CommandRejectedError.__base__ is ProviderError or \
-            issubclass(GCP_CommandRejectedError, ProviderError)
+        assert GCP_CommandRejectedError.__base__ is ProviderError or issubclass(
+            GCP_CommandRejectedError, ProviderError
+        )
         assert issubclass(GCP_CommandTimeoutError, ProviderError)
 
     def test_gcp_provider_error_alias(self):

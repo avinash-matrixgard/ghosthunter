@@ -21,6 +21,7 @@ system prompt tells Sonnet which CLI vocabulary it's validating. Without
 this split Sonnet Layer-6-rejects legitimate AWS commands because the
 old prompt said "read-only GCP only".
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -252,6 +253,7 @@ class Executor:
     ) -> None:
         if client is None:
             from anthropic import AsyncAnthropic  # lazy import
+
             client = AsyncAnthropic()
         self.client = client
         self.model = model
@@ -290,9 +292,7 @@ class Executor:
                 ],
             )
 
-        response = await call_with_retry(
-            _do_call, op_name="Sonnet semantic validation"
-        )
+        response = await call_with_retry(_do_call, op_name="Sonnet semantic validation")
 
         for block in response.content:
             if getattr(block, "type", None) == "tool_use" and block.name == "semantic_check":
@@ -342,9 +342,7 @@ class Executor:
                 ],
             )
 
-        response = await call_with_retry(
-            _do_call, op_name="Sonnet compression"
-        )
+        response = await call_with_retry(_do_call, op_name="Sonnet compression")
 
         parts: list[str] = []
         for block in response.content:

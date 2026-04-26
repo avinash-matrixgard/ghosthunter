@@ -20,12 +20,13 @@ Run as:
     python benchmarks/run_benchmark.py --filter gcp
     python benchmarks/run_benchmark.py --json     # machine-readable to stdout
 """
+
 from __future__ import annotations
 
 import argparse
 import json
 import sys
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -37,10 +38,9 @@ if str(_SRC) not in sys.path:
     sys.path.insert(0, str(_SRC))
 
 from ghosthunter.providers.billing_file import (  # noqa: E402
-    load_spikes_from_file,
     BillingFileError,
+    load_spikes_from_file,
 )
-
 
 FIXTURES_DIR = Path(__file__).parent / "spikes"
 RESULTS_DIR = Path(__file__).parent / "results"
@@ -88,9 +88,7 @@ def _score_service(expected: str, actual: str | None) -> tuple[int, str]:
     return 0, f"service name mismatch ({actual!r} vs expected {expected!r})"
 
 
-def _score_scenario(
-    ground_truth: dict, spikes: list
-) -> ScenarioResult:
+def _score_scenario(ground_truth: dict, spikes: list) -> ScenarioResult:
     spike_gt = ground_truth["spike"]
     expected_service: str = spike_gt["service"]
     expected_direction: str = spike_gt["direction"]
@@ -115,8 +113,10 @@ def _score_scenario(
     if not spikes:
         result.reasons.append("parser returned zero spikes")
         result.checks = {
-            "service": False, "direction": False,
-            "magnitude": False, "cost_in_range": False,
+            "service": False,
+            "direction": False,
+            "magnitude": False,
+            "cost_in_range": False,
         }
         return result
 
@@ -137,14 +137,11 @@ def _score_scenario(
     actual_direction = "up" if top.change_percent >= 0 else "down"
     if actual_direction == expected_direction:
         result.score += POINTS_DIRECTION
-        result.reasons.append(
-            f"[+{POINTS_DIRECTION}] direction matches ({actual_direction})"
-        )
+        result.reasons.append(f"[+{POINTS_DIRECTION}] direction matches ({actual_direction})")
         result.checks["direction"] = True
     else:
         result.reasons.append(
-            f"[+0] direction wrong (got {actual_direction}, "
-            f"expected {expected_direction})"
+            f"[+0] direction wrong (got {actual_direction}, expected {expected_direction})"
         )
         result.checks["direction"] = False
 
@@ -152,14 +149,10 @@ def _score_scenario(
     abs_pct = abs(top.change_percent)
     if abs_pct >= min_pct:
         result.score += POINTS_MAGNITUDE
-        result.reasons.append(
-            f"[+{POINTS_MAGNITUDE}] |{abs_pct:.0f}%| >= {min_pct:.0f}%"
-        )
+        result.reasons.append(f"[+{POINTS_MAGNITUDE}] |{abs_pct:.0f}%| >= {min_pct:.0f}%")
         result.checks["magnitude"] = True
     else:
-        result.reasons.append(
-            f"[+0] |{abs_pct:.0f}%| < required {min_pct:.0f}%"
-        )
+        result.reasons.append(f"[+0] |{abs_pct:.0f}%| < required {min_pct:.0f}%")
         result.checks["magnitude"] = False
 
     # --- cost in range ---
@@ -172,8 +165,7 @@ def _score_scenario(
         result.checks["cost_in_range"] = True
     else:
         result.reasons.append(
-            f"[+0] current_cost ${top.current_cost:,.0f} outside "
-            f"[${cost_lo:,.0f}, ${cost_hi:,.0f}]"
+            f"[+0] current_cost ${top.current_cost:,.0f} outside [${cost_lo:,.0f}, ${cost_hi:,.0f}]"
         )
         result.checks["cost_in_range"] = False
 
@@ -225,9 +217,11 @@ def _render_markdown(results: list[ScenarioResult]) -> str:
     lines.append("")
     lines.append(f"Generated: {ts}")
     lines.append("")
-    lines.append(f"**Scenarios**: {n}  ·  **Passed** (score ≥ {PASS_THRESHOLD}): "
-                 f"{passed}/{n} ({100*passed/max(n,1):.0f}%)  ·  "
-                 f"**Mean score**: {mean:.1f}/100")
+    lines.append(
+        f"**Scenarios**: {n}  ·  **Passed** (score ≥ {PASS_THRESHOLD}): "
+        f"{passed}/{n} ({100 * passed / max(n, 1):.0f}%)  ·  "
+        f"**Mean score**: {mean:.1f}/100"
+    )
     lines.append("")
 
     # Per-provider breakdown
@@ -248,14 +242,8 @@ def _render_markdown(results: list[ScenarioResult]) -> str:
     # Scenario table
     lines.append("## Scenarios")
     lines.append("")
-    lines.append(
-        "| Scenario | Provider | Difficulty | Score | Pass | "
-        "Detected | Change % |"
-    )
-    lines.append(
-        "|----------|----------|------------|-------|------|"
-        "----------|----------|"
-    )
+    lines.append("| Scenario | Provider | Difficulty | Score | Pass | Detected | Change % |")
+    lines.append("|----------|----------|------------|-------|------|----------|----------|")
     for r in results:
         tick = "✅" if r.passed else "❌"
         svc = r.detected_service or "(none)"
@@ -265,8 +253,7 @@ def _render_markdown(results: list[ScenarioResult]) -> str:
             else "—"
         )
         lines.append(
-            f"| `{r.id}` | {r.provider} | {r.difficulty} | "
-            f"{r.score}/100 | {tick} | {svc} | {pct} |"
+            f"| `{r.id}` | {r.provider} | {r.difficulty} | {r.score}/100 | {tick} | {svc} | {pct} |"
         )
     lines.append("")
 

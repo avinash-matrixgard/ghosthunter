@@ -19,6 +19,7 @@ Flow:
 This file is the orchestration layer. All the hard logic (security, models,
 hypothesis math) lives in the modules it imports.
 """
+
 from __future__ import annotations
 
 import json
@@ -67,6 +68,7 @@ from ghosthunter.security.validator import SecurityValidator, ValidationResult
 @dataclass
 class Budget:
     """Layer 5: hard caps on a single investigation."""
+
     max_commands: int = 15
     max_cost_usd: float = 1.0
     max_seconds: float = 600.0  # 10 minutes
@@ -108,6 +110,7 @@ MemoryHook = Callable[[str, str], None]  # (kind, text) → None
 @dataclass
 class PendingCommand:
     """A command awaiting human approval."""
+
     command: str
     tests_hypothesis: str | None
     rationale: str | None
@@ -118,6 +121,7 @@ class PendingCommand:
 @dataclass
 class InvestigationEvent:
     """Anything the UI / audit log might want to render."""
+
     kind: Literal[
         "spike_selected",
         "step_started",
@@ -129,7 +133,7 @@ class InvestigationEvent:
         "command_approved",
         "command_rejected_by_user",
         "command_executed",
-        "compressing",            # Sonnet is turning command output into evidence
+        "compressing",  # Sonnet is turning command output into evidence
         "evidence_added",
         "user_note",
         "concluded",
@@ -250,9 +254,7 @@ class Investigator:
                         }
                     )
                     continue
-                aborted_reason = (
-                    f"reasoner schema error (retries exhausted): {exc.detail}"
-                )
+                aborted_reason = f"reasoner schema error (retries exhausted): {exc.detail}"
                 await self._emit("aborted", {"reason": aborted_reason})
                 break
             except Exception as exc:
@@ -350,9 +352,7 @@ class Investigator:
     # ------------------------------------------------------------------
     # Command pipeline (one command from proposal to evidence)
     # ------------------------------------------------------------------
-    async def _handle_command(
-        self, action: NextAction
-    ) -> Literal["continue", "abort"]:
+    async def _handle_command(self, action: NextAction) -> Literal["continue", "abort"]:
         assert action.command  # checked by caller
         command = action.command
 
@@ -381,9 +381,7 @@ class Investigator:
                 "command_blocked",
                 {"command": command, "layer": "L6", "reason": f"executor error: {exc}"},
             )
-            self._append_tool_feedback(
-                command, f"BLOCKED by semantic validator: {exc}"
-            )
+            self._append_tool_feedback(command, f"BLOCKED by semantic validator: {exc}")
             return "continue"
 
         if not semantic.approved:
@@ -391,9 +389,7 @@ class Investigator:
                 "command_blocked",
                 {"command": command, "layer": "L6", "reason": semantic.reason},
             )
-            self._append_tool_feedback(
-                command, f"BLOCKED by semantic check: {semantic.reason}"
-            )
+            self._append_tool_feedback(command, f"BLOCKED by semantic check: {semantic.reason}")
             return "continue"
 
         # User approval (supervised mode)
@@ -411,9 +407,7 @@ class Investigator:
             return "abort"
         if decision == "reject":
             await self._emit("command_rejected_by_user", {"command": command})
-            self._append_tool_feedback(
-                command, "REJECTED by user — propose a different approach"
-            )
+            self._append_tool_feedback(command, "REJECTED by user — propose a different approach")
             return "continue"
 
         await self._emit("command_approved", {"command": command})
@@ -433,18 +427,14 @@ class Investigator:
             if AdvisorAborted is not None and isinstance(exc, AdvisorAborted):
                 return "abort"
             if AdvisorSkipped is not None and isinstance(exc, AdvisorSkipped):
-                await self._emit(
-                    "command_rejected_by_user", {"command": command}
-                )
+                await self._emit("command_rejected_by_user", {"command": command})
                 self._append_tool_feedback(
                     command,
                     "SKIPPED by user — propose a different command",
                 )
                 return "continue"
             if AdvisorNote is not None and isinstance(exc, AdvisorNote):
-                await self._emit(
-                    "user_note", {"command": command, "note": exc.note}
-                )
+                await self._emit("user_note", {"command": command, "note": exc.note})
                 self._append_tool_feedback(
                     command,
                     f"SKIPPED by user. The user added this note:\n\n"
@@ -550,14 +540,8 @@ class Investigator:
 # ---------------------------------------------------------------------------
 # Pure helpers
 # ---------------------------------------------------------------------------
-def _build_initial_prompt(
-    spike: CostSpike, additional_context: str | None = None
-) -> str:
-    daily = (
-        json.dumps(spike.daily_breakdown[-14:], indent=2)
-        if spike.daily_breakdown
-        else "(none)"
-    )
+def _build_initial_prompt(spike: CostSpike, additional_context: str | None = None) -> str:
+    daily = json.dumps(spike.daily_breakdown[-14:], indent=2) if spike.daily_breakdown else "(none)"
 
     # Descriptions come from the billing file's ChargeDescription column
     # (FOCUS 1.0) or lineItem/LineItemDescription (AWS CUR) and translate
@@ -576,9 +560,7 @@ def _build_initial_prompt(
             for name, cost in items:
                 desc = descriptions.get(f"{dim}:{name}")
                 if desc:
-                    lines.append(
-                        f"  - {name}: ${cost:,.2f}  —  {desc}"
-                    )
+                    lines.append(f"  - {name}: ${cost:,.2f}  —  {desc}")
                 else:
                     lines.append(f"  - {name}: ${cost:,.2f}")
         contributors_block = "\n".join(lines)

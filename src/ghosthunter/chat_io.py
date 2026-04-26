@@ -23,6 +23,7 @@ The ``###`` paste-terminator is gone — bracketed paste mode handles
 multi-line paste natively in any modern terminal (iTerm2, Terminal.app,
 Alacritty, kitty, most Linux terminals).
 """
+
 from __future__ import annotations
 
 from pathlib import Path

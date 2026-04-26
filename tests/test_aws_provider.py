@@ -3,16 +3,15 @@
 Exercises `fetch_billing_spikes` and `execute_command` against a mocked
 Cost Explorer client so the tests don't require boto3 or network access.
 """
+
 from __future__ import annotations
 
 import asyncio
-import os
 from unittest.mock import MagicMock
 
 import pytest
 
 from ghosthunter.providers.aws import AWSProvider, AWSProviderError
-from ghosthunter.providers.base import CostSpike
 from ghosthunter.security.validator import SecurityValidator
 
 
@@ -78,8 +77,8 @@ class TestFetchBillingSpikes:
         # current window
         current = _ce_service_response(
             **{
-                "Amazon EC2": 4_000.0,   # +300%
-                "Amazon S3": 500.0,      # flat
+                "Amazon EC2": 4_000.0,  # +300%
+                "Amazon S3": 500.0,  # flat
             }
         )
         previous = _ce_service_response(
@@ -209,9 +208,7 @@ class TestCEHook:
         ]
         calls: list[tuple[str, dict]] = []
 
-        p = AWSProvider(
-            ce_client=ce, on_ce_call=lambda op, params: calls.append((op, params))
-        )
+        p = AWSProvider(ce_client=ce, on_ce_call=lambda op, params: calls.append((op, params)))
         p.fetch_billing_spikes()
         # 2 service calls (current + previous) + 1 usage_type follow-up = 3.
         assert len(calls) == 3
@@ -258,6 +255,7 @@ class TestExecuteCommand:
     def test_validator_rejects_before_subprocess(self):
         p = AWSProvider(validator=SecurityValidator(provider="aws"))
         from ghosthunter.providers.base import CommandRejectedError
+
         with pytest.raises(CommandRejectedError):
             # Writes are blocked — we should reject without ever spawning
             # a subprocess.
@@ -281,9 +279,12 @@ class TestExecuteCommand:
         # No env vars set — _sandbox_env should still pin profile/region
         # from the constructor args via setdefault.
         for var in (
-            "AWS_PROFILE", "AWS_DEFAULT_PROFILE",
-            "AWS_REGION", "AWS_DEFAULT_REGION",
-            "AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY",
+            "AWS_PROFILE",
+            "AWS_DEFAULT_PROFILE",
+            "AWS_REGION",
+            "AWS_DEFAULT_REGION",
+            "AWS_ACCESS_KEY_ID",
+            "AWS_SECRET_ACCESS_KEY",
             "AWS_SESSION_TOKEN",
         ):
             monkeypatch.delenv(var, raising=False)
@@ -300,6 +301,7 @@ class TestExecuteCommand:
 class TestCLIGlue:
     def test_aws_provider_is_base_provider(self):
         from ghosthunter.providers.base import BaseProvider
+
         p = AWSProvider()
         assert isinstance(p, BaseProvider)
         assert p.provider_key == "aws"

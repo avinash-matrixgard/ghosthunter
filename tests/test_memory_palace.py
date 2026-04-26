@@ -5,6 +5,7 @@ The AWS patterns landed in Phase 2 alongside the advisor-mode scenario
 work; this file locks down the full catalog now that AWS support is
 complete.
 """
+
 from __future__ import annotations
 
 from pathlib import Path

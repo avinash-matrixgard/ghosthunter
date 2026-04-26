@@ -29,6 +29,7 @@ cost columns. That's the easiest path — see `ghosthunter billing-template`.
 
 Column matching is case-insensitive and tolerant of common aliases.
 """
+
 from __future__ import annotations
 
 import csv
@@ -52,12 +53,12 @@ SERVICE_KEYS = (
     "Service",
     "service_name",
     # AWS
-    "lineItem/ProductCode",          # CUR
-    "product/ProductName",           # CUR
-    "product_productname",           # CUR (some exports)
-    "Service name",                  # CE CSV variant
+    "lineItem/ProductCode",  # CUR
+    "product/ProductName",  # CUR
+    "product_productname",  # CUR (some exports)
+    "Service name",  # CE CSV variant
     # FOCUS (FinOps Open Cost & Usage Specification — cross-cloud)
-    "ServiceName",                   # FOCUS 1.0+
+    "ServiceName",  # FOCUS 1.0+
 )
 
 COST_KEYS = (
@@ -71,22 +72,22 @@ COST_KEYS = (
     "amount",
     "total_cost",
     # AWS
-    "UnblendedCost",                 # CE
-    "BlendedCost",                   # CE
-    "NetUnblendedCost",              # CE
-    "AmortizedCost",                 # CE
-    "lineItem/UnblendedCost",        # CUR
-    "lineItem/BlendedCost",          # CUR
-    "lineItem/NetUnblendedCost",     # CUR
-    "Amount",                        # CE JSON flattened rows
+    "UnblendedCost",  # CE
+    "BlendedCost",  # CE
+    "NetUnblendedCost",  # CE
+    "AmortizedCost",  # CE
+    "lineItem/UnblendedCost",  # CUR
+    "lineItem/BlendedCost",  # CUR
+    "lineItem/NetUnblendedCost",  # CUR
+    "Amount",  # CE JSON flattened rows
     # FOCUS. Order matters — we pick the FIRST match against a row's keys.
     # BilledCost is the primary "what you paid" FOCUS column; EffectiveCost
     # is after commitment / contract discounts. Prefer BilledCost for
     # user-facing cost reporting.
-    "BilledCost",                    # FOCUS 1.0+
-    "EffectiveCost",                 # FOCUS 1.0+ — used if BilledCost absent
-    "ListCost",                      # FOCUS 1.0+ — pre-discount reference
-    "ContractedCost",                # FOCUS 1.0+ — post-commitment price
+    "BilledCost",  # FOCUS 1.0+
+    "EffectiveCost",  # FOCUS 1.0+ — used if BilledCost absent
+    "ListCost",  # FOCUS 1.0+ — pre-discount reference
+    "ContractedCost",  # FOCUS 1.0+ — post-commitment price
 )
 
 DATE_KEYS = (
@@ -100,14 +101,14 @@ DATE_KEYS = (
     "day",
     "billing_date",
     # AWS
-    "Start",                         # CE JSON flattened
-    "TimePeriodStart",               # CE raw
-    "lineItem/UsageStartDate",       # CUR
-    "bill/BillingPeriodStartDate",   # CUR
+    "Start",  # CE JSON flattened
+    "TimePeriodStart",  # CE raw
+    "lineItem/UsageStartDate",  # CUR
+    "bill/BillingPeriodStartDate",  # CUR
     # FOCUS. ChargePeriodStart is per-row usage; BillingPeriodStart groups
     # the monthly invoice window. Prefer ChargePeriod for spike detection.
-    "ChargePeriodStart",             # FOCUS 1.0+
-    "BillingPeriodStart",            # FOCUS 1.0+ (coarser fallback)
+    "ChargePeriodStart",  # FOCUS 1.0+
+    "BillingPeriodStart",  # FOCUS 1.0+ (coarser fallback)
 )
 
 SKU_KEYS = (
@@ -120,8 +121,8 @@ SKU_KEYS = (
     # AWS has no direct SKU equivalent; UsageType plays that role
     # and is its own dimension below.
     # FOCUS
-    "SkuId",                         # FOCUS 1.0+ provider SKU id
-    "SkuPriceId",                    # FOCUS 1.0+ specific price variant
+    "SkuId",  # FOCUS 1.0+ provider SKU id
+    "SkuPriceId",  # FOCUS 1.0+ specific price variant
 )
 
 # AWS UsageType — AWS's closest equivalent to a GCP SKU. Treated as a
@@ -144,21 +145,21 @@ PROJECT_KEYS = (
 
 # AWS account — analogous to a GCP project for our cross-file inference.
 ACCOUNT_KEYS = (
-    "Linked Account",                # CE CSV
-    "Account name",                  # CE CSV variant
-    "AccountId",                     # CE JSON flattened
-    "UsageAccountId",                # CE / CUR
-    "lineItem/UsageAccountId",       # CUR
-    "bill/PayerAccountId",           # CUR
+    "Linked Account",  # CE CSV
+    "Account name",  # CE CSV variant
+    "AccountId",  # CE JSON flattened
+    "UsageAccountId",  # CE / CUR
+    "lineItem/UsageAccountId",  # CUR
+    "bill/PayerAccountId",  # CUR
     "account",
     "account_id",
     # FOCUS — SubAccount is the per-tenant account inside a billing org.
     # BillingAccount is the invoice-level parent. Prefer SubAccount for
     # cross-file inference.
-    "SubAccountId",                  # FOCUS 1.0+
-    "SubAccountName",                # FOCUS 1.0+
-    "BillingAccountId",              # FOCUS 1.0+ (coarser fallback)
-    "BillingAccountName",            # FOCUS 1.0+
+    "SubAccountId",  # FOCUS 1.0+
+    "SubAccountName",  # FOCUS 1.0+
+    "BillingAccountId",  # FOCUS 1.0+ (coarser fallback)
+    "BillingAccountName",  # FOCUS 1.0+
 )
 
 LOCATION_KEYS = (
@@ -170,14 +171,14 @@ LOCATION_KEYS = (
     "Region",
     "Location",
     # AWS
-    "product/region",                # CUR
-    "product/location",              # CUR (human-readable region)
-    "lineItem/AvailabilityZone",     # CUR
+    "product/region",  # CUR
+    "product/location",  # CUR (human-readable region)
+    "lineItem/AvailabilityZone",  # CUR
     "aws_region",
     # FOCUS
-    "RegionName",                    # FOCUS 1.0+ (human-readable)
-    "RegionId",                      # FOCUS 1.0+ (provider-canonical id)
-    "AvailabilityZone",              # FOCUS 1.0+ (fallback)
+    "RegionName",  # FOCUS 1.0+ (human-readable)
+    "RegionId",  # FOCUS 1.0+ (provider-canonical id)
+    "AvailabilityZone",  # FOCUS 1.0+ (fallback)
 )
 
 PCT_CHANGE_KEYS = (
@@ -206,12 +207,12 @@ DESCRIPTION_KEYS = (
 )
 
 DIMENSION_KEY_GROUPS: dict[str, tuple[str, ...]] = {
-    "service":    SERVICE_KEYS,
-    "sku":        SKU_KEYS,
+    "service": SERVICE_KEYS,
+    "sku": SKU_KEYS,
     "usage_type": USAGE_TYPE_KEYS,
-    "project":    PROJECT_KEYS,
-    "account":    ACCOUNT_KEYS,
-    "location":   LOCATION_KEYS,
+    "project": PROJECT_KEYS,
+    "account": ACCOUNT_KEYS,
+    "location": LOCATION_KEYS,
 }
 
 # Order in which we pick the "primary grouping" column for a file.
@@ -240,9 +241,7 @@ def load_spikes_from_file(
     min_absolute_change: float = 100.0,
 ) -> list[CostSpike]:
     """Single-file convenience wrapper around `load_spikes_from_files`."""
-    return load_spikes_from_files(
-        [path], min_change_percent, min_absolute_change
-    )
+    return load_spikes_from_files([path], min_change_percent, min_absolute_change)
 
 
 def load_spikes_from_files(
@@ -275,17 +274,13 @@ def load_spikes_from_files(
 
     if not all_normalized:
         details = "\n".join(file_diagnostics) if file_diagnostics else "(none)"
-        raise BillingFileError(
-            "No usable rows in any provided file.\n" + details
-        )
+        raise BillingFileError("No usable rows in any provided file.\n" + details)
 
     has_dates = any(r.day is not None for r in all_normalized)
     distinct_days = {r.day for r in all_normalized if r.day is not None}
 
     if has_dates and len(distinct_days) >= 4:
-        spikes = _spikes_with_date_split(
-            all_normalized, min_change_percent, min_absolute_change
-        )
+        spikes = _spikes_with_date_split(all_normalized, min_change_percent, min_absolute_change)
     else:
         spikes = _spikes_total_only(all_normalized)
 
@@ -299,19 +294,19 @@ def load_spikes_from_files(
 # ---------------------------------------------------------------------------
 @dataclass
 class NormalizedRow:
-    grouping: str          # one of GROUPING_PRIORITY — what this row's primary key is
-    grouping_value: str    # the value of that grouping column for this row
+    grouping: str  # one of GROUPING_PRIORITY — what this row's primary key is
+    grouping_value: str  # the value of that grouping column for this row
     cost: float
     day: date | None
     service: str | None
     sku: str | None
-    usage_type: str | None   # AWS UsageType — the SKU-equivalent for AWS data
+    usage_type: str | None  # AWS UsageType — the SKU-equivalent for AWS data
     project: str | None
-    account: str | None      # AWS account id / name — the project-equivalent
+    account: str | None  # AWS account id / name — the project-equivalent
     location: str | None
     source: str
     pct_change: float | None = None  # period-over-period % from the file, if present
-    description: str | None = None   # ChargeDescription / LineItemDescription, if the file has it
+    description: str | None = None  # ChargeDescription / LineItemDescription, if the file has it
 
 
 # ---------------------------------------------------------------------------
@@ -388,9 +383,7 @@ def _flatten_ce_json(data: dict[str, Any]) -> list[dict[str, Any]]:
     """
     group_defs = data.get("GroupDefinitions", []) or []
     columns_by_idx = [
-        _CE_DIMENSION_TO_COLUMN.get(
-            gd.get("Key", "").upper(), gd.get("Key", "") or f"Key{i}"
-        )
+        _CE_DIMENSION_TO_COLUMN.get(gd.get("Key", "").upper(), gd.get("Key", "") or f"Key{i}")
         for i, gd in enumerate(group_defs)
     ]
 
@@ -404,11 +397,7 @@ def _flatten_ce_json(data: dict[str, Any]) -> list[dict[str, Any]]:
                 row: dict[str, Any] = {"Start": start}
                 keys = g.get("Keys", []) or []
                 for i, k in enumerate(keys):
-                    col = (
-                        columns_by_idx[i]
-                        if i < len(columns_by_idx)
-                        else f"Key{i}"
-                    )
+                    col = columns_by_idx[i] if i < len(columns_by_idx) else f"Key{i}"
                     row[col] = k
                 _promote_ce_metrics(row, g.get("Metrics") or {})
                 rows.append(row)
@@ -470,12 +459,9 @@ def _normalize_rows(
     # Detect every dimension column the file has, then pick the highest-
     # priority one as this file's primary grouping.
     dim_keys: dict[str, str | None] = {
-        dim: _detect_optional_key(sample, keys)
-        for dim, keys in DIMENSION_KEY_GROUPS.items()
+        dim: _detect_optional_key(sample, keys) for dim, keys in DIMENSION_KEY_GROUPS.items()
     }
-    grouping = next(
-        (dim for dim in GROUPING_PRIORITY if dim_keys.get(dim)), None
-    )
+    grouping = next((dim for dim in GROUPING_PRIORITY if dim_keys.get(dim)), None)
     if grouping is None:
         return [], (
             "no usable grouping column found. Need at least one of: "
@@ -504,10 +490,14 @@ def _normalize_rows(
                 day=_parse_date(raw.get(date_key)) if date_key else None,
                 service=_clean_str(raw.get(dim_keys["service"])) if dim_keys["service"] else None,
                 sku=_clean_str(raw.get(dim_keys["sku"])) if dim_keys["sku"] else None,
-                usage_type=_clean_str(raw.get(dim_keys["usage_type"])) if dim_keys["usage_type"] else None,
+                usage_type=_clean_str(raw.get(dim_keys["usage_type"]))
+                if dim_keys["usage_type"]
+                else None,
                 project=_clean_str(raw.get(dim_keys["project"])) if dim_keys["project"] else None,
                 account=_clean_str(raw.get(dim_keys["account"])) if dim_keys["account"] else None,
-                location=_clean_str(raw.get(dim_keys["location"])) if dim_keys["location"] else None,
+                location=_clean_str(raw.get(dim_keys["location"]))
+                if dim_keys["location"]
+                else None,
                 source=source,
                 pct_change=_parse_pct(raw.get(pct_key)) if pct_key else None,
                 description=_clean_str(raw.get(desc_key)) if desc_key else None,
@@ -531,9 +521,7 @@ def _parse_pct(value: Any) -> float | None:
         return None
 
 
-def _detect_optional_key(
-    sample_row: dict[str, Any], candidates: tuple[str, ...]
-) -> str | None:
+def _detect_optional_key(sample_row: dict[str, Any], candidates: tuple[str, ...]) -> str | None:
     lower_to_actual = {k.lower(): k for k in sample_row.keys()}
     for cand in candidates:
         if cand in sample_row:
@@ -604,9 +592,7 @@ def _spikes_with_date_split(
 
     for r in rows:
         key = (r.grouping, r.grouping_value)
-        entry = grouped.setdefault(
-            key, {"current": 0.0, "previous": 0.0, "daily": []}
-        )
+        entry = grouped.setdefault(key, {"current": 0.0, "previous": 0.0, "daily": []})
         if r.day is None:
             entry["current"] += r.cost
         elif r.day < midpoint:
@@ -626,10 +612,7 @@ def _spikes_with_date_split(
         else:
             pct = float("inf") if current > 0 else 0.0
         absolute = current - previous
-        material = (
-            abs(pct) >= min_change_percent
-            or abs(absolute) >= min_absolute_change
-        )
+        material = abs(pct) >= min_change_percent or abs(absolute) >= min_absolute_change
         if not material:
             continue
         spikes.append(
@@ -653,6 +636,7 @@ def _spikes_total_only(rows: list[NormalizedRow]) -> list[CostSpike]:
     previous-period cost from it so we still get period-over-period numbers
     even without dates.
     """
+
     @dataclass
     class _Acc:
         current: float = 0.0
@@ -800,10 +784,10 @@ SERVICE_KEYWORDS = SERVICE_KEYWORDS_GCP
 # Inference scoring constants — tuned for the kind of evidence we get from
 # Console exports. Total score range ~0..120. Anything >= 30 surfaces.
 SCORE_NAME_MATCH = 50
-SCORE_PCT_MATCH_TIGHT = 50    # within 5% relative
-SCORE_PCT_MATCH_LOOSE = 25    # within 25% relative
-SCORE_MAGNITUDE_EXACT = 40    # project total within 10% of service total
-SCORE_MAGNITUDE_CONTAINS = 20 # project >= service AND project is top-3
+SCORE_PCT_MATCH_TIGHT = 50  # within 5% relative
+SCORE_PCT_MATCH_LOOSE = 25  # within 25% relative
+SCORE_MAGNITUDE_EXACT = 40  # project total within 10% of service total
+SCORE_MAGNITUDE_CONTAINS = 20  # project >= service AND project is top-3
 INFERENCE_THRESHOLD = 30
 TOP_HOMES_PER_SPIKE = 3
 
@@ -828,10 +812,7 @@ def _attach_likely_homes(spikes: list[CostSpike]) -> None:
     if not services or not projects:
         return
 
-    project_total_max = max(p.current_cost for p in projects)
-    top3_project_ids = {
-        p.service for p in sorted(projects, key=lambda x: -x.current_cost)[:3]
-    }
+    top3_project_ids = {p.service for p in sorted(projects, key=lambda x: -x.current_cost)[:3]}
 
     # ---- service spikes get a list of likely project homes ----
     for svc in services:
@@ -890,12 +871,18 @@ def _score_match(
         # need to be slightly longer to be reliable). Drop generic glue
         # words that show up across many services.
         stopwords = {
-            "cloud", "service", "engine", "manager", "platform",
-            "amazon", "aws", "elastic", "simple",
+            "cloud",
+            "service",
+            "engine",
+            "manager",
+            "platform",
+            "amazon",
+            "aws",
+            "elastic",
+            "simple",
         }
         keywords = [
-            w.lower() for w in svc_name.split()
-            if len(w) >= 4 and w.lower() not in stopwords
+            w.lower() for w in svc_name.split() if len(w) >= 4 and w.lower() not in stopwords
         ]
     # Final guard: every keyword must be at least 3 chars
     keywords = [k for k in keywords if len(k) >= 3]
@@ -919,23 +906,15 @@ def _score_match(
             relative_diff = abs(svc_pct - proj_pct) / max(abs(svc_pct), 1)
             if relative_diff < 0.05:
                 score += SCORE_PCT_MATCH_TIGHT
-                reasons.append(
-                    f"both spiking ~{svc_pct:+.0f}% (project {proj_pct:+.0f}%)"
-                )
+                reasons.append(f"both spiking ~{svc_pct:+.0f}% (project {proj_pct:+.0f}%)")
             elif relative_diff < 0.25:
                 score += SCORE_PCT_MATCH_LOOSE
-                reasons.append(
-                    f"both spiking same direction ({svc_pct:+.0f}% vs {proj_pct:+.0f}%)"
-                )
+                reasons.append(f"both spiking same direction ({svc_pct:+.0f}% vs {proj_pct:+.0f}%)")
 
     # ---- 3. Magnitude match ----
-    if (
-        service_spike.current_cost > 0
-        and project_spike.current_cost > 0
-    ):
-        ratio = (
-            min(service_spike.current_cost, project_spike.current_cost)
-            / max(service_spike.current_cost, project_spike.current_cost)
+    if service_spike.current_cost > 0 and project_spike.current_cost > 0:
+        ratio = min(service_spike.current_cost, project_spike.current_cost) / max(
+            service_spike.current_cost, project_spike.current_cost
         )
         if ratio >= 0.9:
             score += SCORE_MAGNITUDE_EXACT
@@ -947,9 +926,7 @@ def _score_match(
     return score, reasons
 
 
-def _attach_top_contributors(
-    spikes: list[CostSpike], rows: list[NormalizedRow]
-) -> None:
+def _attach_top_contributors(spikes: list[CostSpike], rows: list[NormalizedRow]) -> None:
     """For each spike, compute the top contributors across other dimensions.
 
     A "contributor" is another dimension column present on the same rows
@@ -999,14 +976,12 @@ def _attach_top_contributors(
                         descriptions_for_dim[value] = (r.cost, r.description)
             if not totals:
                 continue
-            ranked = sorted(
-                totals.items(), key=lambda kv: kv[1], reverse=True
-            )[:TOP_CONTRIBUTORS_LIMIT]
+            ranked = sorted(totals.items(), key=lambda kv: kv[1], reverse=True)[
+                :TOP_CONTRIBUTORS_LIMIT
+            ]
             # Attach descriptions for the contributors we're actually showing.
-            for (contributor_name, _cost) in ranked:
+            for contributor_name, _cost in ranked:
                 desc_entry = descriptions_for_dim.get(contributor_name)
                 if desc_entry:
-                    spike.contributor_descriptions[
-                        f"{dim}:{contributor_name}"
-                    ] = desc_entry[1]
+                    spike.contributor_descriptions[f"{dim}:{contributor_name}"] = desc_entry[1]
             spike.top_contributors[dim] = ranked

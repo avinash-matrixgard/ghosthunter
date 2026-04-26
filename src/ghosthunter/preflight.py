@@ -22,13 +22,14 @@ The module has zero hard deps on boto3 / google-cloud-bigquery: every
 import of those SDKs is inside a check so advisor-mode installs
 without the cloud SDKs still run the core CLI cleanly.
 """
+
 from __future__ import annotations
 
 import os
 import shutil
 import subprocess
 import sys
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Callable
 
 from rich.console import Console
@@ -159,9 +160,7 @@ def _prompt_fix_or_wait(console: Console, issue: PreflightIssue) -> bool:
     if the caller should give up (user declined fix, fix raised, etc).
     """
     if issue.fix_callable is not None:
-        if not Confirm.ask(
-            "[bold]Install now?[/bold]", default=True, console=console
-        ):
+        if not Confirm.ask("[bold]Install now?[/bold]", default=True, console=console):
             console.print("[dim]OK, leaving it to you. Install and re-run.[/dim]")
             return False
         try:
@@ -169,9 +168,7 @@ def _prompt_fix_or_wait(console: Console, issue: PreflightIssue) -> bool:
         except Exception as exc:  # noqa: BLE001 — we surface any failure
             console.print(f"[red]Fix failed: {exc}[/red]")
             if issue.fix_command:
-                console.print(
-                    f"[dim]Run manually: [cyan]{issue.fix_command}[/cyan][/dim]"
-                )
+                console.print(f"[dim]Run manually: [cyan]{issue.fix_command}[/cyan][/dim]")
             return False
         return True
 
@@ -185,9 +182,7 @@ def _prompt_fix_or_wait(console: Console, issue: PreflightIssue) -> bool:
         return True
 
     # Informational / unrecoverable.
-    console.print(
-        "[red]No automatic fix available for this issue. See panel above.[/red]"
-    )
+    console.print("[red]No automatic fix available for this issue. See panel above.[/red]")
     return False
 
 
@@ -303,7 +298,7 @@ def _check_aws_credentials(cfg: Config) -> PreflightIssue | None:
         )
     except botocore.exceptions.ClientError as exc:
         return PreflightIssue(
-            label=f"sts:GetCallerIdentity failed",
+            label="sts:GetCallerIdentity failed",
             detail=str(exc),
         )
     except Exception as exc:  # noqa: BLE001 — catch-all for surprising SDK errors
@@ -367,10 +362,10 @@ def _check_cost_explorer_access(cfg: Config) -> PreflightIssue | None:
                 fix_command=(
                     "aws iam put-user-policy --user-name <USER> "
                     "--policy-name GhosthunterCostExplorer "
-                    "--policy-document '{\"Version\":\"2012-10-17\","
-                    "\"Statement\":[{\"Effect\":\"Allow\","
-                    "\"Action\":[\"ce:Get*\",\"ce:List*\",\"ce:Describe*\"],"
-                    "\"Resource\":\"*\"}]}'"
+                    '--policy-document \'{"Version":"2012-10-17",'
+                    '"Statement":[{"Effect":"Allow",'
+                    '"Action":["ce:Get*","ce:List*","ce:Describe*"],'
+                    '"Resource":"*"}]}\''
                 ),
                 docs_url="https://docs.aws.amazon.com/cost-management/latest/userguide/ce-access.html",
             )
@@ -451,8 +446,7 @@ def _check_gcp_credentials(cfg: Config) -> PreflightIssue | None:
         return PreflightIssue(
             label="GCP project not configured",
             detail=(
-                "~/.ghosthunter/config.toml has no project_id. "
-                "Run `ghosthunter init` to set one."
+                "~/.ghosthunter/config.toml has no project_id. Run `ghosthunter init` to set one."
             ),
             user_command="ghosthunter init",
         )
@@ -528,8 +522,7 @@ def _pip_install(spec: str) -> None:
     )
     if result.returncode != 0:
         raise RuntimeError(
-            f"pip install {spec!r} failed (exit {result.returncode}):\n"
-            f"{result.stderr.strip()}"
+            f"pip install {spec!r} failed (exit {result.returncode}):\n{result.stderr.strip()}"
         )
 
 

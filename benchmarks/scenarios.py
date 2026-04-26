@@ -40,6 +40,7 @@ Baseline design notes:
     dropped. The parser treats negative-direction spikes the same way.
   - All dollar figures are plausible but fictional.
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -134,8 +135,15 @@ SCENARIOS: list[Scenario] = [
                 "288 times/day."
             ),
             evidence_keywords=(
-                "bigquery", "on-demand", "scan", "tb", "cartesian", "join",
-                "composer", "schedule", "unbounded",
+                "bigquery",
+                "on-demand",
+                "scan",
+                "tb",
+                "cartesian",
+                "join",
+                "composer",
+                "schedule",
+                "unbounded",
             ),
             remediation=(
                 "Kill the DAG, add partition / clustering filters, and "
@@ -174,8 +182,15 @@ SCENARIOS: list[Scenario] = [
                 "single instance in training-prod."
             ),
             evidence_keywords=(
-                "nat", "egress", "external", "exfiltration", "service account",
-                "key", "compromise", "training", "internet",
+                "nat",
+                "egress",
+                "external",
+                "exfiltration",
+                "service account",
+                "key",
+                "compromise",
+                "training",
+                "internet",
             ),
             remediation=(
                 "Rotate the compromised key immediately, add egress VPC-SC "
@@ -212,8 +227,14 @@ SCENARIOS: list[Scenario] = [
                 "warm containers 24/7 regardless of traffic."
             ),
             evidence_keywords=(
-                "cloud run", "min-instances", "minimum", "warm", "idle",
-                "staging", "rollout", "config",
+                "cloud run",
+                "min-instances",
+                "minimum",
+                "warm",
+                "idle",
+                "staging",
+                "rollout",
+                "config",
             ),
             remediation=(
                 "Roll back to min-instances=0 (or 1 for latency-sensitive "
@@ -250,8 +271,13 @@ SCENARIOS: list[Scenario] = [
                 "log volume grew ~8x."
             ),
             evidence_keywords=(
-                "logging", "debug", "verbose", "log level", "volume",
-                "ingestion", "checkout",
+                "logging",
+                "debug",
+                "verbose",
+                "log level",
+                "volume",
+                "ingestion",
+                "checkout",
             ),
             remediation=(
                 "Set LOG_LEVEL=INFO, add a log-volume alert at 2x week-"
@@ -288,8 +314,14 @@ SCENARIOS: list[Scenario] = [
                 "scale-down; each warm-up boots N nodes fully."
             ),
             evidence_keywords=(
-                "gke", "kubernetes", "autoscaler", "flap", "poddisruption",
-                "pdb", "scale", "node pool",
+                "gke",
+                "kubernetes",
+                "autoscaler",
+                "flap",
+                "poddisruption",
+                "pdb",
+                "scale",
+                "node pool",
             ),
             remediation=(
                 "Fix PDB minAvailable on the offending deployment. Add "
@@ -331,8 +363,13 @@ SCENARIOS: list[Scenario] = [
                 "endpoints are free for same-region S3."
             ),
             evidence_keywords=(
-                "nat gateway", "vpc endpoint", "s3", "etl", "egress",
-                "data processing", "gateway endpoint",
+                "nat gateway",
+                "vpc endpoint",
+                "s3",
+                "etl",
+                "egress",
+                "data processing",
+                "gateway endpoint",
             ),
             remediation=(
                 "Add an S3 Gateway VPC Endpoint in the VPC and update "
@@ -369,8 +406,14 @@ SCENARIOS: list[Scenario] = [
                 "again but accrue Standard pricing indefinitely."
             ),
             evidence_keywords=(
-                "s3", "lifecycle", "standard", "glacier", "tier",
-                "compliance", "log", "cold",
+                "s3",
+                "lifecycle",
+                "standard",
+                "glacier",
+                "tier",
+                "compliance",
+                "log",
+                "cold",
             ),
             remediation=(
                 "Add a lifecycle rule: transition to Standard-IA at 30 "
@@ -409,8 +452,14 @@ SCENARIOS: list[Scenario] = [
                 "ingestion."
             ),
             evidence_keywords=(
-                "cloudwatch", "logs", "ingestion", "debug", "verbose",
-                "lambda", "log level", "layer",
+                "cloudwatch",
+                "logs",
+                "ingestion",
+                "debug",
+                "verbose",
+                "lambda",
+                "log level",
+                "layer",
             ),
             remediation=(
                 "Pin LOG_LEVEL=INFO in the shared Lambda layer. Set "
@@ -450,8 +499,13 @@ SCENARIOS: list[Scenario] = [
                 "way."
             ),
             evidence_keywords=(
-                "cross-az", "data transfer", "kafka", "msk", "subnet",
-                "availability zone", "consumer",
+                "cross-az",
+                "data transfer",
+                "kafka",
+                "msk",
+                "subnet",
+                "availability zone",
+                "consumer",
             ),
             remediation=(
                 "Move consumers back to the broker's AZ, or use MSK "
@@ -489,8 +543,14 @@ SCENARIOS: list[Scenario] = [
                 "quota."
             ),
             evidence_keywords=(
-                "bedrock", "agent", "chain", "loop", "rate limit", "quota",
-                "weekend", "synthetic",
+                "bedrock",
+                "agent",
+                "chain",
+                "loop",
+                "rate limit",
+                "quota",
+                "weekend",
+                "synthetic",
             ),
             remediation=(
                 "Kill the runaway agent job. Add Bedrock provisioned "

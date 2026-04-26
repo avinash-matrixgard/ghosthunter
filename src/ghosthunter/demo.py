@@ -9,6 +9,7 @@ us to mock Anthropic clients. Instead it directly emits the same
 `InvestigationEvent` objects the real investigator would emit, so the UI
 renders identically.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -28,7 +29,7 @@ from ghosthunter.investigator import (
     PendingCommand,
 )
 from ghosthunter.providers.gcp import CommandResult, CostSpike
-from ghosthunter.security.validator import SecurityValidator, ValidationResult
+from ghosthunter.security.validator import SecurityValidator
 from ghosthunter.ui import RichStreamRenderer
 
 SAMPLE_DIR = Path(__file__).resolve().parent.parent.parent / "sample_data"
@@ -61,17 +62,13 @@ async def run_demo(
     if provider_filter in ("gcp", "aws"):
         scenarios = [s for s in scenarios if s.get("provider") == provider_filter]
         if not scenarios:
-            console.print(
-                f"[red]No scenarios match provider '{provider_filter}'.[/red]"
-            )
+            console.print(f"[red]No scenarios match provider '{provider_filter}'.[/red]")
             return
 
     script = _select_scenario(scenarios, scenario_id)
     if script is None:
         ids = ", ".join(s.get("id", "?") for s in scenarios)
-        console.print(
-            f"[red]Unknown scenario '{scenario_id}'. Available: {ids}[/red]"
-        )
+        console.print(f"[red]Unknown scenario '{scenario_id}'. Available: {ids}[/red]")
         return
 
     provider = script.get("provider", "gcp")
@@ -108,17 +105,13 @@ async def run_demo(
 
         # If this step concludes, render and stop.
         if "conclude" in step:
-            await renderer(
-                InvestigationEvent("concluded", {"conclusion": step["conclude"]})
-            )
+            await renderer(InvestigationEvent("concluded", {"conclusion": step["conclude"]}))
             break
 
         # Otherwise the step proposes a command.
         command = step["command"]
         static_check = validator.is_allowed(command)
-        semantic = _FakeSemanticResult(
-            approved=True, reason="demo replay — pre-validated"
-        )
+        semantic = _FakeSemanticResult(approved=True, reason="demo replay — pre-validated")
         pending = PendingCommand(
             command=command,
             tests_hypothesis=step.get("tests_hypothesis"),
@@ -130,14 +123,10 @@ async def run_demo(
 
         decision = _demo_prompt(console)
         if decision == "abort":
-            await renderer(
-                InvestigationEvent("aborted", {"reason": "demo aborted by user"})
-            )
+            await renderer(InvestigationEvent("aborted", {"reason": "demo aborted by user"}))
             return
         if decision == "reject":
-            await renderer(
-                InvestigationEvent("command_rejected_by_user", {"command": command})
-            )
+            await renderer(InvestigationEvent("command_rejected_by_user", {"command": command}))
             continue
 
         # Fake execution
@@ -222,6 +211,7 @@ def _demo_prompt(console: Console) -> str:
 class _FakeSemanticResult:
     """Duck-typed stand-in for SemanticResult so we don't import the
     Sonnet executor module in demo mode."""
+
     def __init__(self, approved: bool, reason: str) -> None:
         self.approved = approved
         self.reason = reason

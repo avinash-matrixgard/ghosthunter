@@ -8,11 +8,11 @@ Locks down:
     rejection and without human interaction (input patched).
   - `provider_filter` works.
 """
+
 from __future__ import annotations
 
 import asyncio
 import json
-from pathlib import Path
 from unittest.mock import patch
 
 import pytest
@@ -65,9 +65,7 @@ def _collect_commands(scenario: dict) -> list[str]:
     return [step["command"] for step in scenario["steps"] if "command" in step]
 
 
-_AWS_SCENARIOS = [
-    s for s in _load_bundle()["scenarios"] if s.get("provider") == "aws"
-]
+_AWS_SCENARIOS = [s for s in _load_bundle()["scenarios"] if s.get("provider") == "aws"]
 
 
 class TestAWSScenarioCommandsValidate:
@@ -111,9 +109,7 @@ class TestScenarioStructure:
         )
         conclusion = last["conclude"]
         for key in ("root_cause", "confidence", "evidence_summary", "recommendations"):
-            assert key in conclusion, (
-                f"scenario {scenario['id']!r} conclusion missing {key!r}"
-            )
+            assert key in conclusion, f"scenario {scenario['id']!r} conclusion missing {key!r}"
 
     @pytest.mark.parametrize("scenario", _load_bundle()["scenarios"], ids=lambda s: s["id"])
     def test_non_final_steps_have_command_and_evidence(self, scenario):
@@ -143,8 +139,10 @@ class TestRunDemoEnd2End:
 
         # Auto-approve every prompt so the replay runs unattended, and
         # zero out the per-step delay so the test is fast.
-        with patch("ghosthunter.demo._demo_prompt", return_value="approve"), \
-             patch("ghosthunter.demo.asyncio.sleep", new=_no_sleep):
+        with (
+            patch("ghosthunter.demo._demo_prompt", return_value="approve"),
+            patch("ghosthunter.demo.asyncio.sleep", new=_no_sleep),
+        ):
             asyncio.run(
                 run_demo(
                     console,

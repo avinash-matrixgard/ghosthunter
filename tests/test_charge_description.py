@@ -11,6 +11,7 @@ codes that the CSV already contained. The fix: thread descriptions
 through the data model and render them alongside SKU IDs everywhere
 they're displayed (CLI + Opus prompt).
 """
+
 from __future__ import annotations
 
 import csv
@@ -23,7 +24,6 @@ from ghosthunter.providers.billing_file import (
     load_spikes_from_file,
 )
 
-
 REPO_ROOT = Path(__file__).resolve().parent.parent
 FOCUS_100K = REPO_ROOT / "benchmarks" / "real_world" / "focus_sample_100000.csv"
 
@@ -31,8 +31,14 @@ FOCUS_100K = REPO_ROOT / "benchmarks" / "real_world" / "focus_sample_100000.csv"
 def _write_focus_csv(path: Path, rows: list[dict]) -> None:
     """Helper: build a tiny FOCUS 1.0 CSV fixture with description column."""
     fieldnames = [
-        "ChargePeriodStart", "ServiceName", "SkuId", "ChargeDescription",
-        "SubAccountId", "RegionId", "ProviderName", "BilledCost",
+        "ChargePeriodStart",
+        "ServiceName",
+        "SkuId",
+        "ChargeDescription",
+        "SubAccountId",
+        "RegionId",
+        "ProviderName",
+        "BilledCost",
     ]
     with path.open("w", newline="") as f:
         w = csv.DictWriter(f, fieldnames=fieldnames)
@@ -66,38 +72,44 @@ class TestDescriptionThroughParser:
         rows: list[dict] = []
         # Previous period (low cost)
         for day in range(1, 16):
-            rows.append({
-                "ChargePeriodStart": f"2026-03-{day:02d}",
-                "ServiceName": "Amazon Elastic Compute Cloud",
-                "SkuId": "SKUAAA1",
-                "ChargeDescription": "$1.624 per On Demand Linux g5.4xlarge Instance Hour",
-                "SubAccountId": "acct-prod",
-                "RegionId": "us-east-1",
-                "ProviderName": "AWS",
-                "BilledCost": "10.00",
-            })
+            rows.append(
+                {
+                    "ChargePeriodStart": f"2026-03-{day:02d}",
+                    "ServiceName": "Amazon Elastic Compute Cloud",
+                    "SkuId": "SKUAAA1",
+                    "ChargeDescription": "$1.624 per On Demand Linux g5.4xlarge Instance Hour",
+                    "SubAccountId": "acct-prod",
+                    "RegionId": "us-east-1",
+                    "ProviderName": "AWS",
+                    "BilledCost": "10.00",
+                }
+            )
         # Current period (high cost — the spike)
         for day in range(16, 31):
-            rows.append({
-                "ChargePeriodStart": f"2026-03-{day:02d}",
-                "ServiceName": "Amazon Elastic Compute Cloud",
-                "SkuId": "SKUAAA1",
-                "ChargeDescription": "$1.624 per On Demand Linux g5.4xlarge Instance Hour",
-                "SubAccountId": "acct-prod",
-                "RegionId": "us-east-1",
-                "ProviderName": "AWS",
-                "BilledCost": "50.00",
-            })
-            rows.append({
-                "ChargePeriodStart": f"2026-03-{day:02d}",
-                "ServiceName": "Amazon Elastic Compute Cloud",
-                "SkuId": "SKUBBB2",
-                "ChargeDescription": "$0.10 per GB-month gp3 SSD storage",
-                "SubAccountId": "acct-prod",
-                "RegionId": "us-east-1",
-                "ProviderName": "AWS",
-                "BilledCost": "5.00",
-            })
+            rows.append(
+                {
+                    "ChargePeriodStart": f"2026-03-{day:02d}",
+                    "ServiceName": "Amazon Elastic Compute Cloud",
+                    "SkuId": "SKUAAA1",
+                    "ChargeDescription": "$1.624 per On Demand Linux g5.4xlarge Instance Hour",
+                    "SubAccountId": "acct-prod",
+                    "RegionId": "us-east-1",
+                    "ProviderName": "AWS",
+                    "BilledCost": "50.00",
+                }
+            )
+            rows.append(
+                {
+                    "ChargePeriodStart": f"2026-03-{day:02d}",
+                    "ServiceName": "Amazon Elastic Compute Cloud",
+                    "SkuId": "SKUBBB2",
+                    "ChargeDescription": "$0.10 per GB-month gp3 SSD storage",
+                    "SubAccountId": "acct-prod",
+                    "RegionId": "us-east-1",
+                    "ProviderName": "AWS",
+                    "BilledCost": "5.00",
+                }
+            )
 
         fixture = tmp_path / "focus_fixture.csv"
         _write_focus_csv(fixture, rows)
@@ -105,9 +117,7 @@ class TestDescriptionThroughParser:
         spikes = load_spikes_from_file(fixture)
         assert spikes, "parser returned no spikes"
 
-        ec2 = next(
-            (s for s in spikes if "Elastic Compute" in s.service), None
-        )
+        ec2 = next((s for s in spikes if "Elastic Compute" in s.service), None)
         assert ec2 is not None, "EC2 spike not present"
 
         # The descriptions must have been attached to the SKU contributors.
@@ -121,21 +131,26 @@ class TestDescriptionThroughParser:
         """Older GCP Console exports have no description column. Parser
         must still work — just without descriptions."""
         fieldnames = [
-            "Usage start date", "Service description", "SKU description",
-            "Project ID", "Cost ($)",
+            "Usage start date",
+            "Service description",
+            "SKU description",
+            "Project ID",
+            "Cost ($)",
         ]
         p = tmp_path / "gcp_no_desc.csv"
         with p.open("w", newline="") as f:
             w = csv.DictWriter(f, fieldnames=fieldnames)
             w.writeheader()
             for day in range(1, 31):
-                w.writerow({
-                    "Usage start date": f"2026-03-{day:02d}",
-                    "Service description": "BigQuery",
-                    "SKU description": "Analysis",
-                    "Project ID": "proj-a",
-                    "Cost ($)": "10.0" if day < 16 else "100.0",
-                })
+                w.writerow(
+                    {
+                        "Usage start date": f"2026-03-{day:02d}",
+                        "Service description": "BigQuery",
+                        "SKU description": "Analysis",
+                        "Project ID": "proj-a",
+                        "Cost ($)": "10.0" if day < 16 else "100.0",
+                    }
+                )
 
         spikes = load_spikes_from_file(p)
         assert spikes
@@ -147,16 +162,18 @@ class TestDescriptionThroughParser:
         human names. Prevents noise in the prompt."""
         rows = []
         for day in range(1, 31):
-            rows.append({
-                "ChargePeriodStart": f"2026-03-{day:02d}",
-                "ServiceName": "Amazon S3",
-                "SkuId": "STORAGE",
-                "ChargeDescription": "$0.023 per GB-month standard storage",
-                "SubAccountId": "acct-a",
-                "RegionId": "us-east-1",
-                "ProviderName": "AWS",
-                "BilledCost": "20.0" if day < 16 else "100.0",
-            })
+            rows.append(
+                {
+                    "ChargePeriodStart": f"2026-03-{day:02d}",
+                    "ServiceName": "Amazon S3",
+                    "SkuId": "STORAGE",
+                    "ChargeDescription": "$0.023 per GB-month standard storage",
+                    "SubAccountId": "acct-a",
+                    "RegionId": "us-east-1",
+                    "ProviderName": "AWS",
+                    "BilledCost": "20.0" if day < 16 else "100.0",
+                }
+            )
         p = tmp_path / "s3.csv"
         _write_focus_csv(p, rows)
 
@@ -182,12 +199,8 @@ def test_focus_100k_surfaces_g5_description():
     learned that SKU ``4GQWNPC9K2PZAY97`` means a g5.4xlarge GPU hour
     and kept asking the user to decode it."""
     spikes = load_spikes_from_file(FOCUS_100K)
-    ec2 = next(
-        (s for s in spikes if "Elastic Compute" in s.service), None
-    )
-    assert ec2 is not None, (
-        "No EC2 spike in FOCUS 100K sample — the fixture data may have changed"
-    )
+    ec2 = next((s for s in spikes if "Elastic Compute" in s.service), None)
+    assert ec2 is not None, "No EC2 spike in FOCUS 100K sample — the fixture data may have changed"
     top_sku = next(iter(ec2.top_contributors.get("sku", [])), None)
     assert top_sku is not None, "no SKU contributors in EC2 spike"
     sku_id = top_sku[0]

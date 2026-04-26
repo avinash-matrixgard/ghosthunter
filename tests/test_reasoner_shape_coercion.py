@@ -11,6 +11,7 @@ Real-world trigger: running advisor mode on the FOCUS 100K sample and
 answering "no access" three times in a row — Opus's 4th response
 returned hypotheses as a list of strings.
 """
+
 from __future__ import annotations
 
 import pytest
@@ -18,7 +19,6 @@ import pytest
 from ghosthunter.models.reasoner import (
     HypothesisStep,
     InvestigationStep,
-    NextAction,
     ReasonerSchemaError,
     _coerce_hypothesis,
     _coerce_next_action,
@@ -48,9 +48,7 @@ class TestCoerceHypothesis:
 
     def test_bare_string_becomes_hypothesis(self):
         """The real-world Opus slip-up — a string where a dict was expected."""
-        out = _coerce_hypothesis(
-            "H1: EC2 instances in us-east-1 likely upsized", idx=0
-        )
+        out = _coerce_hypothesis("H1: EC2 instances in us-east-1 likely upsized", idx=0)
         assert out is not None
         assert out.id == "H1"
         assert "EC2 instances" in out.description
@@ -62,9 +60,7 @@ class TestCoerceHypothesis:
         assert _coerce_hypothesis("   ", idx=0) is None
 
     def test_dict_missing_id_gets_synthesized(self):
-        out = _coerce_hypothesis(
-            {"description": "NAT gateway spike", "confidence": 60}, idx=2
-        )
+        out = _coerce_hypothesis({"description": "NAT gateway spike", "confidence": 60}, idx=2)
         assert out is not None
         assert out.id == "H3"  # synthesized from idx
 
@@ -72,29 +68,21 @@ class TestCoerceHypothesis:
         assert _coerce_hypothesis({"id": "H1", "confidence": 80}, idx=0) is None
 
     def test_confidence_clamped_to_range(self):
-        out = _coerce_hypothesis(
-            {"description": "x", "confidence": 9999}, idx=0
-        )
+        out = _coerce_hypothesis({"description": "x", "confidence": 9999}, idx=0)
         assert out is not None
         assert out.confidence == 100
 
-        out = _coerce_hypothesis(
-            {"description": "x", "confidence": -50}, idx=0
-        )
+        out = _coerce_hypothesis({"description": "x", "confidence": -50}, idx=0)
         assert out is not None
         assert out.confidence == 0
 
     def test_confidence_non_numeric_falls_back_to_default(self):
-        out = _coerce_hypothesis(
-            {"description": "x", "confidence": "high"}, idx=0
-        )
+        out = _coerce_hypothesis({"description": "x", "confidence": "high"}, idx=0)
         assert out is not None
         assert out.confidence == 50
 
     def test_invalid_status_coerced_to_active(self):
-        out = _coerce_hypothesis(
-            {"description": "x", "status": "maybe"}, idx=0
-        )
+        out = _coerce_hypothesis({"description": "x", "status": "maybe"}, idx=0)
         assert out is not None
         assert out.status == "active"
 
@@ -176,9 +164,7 @@ class TestCoerceNextAction:
         }
 
     def test_conclude_with_non_dict_conclusion_drops_it(self):
-        out = _coerce_next_action(
-            {"type": "conclude", "conclusion": "it was BigQuery"}
-        )
+        out = _coerce_next_action({"type": "conclude", "conclusion": "it was BigQuery"})
         assert out.type == "conclude"
         assert out.conclusion is None
 

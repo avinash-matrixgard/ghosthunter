@@ -17,10 +17,10 @@ must:
 
 All tests stub out ``asyncio.sleep`` to zero so the suite stays fast.
 """
+
 from __future__ import annotations
 
 import asyncio
-from unittest.mock import patch
 
 import pytest
 
@@ -53,16 +53,35 @@ def _make_fake_anthropic_module():
             self.status_code = status_code
             self.response = response
 
-    class _AuthenticationError(_APIStatusError): pass
-    class _PermissionDeniedError(_APIStatusError): pass
-    class _NotFoundError(_APIStatusError): pass
-    class _BadRequestError(_APIStatusError): pass
-    class _UnprocessableEntityError(_APIStatusError): pass
-    class _RateLimitError(_APIStatusError): pass
-    class _OverloadedError(_APIStatusError): pass
-    class _InternalServerError(_APIStatusError): pass
-    class _APIConnectionError(_APIStatusError): pass
-    class _APITimeoutError(_APIStatusError): pass
+    class _AuthenticationError(_APIStatusError):
+        pass
+
+    class _PermissionDeniedError(_APIStatusError):
+        pass
+
+    class _NotFoundError(_APIStatusError):
+        pass
+
+    class _BadRequestError(_APIStatusError):
+        pass
+
+    class _UnprocessableEntityError(_APIStatusError):
+        pass
+
+    class _RateLimitError(_APIStatusError):
+        pass
+
+    class _OverloadedError(_APIStatusError):
+        pass
+
+    class _InternalServerError(_APIStatusError):
+        pass
+
+    class _APIConnectionError(_APIStatusError):
+        pass
+
+    class _APITimeoutError(_APIStatusError):
+        pass
 
     class _Module:
         APIStatusError = _APIStatusError
@@ -85,6 +104,7 @@ def fake_anthropic(monkeypatch):
     """Patch _classify_retryable's lazy ``import anthropic`` to our fake."""
     mod = _make_fake_anthropic_module()
     import sys
+
     monkeypatch.setitem(sys.modules, "anthropic", mod)
     return mod
 
@@ -92,8 +112,10 @@ def fake_anthropic(monkeypatch):
 @pytest.fixture(autouse=True)
 def no_real_sleep(monkeypatch):
     """Zero out asyncio.sleep so retry backoffs don't slow the suite."""
+
     async def _fast_sleep(*_args, **_kwargs):
         return None
+
     monkeypatch.setattr(_api_retry.asyncio, "sleep", _fast_sleep)
 
 
@@ -272,9 +294,7 @@ class TestRetryAfterHeader:
         class _FakeResponse:
             headers = {"retry-after": "7"}
 
-        exc = fake_anthropic.RateLimitError(
-            "x", status_code=429, response=_FakeResponse()
-        )
+        exc = fake_anthropic.RateLimitError("x", status_code=429, response=_FakeResponse())
 
         sleeps_requested: list[float] = []
 
@@ -329,9 +349,7 @@ class TestStatusCodeFallback:
             (503, ModelServerError, True),
         ],
     )
-    def test_classify_by_status_code(
-        self, fake_anthropic, code, expected_cls, retryable
-    ):
+    def test_classify_by_status_code(self, fake_anthropic, code, expected_cls, retryable):
         exc = fake_anthropic.APIStatusError("x", status_code=code)
         if retryable:
             fn = _call_n_times([exc] * (MAX_RETRIES + 1))
@@ -348,17 +366,11 @@ class TestErrorMessageQuality:
     def test_op_name_in_message(self, fake_anthropic):
         exc = fake_anthropic.AuthenticationError("revoked", status_code=401)
         with pytest.raises(ModelAuthError) as excinfo:
-            asyncio.run(
-                call_with_retry(
-                    _call_n_times([exc]), op_name="Sonnet semantic validation"
-                )
-            )
+            asyncio.run(call_with_retry(_call_n_times([exc]), op_name="Sonnet semantic validation"))
         assert "Sonnet semantic validation" in str(excinfo.value)
 
     def test_original_message_preserved(self, fake_anthropic):
-        exc = fake_anthropic.BadRequestError(
-            "tool input did not match schema", status_code=400
-        )
+        exc = fake_anthropic.BadRequestError("tool input did not match schema", status_code=400)
         with pytest.raises(ModelBadRequestError) as excinfo:
             asyncio.run(call_with_retry(_call_n_times([exc]), op_name="t"))
         assert "tool input did not match schema" in str(excinfo.value)

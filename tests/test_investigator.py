@@ -21,15 +21,14 @@ Covers paths that previously had zero direct coverage:
 - Reasoner exceptions abort the run gracefully.
 - Events fire in the documented order with the expected payloads.
 """
+
 from __future__ import annotations
 
 import asyncio
-from dataclasses import replace
 from typing import Any
 
 import pytest
 
-from ghosthunter.hypothesis import Hypothesis
 from ghosthunter.investigator import (
     Budget,
     InvestigationEvent,
@@ -68,8 +67,9 @@ def _spike(service: str = "Cloud DNS", cur: float = 117_000, prev: float = 12_00
     )
 
 
-def _step_command(command: str, reasoning: str = "", h_id: str = "H1",
-                  h_conf: int = 60) -> InvestigationStep:
+def _step_command(
+    command: str, reasoning: str = "", h_id: str = "H1", h_conf: int = 60
+) -> InvestigationStep:
     return InvestigationStep(
         hypotheses=[
             HypothesisStep(
@@ -131,6 +131,7 @@ class _ScriptedReasoner:
     Blows up if the investigator tries to call past the script's end —
     keeps tests honest about how many turns they intended.
     """
+
     def __init__(self, steps: list[InvestigationStep]) -> None:
         self._steps = list(steps)
         self.call_count = 0
@@ -140,14 +141,13 @@ class _ScriptedReasoner:
         self.messages_snapshots.append(list(messages))
         self.call_count += 1
         if not self._steps:
-            raise RuntimeError(
-                "reasoner called more times than the test script provides"
-            )
+            raise RuntimeError("reasoner called more times than the test script provides")
         return self._steps.pop(0)
 
 
 class _RaisingReasoner:
     """Raises the configured exception on step()."""
+
     def __init__(self, exc: Exception) -> None:
         self._exc = exc
 
@@ -186,6 +186,7 @@ class _ScriptedProvider:
     or Exception instances (raised). One element is consumed per call to
     ``execute_command``.
     """
+
     def __init__(
         self,
         responses: list[Any] | None = None,
@@ -246,9 +247,11 @@ def event_capture():
 def approval_log():
     """Approval hook that records every prompt and returns 'approve' by
     default. Tests can override by setting ``approval_log.decision``."""
+
     class _Rec:
         prompts: list[PendingCommand] = []
         decision: str = "approve"
+
     rec = _Rec()
 
     async def _hook(pending):
@@ -279,7 +282,9 @@ class TestHappyPath:
         provider = _ScriptedProvider()
 
         inv = _build_investigator(
-            reasoner, executor, provider,
+            reasoner,
+            executor,
+            provider,
             approval_hook=approval_log.hook,
             event_hook=hook,
         )
@@ -296,15 +301,19 @@ class TestHappyPath:
 
     def test_command_then_conclude(self, event_capture, approval_log):
         events, hook = event_capture
-        reasoner = _ScriptedReasoner([
-            _step_command("gcloud logging read 'x' --limit=10"),
-            _step_conclude("found it after one command"),
-        ])
+        reasoner = _ScriptedReasoner(
+            [
+                _step_command("gcloud logging read 'x' --limit=10"),
+                _step_conclude("found it after one command"),
+            ]
+        )
         executor = _ScriptedExecutor()
         provider = _ScriptedProvider([_ok_result()])
 
         inv = _build_investigator(
-            reasoner, executor, provider,
+            reasoner,
+            executor,
+            provider,
             approval_hook=approval_log.hook,
             event_hook=hook,
         )
@@ -326,16 +335,17 @@ class TestBudgetExhaustion:
     def test_command_count_budget_aborts(self, event_capture, approval_log):
         events, hook = event_capture
         # Reasoner proposes command every turn.
-        reasoner = _ScriptedReasoner([
-            _step_command(f"gcloud logging read 'q{i}' --limit=1")
-            for i in range(10)
-        ])
+        reasoner = _ScriptedReasoner(
+            [_step_command(f"gcloud logging read 'q{i}' --limit=1") for i in range(10)]
+        )
         executor = _ScriptedExecutor()
         provider = _ScriptedProvider([_ok_result() for _ in range(10)])
         budget = Budget(max_commands=3, max_cost_usd=99, max_seconds=9999)
 
         inv = _build_investigator(
-            reasoner, executor, provider,
+            reasoner,
+            executor,
+            provider,
             approval_hook=approval_log.hook,
             event_hook=hook,
             budget=budget,
@@ -349,19 +359,18 @@ class TestBudgetExhaustion:
 
     def test_time_budget_aborts(self, event_capture, approval_log):
         events, hook = event_capture
-        reasoner = _ScriptedReasoner([
-            _step_command(f"gcloud logging read 'q{i}' --limit=1")
-            for i in range(5)
-        ])
+        reasoner = _ScriptedReasoner(
+            [_step_command(f"gcloud logging read 'q{i}' --limit=1") for i in range(5)]
+        )
         executor = _ScriptedExecutor()
         # Each command "takes" 4 seconds via duration_seconds; budget is 10s.
-        provider = _ScriptedProvider([
-            _ok_result(dur=4.0) for _ in range(5)
-        ])
+        provider = _ScriptedProvider([_ok_result(dur=4.0) for _ in range(5)])
         budget = Budget(max_commands=99, max_cost_usd=99, max_seconds=10)
 
         inv = _build_investigator(
-            reasoner, executor, provider,
+            reasoner,
+            executor,
+            provider,
             approval_hook=approval_log.hook,
             event_hook=hook,
             budget=budget,
@@ -379,15 +388,19 @@ class TestCommandRejection:
         but should let the reasoner propose a different command on the
         next turn."""
         events, hook = event_capture
-        reasoner = _ScriptedReasoner([
-            _step_command("gcloud compute instances delete vm1"),  # bad
-            _step_conclude("pivoted"),
-        ])
+        reasoner = _ScriptedReasoner(
+            [
+                _step_command("gcloud compute instances delete vm1"),  # bad
+                _step_conclude("pivoted"),
+            ]
+        )
         executor = _ScriptedExecutor()
         provider = _ScriptedProvider()
 
         inv = _build_investigator(
-            reasoner, executor, provider,
+            reasoner,
+            executor,
+            provider,
             approval_hook=approval_log.hook,
             event_hook=hook,
         )
@@ -407,10 +420,12 @@ class TestCommandRejection:
     def test_semantic_reject_feedback_loop(self, event_capture, approval_log):
         """Static validator passes, Sonnet rejects. Loop continues."""
         events, hook = event_capture
-        reasoner = _ScriptedReasoner([
-            _step_command("gcloud logging read 'x' --limit=99999"),
-            _step_conclude("backed off"),
-        ])
+        reasoner = _ScriptedReasoner(
+            [
+                _step_command("gcloud logging read 'x' --limit=99999"),
+                _step_conclude("backed off"),
+            ]
+        )
         executor = _ScriptedExecutor(
             semantic_results=[
                 SemanticResult(approved=False, reason="too broad, no time filter"),
@@ -419,7 +434,9 @@ class TestCommandRejection:
         provider = _ScriptedProvider()
 
         inv = _build_investigator(
-            reasoner, executor, provider,
+            reasoner,
+            executor,
+            provider,
             approval_hook=approval_log.hook,
             event_hook=hook,
         )
@@ -436,16 +453,20 @@ class TestCommandRejection:
 
     def test_user_rejects_feedback_loop(self, event_capture, approval_log):
         events, hook = event_capture
-        reasoner = _ScriptedReasoner([
-            _step_command("gcloud logging read 'x' --limit=100"),
-            _step_conclude("pivoted after user reject"),
-        ])
+        reasoner = _ScriptedReasoner(
+            [
+                _step_command("gcloud logging read 'x' --limit=100"),
+                _step_conclude("pivoted after user reject"),
+            ]
+        )
         executor = _ScriptedExecutor()
         provider = _ScriptedProvider()
         approval_log.decision = "reject"
 
         inv = _build_investigator(
-            reasoner, executor, provider,
+            reasoner,
+            executor,
+            provider,
             approval_hook=approval_log.hook,
             event_hook=hook,
         )
@@ -461,17 +482,21 @@ class TestCommandRejection:
 
     def test_user_aborts_ends_investigation(self, event_capture, approval_log):
         events, hook = event_capture
-        reasoner = _ScriptedReasoner([
-            _step_command("gcloud logging read 'x'"),
-            # Won't reach this because user aborts.
-            _step_conclude("unreachable"),
-        ])
+        reasoner = _ScriptedReasoner(
+            [
+                _step_command("gcloud logging read 'x'"),
+                # Won't reach this because user aborts.
+                _step_conclude("unreachable"),
+            ]
+        )
         executor = _ScriptedExecutor()
         provider = _ScriptedProvider()
         approval_log.decision = "abort"
 
         inv = _build_investigator(
-            reasoner, executor, provider,
+            reasoner,
+            executor,
+            provider,
             approval_hook=approval_log.hook,
             event_hook=hook,
         )
@@ -489,15 +514,19 @@ class TestCommandRejection:
 class TestAdvisorExceptions:
     def test_advisor_aborted_ends_investigation(self, event_capture, approval_log):
         events, hook = event_capture
-        reasoner = _ScriptedReasoner([
-            _step_command("gcloud logging read 'x'"),
-            _step_conclude("unreachable"),
-        ])
+        reasoner = _ScriptedReasoner(
+            [
+                _step_command("gcloud logging read 'x'"),
+                _step_conclude("unreachable"),
+            ]
+        )
         executor = _ScriptedExecutor()
         provider = _ScriptedProvider([AdvisorAborted("user /quit")])
 
         inv = _build_investigator(
-            reasoner, executor, provider,
+            reasoner,
+            executor,
+            provider,
             approval_hook=approval_log.hook,
             event_hook=hook,
         )
@@ -507,15 +536,19 @@ class TestAdvisorExceptions:
 
     def test_advisor_skipped_injects_feedback(self, event_capture, approval_log):
         events, hook = event_capture
-        reasoner = _ScriptedReasoner([
-            _step_command("gcloud logging read 'x'"),
-            _step_conclude("concluded after skip"),
-        ])
+        reasoner = _ScriptedReasoner(
+            [
+                _step_command("gcloud logging read 'x'"),
+                _step_conclude("concluded after skip"),
+            ]
+        )
         executor = _ScriptedExecutor()
         provider = _ScriptedProvider([AdvisorSkipped("skip")])
 
         inv = _build_investigator(
-            reasoner, executor, provider,
+            reasoner,
+            executor,
+            provider,
             approval_hook=approval_log.hook,
             event_hook=hook,
         )
@@ -525,19 +558,18 @@ class TestAdvisorExceptions:
         # Second message to reasoner should carry "SKIPPED" feedback.
         second_msgs = reasoner.messages_snapshots[1]
         joined = "\n".join(
-            m["content"] if isinstance(m["content"], str) else ""
-            for m in second_msgs
+            m["content"] if isinstance(m["content"], str) else "" for m in second_msgs
         )
         assert "SKIPPED" in joined
 
-    def test_advisor_note_calls_memory_hook_and_continues(
-        self, event_capture, approval_log
-    ):
+    def test_advisor_note_calls_memory_hook_and_continues(self, event_capture, approval_log):
         events, hook = event_capture
-        reasoner = _ScriptedReasoner([
-            _step_command("gcloud logging read 'x'"),
-            _step_conclude("done"),
-        ])
+        reasoner = _ScriptedReasoner(
+            [
+                _step_command("gcloud logging read 'x'"),
+                _step_conclude("done"),
+            ]
+        )
         executor = _ScriptedExecutor()
         provider = _ScriptedProvider([AdvisorNote("forgot to mention the region")])
 
@@ -547,7 +579,9 @@ class TestAdvisorExceptions:
             memory_calls.append((kind, text))
 
         inv = _build_investigator(
-            reasoner, executor, provider,
+            reasoner,
+            executor,
+            provider,
             approval_hook=approval_log.hook,
             event_hook=hook,
             memory_hook=_mem_hook,
@@ -562,21 +596,25 @@ class TestAdvisorExceptions:
 # Provider-level failures (Layer 7)
 # ---------------------------------------------------------------------------
 class TestProviderFailures:
-    def test_command_rejected_error_injects_feedback(
-        self, event_capture, approval_log
-    ):
+    def test_command_rejected_error_injects_feedback(self, event_capture, approval_log):
         events, hook = event_capture
-        reasoner = _ScriptedReasoner([
-            _step_command("gcloud logging read 'x'"),
-            _step_conclude("concluded after L7 rejection"),
-        ])
+        reasoner = _ScriptedReasoner(
+            [
+                _step_command("gcloud logging read 'x'"),
+                _step_conclude("concluded after L7 rejection"),
+            ]
+        )
         executor = _ScriptedExecutor()
-        provider = _ScriptedProvider([
-            CommandRejectedError("L7 re-validation failed"),
-        ])
+        provider = _ScriptedProvider(
+            [
+                CommandRejectedError("L7 re-validation failed"),
+            ]
+        )
 
         inv = _build_investigator(
-            reasoner, executor, provider,
+            reasoner,
+            executor,
+            provider,
             approval_hook=approval_log.hook,
             event_hook=hook,
         )
@@ -586,17 +624,23 @@ class TestProviderFailures:
 
     def test_command_timeout_injects_feedback(self, event_capture, approval_log):
         events, hook = event_capture
-        reasoner = _ScriptedReasoner([
-            _step_command("gcloud logging read 'x'"),
-            _step_conclude("ok despite timeout"),
-        ])
+        reasoner = _ScriptedReasoner(
+            [
+                _step_command("gcloud logging read 'x'"),
+                _step_conclude("ok despite timeout"),
+            ]
+        )
         executor = _ScriptedExecutor()
-        provider = _ScriptedProvider([
-            CommandTimeoutError("exceeded 120s"),
-        ])
+        provider = _ScriptedProvider(
+            [
+                CommandTimeoutError("exceeded 120s"),
+            ]
+        )
 
         inv = _build_investigator(
-            reasoner, executor, provider,
+            reasoner,
+            executor,
+            provider,
             approval_hook=approval_log.hook,
             event_hook=hook,
         )
@@ -610,15 +654,19 @@ class TestProviderFailures:
 class TestNeedInfo:
     def test_need_info_routes_through_ask_user(self, event_capture, approval_log):
         events, hook = event_capture
-        reasoner = _ScriptedReasoner([
-            _step_need_info("Which project?"),
-            _step_conclude("got it"),
-        ])
+        reasoner = _ScriptedReasoner(
+            [
+                _step_need_info("Which project?"),
+                _step_conclude("got it"),
+            ]
+        )
         executor = _ScriptedExecutor()
         provider = _ScriptedProvider(answer_for_ask_user="prod-edge-42")
 
         inv = _build_investigator(
-            reasoner, executor, provider,
+            reasoner,
+            executor,
+            provider,
             approval_hook=approval_log.hook,
             event_hook=hook,
         )
@@ -630,8 +678,7 @@ class TestNeedInfo:
         # The answer is injected into the next reasoner call.
         second_msgs = reasoner.messages_snapshots[1]
         joined = "\n".join(
-            m["content"] if isinstance(m["content"], str) else ""
-            for m in second_msgs
+            m["content"] if isinstance(m["content"], str) else "" for m in second_msgs
         )
         assert "prod-edge-42" in joined
 
@@ -647,7 +694,9 @@ class TestReasonerFailure:
         provider = _ScriptedProvider()
 
         inv = _build_investigator(
-            reasoner, executor, provider,
+            reasoner,
+            executor,
+            provider,
             approval_hook=approval_log.hook,
             event_hook=hook,
         )
@@ -662,19 +711,21 @@ class TestReasonerFailure:
 # Events order
 # ---------------------------------------------------------------------------
 class TestEvents:
-    def test_event_order_on_happy_command_cycle(
-        self, event_capture, approval_log
-    ):
+    def test_event_order_on_happy_command_cycle(self, event_capture, approval_log):
         events, hook = event_capture
-        reasoner = _ScriptedReasoner([
-            _step_command("gcloud logging read 'x'", reasoning="the hypothesis"),
-            _step_conclude("done"),
-        ])
+        reasoner = _ScriptedReasoner(
+            [
+                _step_command("gcloud logging read 'x'", reasoning="the hypothesis"),
+                _step_conclude("done"),
+            ]
+        )
         executor = _ScriptedExecutor()
         provider = _ScriptedProvider([_ok_result()])
 
         inv = _build_investigator(
-            reasoner, executor, provider,
+            reasoner,
+            executor,
+            provider,
             approval_hook=approval_log.hook,
             event_hook=hook,
         )

@@ -3,6 +3,7 @@
 These catch obvious shell-injection and dangerous binaries. They do NOT try
 to catch destructive GCP verbs — that's the allowlist's job.
 """
+
 import re
 
 # Patterns that are unsafe regardless of where they appear in the string.

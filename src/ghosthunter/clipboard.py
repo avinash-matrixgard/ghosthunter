@@ -27,6 +27,7 @@ paths turn into no-ops. Useful in CI, in terminals where OSC 52
 output is visible garbage instead of silent, or for security-paranoid
 users who don't want their clipboard mutated by a tool.
 """
+
 from __future__ import annotations
 
 import base64
@@ -35,7 +36,6 @@ import platform
 import subprocess
 import sys
 from typing import IO
-
 
 # Conservative cap — some terminals reject larger OSC 52 payloads. Our
 # proposed commands are typically < 1 KB, so this just guards against
@@ -51,9 +51,7 @@ def _opted_out() -> bool:
     return value in {"1", "true", "yes", "on"}
 
 
-def write_osc52(
-    text: str, *, stream: IO[str] | None = None
-) -> bool:
+def write_osc52(text: str, *, stream: IO[str] | None = None) -> bool:
     """Write `text` to the terminal's system clipboard via OSC 52.
 
     Returns True if we emitted the escape sequence (which doesn't
@@ -126,9 +124,7 @@ def _native_clipboard_cmd() -> list[str] | None:
     return None
 
 
-def copy_to_clipboard(
-    text: str, *, stream: IO[str] | None = None
-) -> tuple[bool, str]:
+def copy_to_clipboard(text: str, *, stream: IO[str] | None = None) -> tuple[bool, str]:
     """User-initiated copy (``/copy``). Returns ``(ok, mechanism)``.
 
     Tries OS-native tools first — these survive SSH without terminal

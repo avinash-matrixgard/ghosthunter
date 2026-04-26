@@ -19,6 +19,7 @@ Cloud DNS bill:
    produced ``Illegal input character "\\342"`` (``\\342`` = first byte
    of ``│`` in UTF-8).
 """
+
 from __future__ import annotations
 
 import re
@@ -90,11 +91,14 @@ class TestQuoteAwareSubstitution:
 # find_fast_reject no longer trips on sql backticks
 # ---------------------------------------------------------------------------
 class TestFastRejectNoLongerFlagsBackticks:
-    @pytest.mark.parametrize("cmd", [
-        "bq query 'SELECT 1 FROM `p.d.t`'",
-        "bq query --use_legacy_sql=false 'SELECT * FROM `a.b.c`'",
-        "echo `x`",  # unquoted — still dangerous, but caught later, not here
-    ])
+    @pytest.mark.parametrize(
+        "cmd",
+        [
+            "bq query 'SELECT 1 FROM `p.d.t`'",
+            "bq query --use_legacy_sql=false 'SELECT * FROM `a.b.c`'",
+            "echo `x`",  # unquoted — still dangerous, but caught later, not here
+        ],
+    )
     def test_backticks_pass_fast_reject(self, cmd: str):
         """Backticks were removed from ``FAST_REJECT_PATTERNS`` in v1.0.4 —
         the quote-aware helper catches the unquoted cases instead."""
@@ -118,13 +122,12 @@ class TestValidatorEndToEnd:
             "bq query --use_legacy_sql=false --project_id=prj-acme-dns "
             "'SELECT DATE(usage_start_time) AS d, SUM(cost) AS c "
             "FROM `prj-billing.billing_export.gcp_billing_export_v1_X` "
-            "WHERE service.description = \"Cloud DNS\" "
+            'WHERE service.description = "Cloud DNS" '
             "GROUP BY d ORDER BY d'"
         )
         result = self.v.is_allowed(cmd)
         assert result.allowed, (
-            f"bq query with backticks still blocked at {result.layer}: "
-            f"{result.reason}"
+            f"bq query with backticks still blocked at {result.layer}: {result.reason}"
         )
 
     def test_backtick_command_substitution_still_blocked(self):
@@ -168,8 +171,9 @@ class TestCommandPanelIsPlainAscii:
     no borders to pick up in the first place."""
 
     def _render_panel(self, command: str) -> str:
-        from rich.console import Console
         import io
+
+        from rich.console import Console
 
         from ghosthunter.providers.advisor import AdvisorProvider
 
@@ -219,7 +223,7 @@ class TestCommandPanelIsPlainAscii:
             "--project_id=prj-acme-dns "
             "'SELECT DATE(usage_start_time) AS d, SUM(cost) AS c "
             "FROM `prj-billing.billing_export.gcp_billing_export_v1_X` "
-            "WHERE service.description = \"Cloud DNS\" "
+            'WHERE service.description = "Cloud DNS" '
             "GROUP BY d ORDER BY d'"
         )
         out = self._render_panel(long_cmd)
@@ -229,9 +233,7 @@ class TestCommandPanelIsPlainAscii:
             f"Got:\n{out!r}"
         )
         offenders = [c for c in _BOX_DRAWING_CHARS if c in out]
-        assert not offenders, (
-            f"long command rendering introduced border chars: {offenders!r}"
-        )
+        assert not offenders, f"long command rendering introduced border chars: {offenders!r}"
 
     def test_no_dangerous_unicode_anywhere_in_panel(self):
         """Defence in depth: the output must not contain ANY of the
@@ -248,6 +250,5 @@ class TestCommandPanelIsPlainAscii:
         dangerous = set(_BOX_DRAWING_CHARS + _SMART_QUOTES)
         offenders = sorted({ch for ch in clean if ch in dangerous})
         assert not offenders, (
-            f"panel contains clipboard-hostile chars: "
-            f"{[f'U+{ord(c):04X}' for c in offenders]}"
+            f"panel contains clipboard-hostile chars: {[f'U+{ord(c):04X}' for c in offenders]}"
         )

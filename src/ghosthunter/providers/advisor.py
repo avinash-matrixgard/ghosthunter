@@ -16,10 +16,10 @@ The class is duck-type compatible with `GCPProvider`: same `execute_command`
 signature, same return type. The investigator does not need to know which
 mode it's in.
 """
+
 from __future__ import annotations
 
 import asyncio
-import time
 from pathlib import Path
 
 from rich.console import Console
@@ -236,10 +236,7 @@ class AdvisorProvider:
         # Use Rich markup + print so the command itself is printed
         # verbatim (markup=False on the command line — no accidental
         # interpretation of [bold] if it happens to be in a SQL filter).
-        self.console.print(
-            "[bold yellow]-- Run this command in your own terminal --"
-            "[/bold yellow]"
-        )
+        self.console.print("[bold yellow]-- Run this command in your own terminal --[/bold yellow]")
         # ``markup=False`` is load-bearing: a real command could contain
         # ``[`` / ``]`` (e.g. inside a jq filter or JSON payload) and we
         # don't want Rich trying to parse those as style tags.
@@ -251,12 +248,8 @@ class AdvisorProvider:
         # the string as-is and lets the terminal handle visual wrap so
         # triple-click / click-drag selects the original contiguous
         # command.
-        self.console.print(
-            command, markup=False, highlight=False, soft_wrap=True
-        )
-        self.console.print(
-            "[dim]read-only · validated by 4 security layers[/dim]"
-        )
+        self.console.print(command, markup=False, highlight=False, soft_wrap=True)
+        self.console.print("[dim]read-only · validated by 4 security layers[/dim]")
 
         # OSC 52 auto-copy: silently push the command onto the user's
         # clipboard if their terminal supports it (iTerm2, Kitty,
@@ -268,9 +261,8 @@ class AdvisorProvider:
         osc52_attempted = False
         try:
             from ghosthunter.clipboard import write_osc52
-            osc52_attempted = write_osc52(
-                command, stream=getattr(self.console, "file", None)
-            )
+
+            osc52_attempted = write_osc52(command, stream=getattr(self.console, "file", None))
         except Exception:
             osc52_attempted = False
 
@@ -278,15 +270,11 @@ class AdvisorProvider:
         # didn't honour OSC 52 still have a documented one-keystroke
         # way to put the command on their clipboard.
         if osc52_attempted:
-            hint_prefix = (
-                "[dim italic]command placed on your clipboard (OSC 52). "
-            )
+            hint_prefix = "[dim italic]command placed on your clipboard (OSC 52). "
         else:
             hint_prefix = "[dim italic]"
         self.console.print(
-            hint_prefix
-            + f"type [bold]{SLASH_COPY}[/bold] to copy this command."
-            + "[/dim italic]"
+            hint_prefix + f"type [bold]{SLASH_COPY}[/bold] to copy this command." + "[/dim italic]"
         )
         self.console.print(
             "[dim]Paste the output (multi-line paste works), drop a "
@@ -341,9 +329,7 @@ class AdvisorProvider:
                     try:
                         return candidate.read_text(errors="replace")
                     except OSError as exc:
-                        self.console.print(
-                            f"[red]Could not read {candidate}: {exc}[/red]"
-                        )
+                        self.console.print(f"[red]Could not read {candidate}: {exc}[/red]")
                         continue
 
             # ---- Slash commands (only on single-line input) ----
@@ -421,9 +407,7 @@ class AdvisorProvider:
 
         if cmd == SLASH_NOTE:
             if not arg:
-                self.console.print(
-                    "[yellow]Usage: /note <text to send to Opus>[/yellow]"
-                )
+                self.console.print("[yellow]Usage: /note <text to send to Opus>[/yellow]")
                 return
             raise AdvisorNote(arg)
 
@@ -431,9 +415,7 @@ class AdvisorProvider:
             if self.on_show_hypotheses is not None:
                 self.on_show_hypotheses()
             else:
-                self.console.print(
-                    "[dim](hypothesis snapshot not wired up)[/dim]"
-                )
+                self.console.print("[dim](hypothesis snapshot not wired up)[/dim]")
             return
 
         if cmd == SLASH_SPIKE:
@@ -443,9 +425,7 @@ class AdvisorProvider:
             try:
                 n = int(arg.split()[0])
             except ValueError:
-                self.console.print(
-                    f"[yellow]Not a number: {arg}[/yellow]"
-                )
+                self.console.print(f"[yellow]Not a number: {arg}[/yellow]")
                 return
             raise AdvisorSpikeSwitch(n)
 
@@ -453,9 +433,7 @@ class AdvisorProvider:
             if self.on_list_spikes is not None:
                 self.on_list_spikes()
             else:
-                self.console.print(
-                    "[dim](spike list not wired up)[/dim]"
-                )
+                self.console.print("[dim](spike list not wired up)[/dim]")
             return
 
         if cmd == SLASH_COPY:
@@ -470,15 +448,13 @@ class AdvisorProvider:
                 )
                 return
             from ghosthunter.clipboard import copy_to_clipboard
+
             ok, mech = copy_to_clipboard(
                 self._last_proposed_command,
                 stream=getattr(self.console, "file", None),
             )
             if ok:
-                self.console.print(
-                    f"[green]✓ copied to clipboard[/green] "
-                    f"[dim]({mech})[/dim]"
-                )
+                self.console.print(f"[green]✓ copied to clipboard[/green] [dim]({mech})[/dim]")
             elif mech == "skipped":
                 self.console.print(
                     "[yellow]Clipboard disabled via "
@@ -495,9 +471,7 @@ class AdvisorProvider:
             return
 
         # Unknown slash command
-        self.console.print(
-            f"[yellow]Unknown command '{cmd}'. Type /help for options.[/yellow]"
-        )
+        self.console.print(f"[yellow]Unknown command '{cmd}'. Type /help for options.[/yellow]")
 
     def _print_help_during_investigation(self) -> None:
         self.console.print(
@@ -531,4 +505,3 @@ class AdvisorProvider:
                 border_style="cyan",
             )
         )
-

@@ -10,6 +10,7 @@ This file locks down the full AWS catalog:
 
 Complements `test_security_aws.py` (which covers the Phase 2 core only).
 """
+
 from __future__ import annotations
 
 import random
@@ -58,9 +59,7 @@ class TestEveryAllowedPattern:
     @pytest.mark.parametrize("pattern", ALLOWED_PATTERNS)
     def test_pattern_matches_its_probe(self, pattern):
         probe = _pattern_to_probe(pattern)
-        assert matches_allowlist_aws(probe), (
-            f"pattern {pattern!r} should match its probe {probe!r}"
-        )
+        assert matches_allowlist_aws(probe), f"pattern {pattern!r} should match its probe {probe!r}"
 
 
 # ---------------------------------------------------------------------------
@@ -266,9 +265,7 @@ class TestBroadCatalogReads:
     @pytest.mark.parametrize("cmd", CATALOG_READS)
     def test_read_allowed(self, aws_validator, cmd):
         r = aws_validator.is_allowed(cmd)
-        assert r.allowed, (
-            f"{cmd!r} should be allowed; layer={r.layer} reason={r.reason!r}"
-        )
+        assert r.allowed, f"{cmd!r} should be allowed; layer={r.layer} reason={r.reason!r}"
 
 
 # ---------------------------------------------------------------------------
@@ -293,9 +290,7 @@ class TestTargetedRegressions:
         ).allowed
 
     def test_logs_get_query_results_allowed(self, aws_validator):
-        assert aws_validator.is_allowed(
-            "aws logs get-query-results --query-id x"
-        ).allowed
+        assert aws_validator.is_allowed("aws logs get-query-results --query-id x").allowed
 
     # --- SSM: get-parameter allowed only without --with-decryption ---
     @pytest.mark.parametrize(
@@ -313,15 +308,11 @@ class TestTargetedRegressions:
         assert r.layer == "L4"
 
     def test_ssm_without_decryption_allowed(self, aws_validator):
-        assert aws_validator.is_allowed(
-            "aws ssm get-parameter --name /prod/db/host"
-        ).allowed
+        assert aws_validator.is_allowed("aws ssm get-parameter --name /prod/db/host").allowed
 
     # --- Secrets Manager: metadata allowed, value blocked ---
     def test_secretsmanager_describe_allowed(self, aws_validator):
-        assert aws_validator.is_allowed(
-            "aws secretsmanager describe-secret --secret-id x"
-        ).allowed
+        assert aws_validator.is_allowed("aws secretsmanager describe-secret --secret-id x").allowed
 
     def test_secretsmanager_list_allowed(self, aws_validator):
         assert aws_validator.is_allowed("aws secretsmanager list-secrets").allowed
@@ -348,9 +339,7 @@ class TestTargetedRegressions:
 
     # --- EC2: get-password-data blocked (Windows admin password leak) ---
     def test_ec2_get_password_data_blocked(self, aws_validator):
-        assert not aws_validator.is_allowed(
-            "aws ec2 get-password-data --instance-id i-x"
-        ).allowed
+        assert not aws_validator.is_allowed("aws ec2 get-password-data --instance-id i-x").allowed
 
     # --- KMS: list/describe allowed, crypto operations blocked ---
     def test_kms_list_keys_allowed(self, aws_validator):
@@ -409,25 +398,84 @@ class TestTargetedRegressions:
 # Not a single one should be allowed.
 # ---------------------------------------------------------------------------
 FUZZ_SERVICES = [
-    "ec2", "s3api", "s3", "rds", "lambda", "iam", "cloudformation",
-    "cloudwatch", "logs", "sqs", "sns", "kinesis", "dynamodb",
-    "ecs", "eks", "route53", "cloudfront", "elbv2", "apigateway",
-    "apigatewayv2", "sagemaker", "bedrock", "stepfunctions",
-    "eventbridge", "config", "secretsmanager", "kms", "acm",
-    "redshift", "opensearch", "glue", "athena", "emr",
-    "codebuild", "codedeploy", "codepipeline", "ssm",
-    "batch", "datasync", "transfer",
+    "ec2",
+    "s3api",
+    "s3",
+    "rds",
+    "lambda",
+    "iam",
+    "cloudformation",
+    "cloudwatch",
+    "logs",
+    "sqs",
+    "sns",
+    "kinesis",
+    "dynamodb",
+    "ecs",
+    "eks",
+    "route53",
+    "cloudfront",
+    "elbv2",
+    "apigateway",
+    "apigatewayv2",
+    "sagemaker",
+    "bedrock",
+    "stepfunctions",
+    "eventbridge",
+    "config",
+    "secretsmanager",
+    "kms",
+    "acm",
+    "redshift",
+    "opensearch",
+    "glue",
+    "athena",
+    "emr",
+    "codebuild",
+    "codedeploy",
+    "codepipeline",
+    "ssm",
+    "batch",
+    "datasync",
+    "transfer",
 ]
 
 FUZZ_WRITE_VERBS = [
-    "create", "delete", "update", "put", "tag", "untag",
-    "attach", "detach", "modify", "enable", "disable",
-    "reset", "rotate", "restore", "register", "deregister",
-    "promote", "demote", "activate", "deactivate",
-    "import", "export", "upgrade", "downgrade",
-    "cancel", "confirm", "copy", "move", "publish",
-    "subscribe", "unsubscribe", "replace", "accept",
-    "reject", "set",
+    "create",
+    "delete",
+    "update",
+    "put",
+    "tag",
+    "untag",
+    "attach",
+    "detach",
+    "modify",
+    "enable",
+    "disable",
+    "reset",
+    "rotate",
+    "restore",
+    "register",
+    "deregister",
+    "promote",
+    "demote",
+    "activate",
+    "deactivate",
+    "import",
+    "export",
+    "upgrade",
+    "downgrade",
+    "cancel",
+    "confirm",
+    "copy",
+    "move",
+    "publish",
+    "subscribe",
+    "unsubscribe",
+    "replace",
+    "accept",
+    "reject",
+    "set",
 ]
 
 
@@ -439,8 +487,16 @@ def _make_fuzz_cases(seed: int = 42, count: int = 200) -> list[str]:
         verb = rng.choice(FUZZ_WRITE_VERBS)
         # Attach a random kebab-case noun so we exercise the `*-<tail>` form.
         nouns = [
-            "resource", "instance", "policy", "item", "config",
-            "permission", "rule", "subscription", "topic", "key",
+            "resource",
+            "instance",
+            "policy",
+            "item",
+            "config",
+            "permission",
+            "rule",
+            "subscription",
+            "topic",
+            "key",
         ]
         noun = rng.choice(nouns)
         suffix = rng.choice(["", "-set", "-request", "-batch", "-v2"])
@@ -472,32 +528,22 @@ class TestAllowlistInvariants:
 
     def test_blocklist_entries_are_all_aws(self):
         for p in WRITE_DISGUISED_AS_READ:
-            assert p.startswith(r"^aws\s+"), (
-                f"block-list entry must start with ^aws\\s+ : {p!r}"
-            )
+            assert p.startswith(r"^aws\s+"), f"block-list entry must start with ^aws\\s+ : {p!r}"
 
     def test_allowed_entries_are_all_aws_or_base_rule(self):
         for p in ALLOWED_PATTERNS:
             if p is BASE_READ_RULE:
                 continue
-            assert p.startswith(r"^aws\s+"), (
-                f"allowed entry must start with ^aws\\s+ : {p!r}"
-            )
+            assert p.startswith(r"^aws\s+"), f"allowed entry must start with ^aws\\s+ : {p!r}"
 
     def test_base_read_rule_compiles_and_matches_example(self):
-        assert re.compile(BASE_READ_RULE, re.IGNORECASE).match(
-            "aws newservice describe-something"
-        )
+        assert re.compile(BASE_READ_RULE, re.IGNORECASE).match("aws newservice describe-something")
 
     def test_blocklist_checked_before_base_read_rule(self):
         # get-password-data matches the base rule literally; must still fail.
-        assert not matches_allowlist_aws(
-            "aws ec2 get-password-data --instance-id i-x"
-        )
+        assert not matches_allowlist_aws("aws ec2 get-password-data --instance-id i-x")
         # Same for secretsmanager get-secret-value.
-        assert not matches_allowlist_aws(
-            "aws secretsmanager get-secret-value --secret-id foo"
-        )
+        assert not matches_allowlist_aws("aws secretsmanager get-secret-value --secret-id foo")
 
     def test_validate_query_aws_is_idempotent_on_reads(self):
         # Benign reads always pass the semantic layer.

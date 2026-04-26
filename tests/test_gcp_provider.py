@@ -36,10 +36,10 @@ Coverage:
     * ``provider_hint_for_reasoner()`` mentions gcloud/bq/gsutil.
 - ``quote_for_shell`` — escapes shell metacharacters.
 """
+
 from __future__ import annotations
 
 import asyncio
-from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -49,7 +49,6 @@ from ghosthunter.providers.gcp import (
     CommandRejectedError,
     CommandResult,
     CommandTimeoutError,
-    CostSpike,
     GCPProvider,
     GCPProviderError,
 )
@@ -100,9 +99,7 @@ def _patch_subprocess(monkeypatch, proc: _FakeProc) -> list[dict]:
         call_log.append({"cmd": cmd, "kwargs": kwargs})
         return proc
 
-    monkeypatch.setattr(
-        asyncio, "create_subprocess_shell", _fake_create
-    )
+    monkeypatch.setattr(asyncio, "create_subprocess_shell", _fake_create)
     return call_log
 
 
@@ -139,9 +136,7 @@ class TestExecuteCommandHappyPath:
         proc = _FakeProc(stdout=b"line1\nline2\n", returncode=0)
         log = _patch_subprocess(monkeypatch, proc)
 
-        result = asyncio.run(
-            prov.execute_command("gcloud compute instances list --format=json")
-        )
+        result = asyncio.run(prov.execute_command("gcloud compute instances list --format=json"))
 
         assert isinstance(result, CommandResult)
         assert result.command == "gcloud compute instances list --format=json"
@@ -160,9 +155,7 @@ class TestExecuteCommandHappyPath:
             monkeypatch,
             _FakeProc(stdout=b"", stderr=b"ERROR: not found", returncode=2),
         )
-        result = asyncio.run(
-            prov.execute_command("gcloud compute instances list")
-        )
+        result = asyncio.run(prov.execute_command("gcloud compute instances list"))
         assert result.exit_code == 2
         assert "ERROR" in result.stderr
         assert not result.succeeded
@@ -171,9 +164,7 @@ class TestExecuteCommandHappyPath:
         prov = GCPProvider(project_id="demo-proj", max_output_bytes=50)
         oversized = b"X" * 200
         _patch_subprocess(monkeypatch, _FakeProc(stdout=oversized))
-        result = asyncio.run(
-            prov.execute_command("gcloud compute instances list")
-        )
+        result = asyncio.run(prov.execute_command("gcloud compute instances list"))
         assert result.truncated is True
         assert len(result.stdout) == 50
 
@@ -184,9 +175,7 @@ class TestExecuteCommandHappyPath:
             monkeypatch,
             _FakeProc(stdout=b"\xff\xfe not utf-8", returncode=0),
         )
-        result = asyncio.run(
-            prov.execute_command("gcloud compute instances list")
-        )
+        result = asyncio.run(prov.execute_command("gcloud compute instances list"))
         # Should not raise; replacement chars in output.
         assert "not utf-8" in result.stdout
 
@@ -201,9 +190,7 @@ class TestExecuteCommandTimeout:
         _patch_subprocess(monkeypatch, proc)
 
         with pytest.raises(CommandTimeoutError) as excinfo:
-            asyncio.run(
-                prov.execute_command("gcloud compute instances list")
-            )
+            asyncio.run(prov.execute_command("gcloud compute instances list"))
         assert "1s" in str(excinfo.value)
         assert proc.killed, "proc.kill() must be called on timeout"
 
@@ -220,9 +207,7 @@ class TestSandboxEnv:
         monkeypatch.setenv("LANG", "en_US.UTF-8")
         monkeypatch.setenv("LC_ALL", "en_US.UTF-8")
         monkeypatch.setenv("CLOUDSDK_CONFIG", "/tmp/cloudsdk")
-        monkeypatch.setenv(
-            "GOOGLE_APPLICATION_CREDENTIALS", "/tmp/sa-key.json"
-        )
+        monkeypatch.setenv("GOOGLE_APPLICATION_CREDENTIALS", "/tmp/sa-key.json")
         monkeypatch.setenv("GOOGLE_CLOUD_PROJECT", "env-proj")
         # Pollutants that should be stripped.
         monkeypatch.setenv("NPM_TOKEN", "don't leak me")
@@ -301,13 +286,11 @@ class TestRowsToSpikes:
     def test_surfaces_services_over_percent_threshold(self):
         rows = [
             self._row("Cloud DNS", "current", 1000.0),
-            self._row("Cloud DNS", "previous", 100.0),   # +900% — big
+            self._row("Cloud DNS", "previous", 100.0),  # +900% — big
             self._row("Compute Engine", "current", 105.0),
             self._row("Compute Engine", "previous", 100.0),  # +5% — below 20%
         ]
-        spikes = GCPProvider._rows_to_spikes(
-            rows, min_change_percent=20, min_absolute_change=1000
-        )
+        spikes = GCPProvider._rows_to_spikes(rows, min_change_percent=20, min_absolute_change=1000)
         names = [s.service for s in spikes]
         assert "Cloud DNS" in names
         assert "Compute Engine" not in names
@@ -332,13 +315,9 @@ class TestRowsToSpikes:
             self._row("Compute Engine", "current", 1500.0),
             self._row("Compute Engine", "previous", 500.0),
         ]
-        spikes = GCPProvider._rows_to_spikes(
-            rows, min_change_percent=20, min_absolute_change=0
-        )
+        spikes = GCPProvider._rows_to_spikes(rows, min_change_percent=20, min_absolute_change=0)
         # Larger absolute delta first.
-        assert [s.service for s in spikes] == [
-            "Compute Engine", "Cloud DNS"
-        ]
+        assert [s.service for s in spikes] == ["Compute Engine", "Cloud DNS"]
 
     def test_new_service_infinite_percent(self):
         """A service that's entirely new (no previous) shows as +inf%."""
@@ -346,9 +325,7 @@ class TestRowsToSpikes:
             self._row("Cloud Run", "current", 500.0),
             # no previous row for Cloud Run
         ]
-        spikes = GCPProvider._rows_to_spikes(
-            rows, min_change_percent=20, min_absolute_change=0
-        )
+        spikes = GCPProvider._rows_to_spikes(rows, min_change_percent=20, min_absolute_change=0)
         assert len(spikes) == 1
         assert spikes[0].previous_cost == 0.0
         assert spikes[0].change_percent == float("inf")
@@ -358,9 +335,7 @@ class TestRowsToSpikes:
             self._row("Cloud DNS", "current", 100.0),
             self._row("Cloud DNS", "previous", 100.0),
         ]
-        spikes = GCPProvider._rows_to_spikes(
-            rows, min_change_percent=20, min_absolute_change=100
-        )
+        spikes = GCPProvider._rows_to_spikes(rows, min_change_percent=20, min_absolute_change=100)
         assert spikes == []
 
 
@@ -377,7 +352,9 @@ class TestBaseProviderConformance:
 
     def test_cli_tools(self):
         assert GCPProvider(project_id="x").cli_tools() == (
-            "gcloud", "bq", "gsutil",
+            "gcloud",
+            "bq",
+            "gsutil",
         )
 
     def test_env_keep_list_contains_gcp_and_shared(self):
@@ -409,12 +386,15 @@ class TestBaseProviderConformance:
 # quote_for_shell
 # ---------------------------------------------------------------------------
 class TestQuoteForShell:
-    @pytest.mark.parametrize("value,should_quote", [
-        ("simple", False),
-        ("has space", True),
-        ("dangerous;inject", True),
-        ("with'quote", True),
-    ])
+    @pytest.mark.parametrize(
+        "value,should_quote",
+        [
+            ("simple", False),
+            ("has space", True),
+            ("dangerous;inject", True),
+            ("with'quote", True),
+        ],
+    )
     def test_quote_for_shell(self, value, should_quote):
         out = GCPProvider.quote_for_shell(value)
         if should_quote:

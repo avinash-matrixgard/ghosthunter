@@ -8,6 +8,7 @@ Backward compat: existing configs predating the `provider` field load
 cleanly and default to ``provider = "gcp"``. Writing a loaded config
 back out adds the field in-place.
 """
+
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass, field
@@ -37,6 +38,7 @@ class AWSConfig:
     and Phase 4 uses `ce_api_cost_ack` to suppress the CE-cost banner
     after first acknowledgment.
     """
+
     profile: str = ""
     region: str = "us-east-1"
     account_id: str = ""
@@ -68,9 +70,7 @@ class Config:
         if path is None:
             path = CONFIG_PATH
         if not path.exists():
-            raise FileNotFoundError(
-                f"No config at {path}. Run `ghosthunter init` first."
-            )
+            raise FileNotFoundError(f"No config at {path}. Run `ghosthunter init` first.")
         with path.open("rb") as f:
             data = tomli.load(f)
         budget_data = data.pop("budget", {})

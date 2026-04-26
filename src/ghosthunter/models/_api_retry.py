@@ -22,11 +22,12 @@ Design choices:
 - **Do not retry auth / validation errors.** Those are configuration
   problems; the caller needs to fix them, not wait.
 """
+
 from __future__ import annotations
 
 import asyncio
 import random
-from typing import TYPE_CHECKING, Any, Awaitable, Callable, TypeVar
+from typing import TYPE_CHECKING, Awaitable, Callable, TypeVar
 
 if TYPE_CHECKING:
     pass
@@ -217,7 +218,7 @@ async def call_with_retry(
             if suggested is not None and suggested > 0:
                 delay = min(suggested, MAX_BACKOFF_SECONDS)
             else:
-                base = INITIAL_BACKOFF_SECONDS * (2 ** attempt)
+                base = INITIAL_BACKOFF_SECONDS * (2**attempt)
                 delay = min(base, MAX_BACKOFF_SECONDS)
             delay += random.uniform(0, JITTER_SECONDS)
             await asyncio.sleep(delay)

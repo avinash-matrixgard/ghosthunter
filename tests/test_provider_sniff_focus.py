@@ -6,6 +6,7 @@ Console aliases — including every FOCUS 1.0 export, which uses a
 cloud-agnostic schema. We now peek at ``ProviderName`` values (or
 ``ServiceName`` prefixes as a fallback) and route accordingly.
 """
+
 from __future__ import annotations
 
 import csv
@@ -13,8 +14,7 @@ from pathlib import Path
 
 import pytest
 
-from ghosthunter.cli import _sniff_provider_from_file, _sniff_focus_rows
-
+from ghosthunter.cli import _sniff_focus_rows, _sniff_provider_from_file
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 SYNTH = REPO_ROOT / "benchmarks" / "spikes"
@@ -33,9 +33,7 @@ class TestSniffFocusRows:
         assert _sniff_focus_rows(rows) == "aws"
 
     def test_all_google_provider_name(self):
-        rows = [
-            {"ProviderName": "Google Cloud", "ServiceName": "Compute Engine"}
-        ] * 10
+        rows = [{"ProviderName": "Google Cloud", "ServiceName": "Compute Engine"}] * 10
         assert _sniff_focus_rows(rows) == "gcp"
 
     def test_provider_name_case_insensitive(self):
@@ -50,9 +48,7 @@ class TestSniffFocusRows:
         """Ghosthunter doesn't have reasoner rules for Azure — returning
         None lets the caller fall through to a helpful warning rather
         than silently mis-routing to GCP or AWS rules."""
-        rows = [
-            {"ProviderName": "Microsoft", "ServiceName": "Azure SQL"}
-        ] * 20 + [
+        rows = [{"ProviderName": "Microsoft", "ServiceName": "Azure SQL"}] * 20 + [
             {"ProviderName": "AWS", "ServiceName": "Amazon S3"}
         ] * 3
         assert _sniff_focus_rows(rows) is None
@@ -88,17 +84,18 @@ class TestSniffFocusRows:
 # _sniff_provider_from_file on synthetic + real fixtures
 # ---------------------------------------------------------------------------
 class TestSniffFromFile:
-    @pytest.mark.parametrize("fixture_id,expected", [
-        ("aws_01_nat_gateway_runaway", "aws"),
-        ("aws_02_s3_lifecycle_miss", "aws"),
-        ("aws_05_bedrock_runaway", "aws"),
-        ("gcp_01_bigquery_slot_runaway", "gcp"),
-        ("gcp_03_cloudrun_min_instances", "gcp"),
-        ("gcp_05_gke_autoscaler_flapping", "gcp"),
-    ])
-    def test_synthetic_focus_fixtures_sniff_correctly(
-        self, fixture_id: str, expected: str
-    ):
+    @pytest.mark.parametrize(
+        "fixture_id,expected",
+        [
+            ("aws_01_nat_gateway_runaway", "aws"),
+            ("aws_02_s3_lifecycle_miss", "aws"),
+            ("aws_05_bedrock_runaway", "aws"),
+            ("gcp_01_bigquery_slot_runaway", "gcp"),
+            ("gcp_03_cloudrun_min_instances", "gcp"),
+            ("gcp_05_gke_autoscaler_flapping", "gcp"),
+        ],
+    )
+    def test_synthetic_focus_fixtures_sniff_correctly(self, fixture_id: str, expected: str):
         csv_path = SYNTH / f"{fixture_id}.csv"
         assert csv_path.exists(), f"missing benchmark fixture: {csv_path}"
         assert _sniff_provider_from_file(csv_path) == expected
@@ -139,11 +136,13 @@ class TestSniffEdgeCases:
             )
             w.writeheader()
             for _ in range(20):
-                w.writerow({
-                    "ChargePeriodStart": "2026-03-01",
-                    "ServiceName": "Azure SQL Database",
-                    "ProviderName": "Microsoft",
-                    "BilledCost": "1.00",
-                })
+                w.writerow(
+                    {
+                        "ChargePeriodStart": "2026-03-01",
+                        "ServiceName": "Azure SQL Database",
+                        "ProviderName": "Microsoft",
+                        "BilledCost": "1.00",
+                    }
+                )
         # Azure isn't a supported provider → None (caller falls through).
         assert _sniff_provider_from_file(p) is None
