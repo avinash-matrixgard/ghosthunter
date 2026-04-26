@@ -1,8 +1,19 @@
 version: 2
 updates:
-  # Python dependencies via Poetry
+  # Python dependencies via Poetry.
+  #
+  # versioning-strategy = "increase" preserves the existing caret/range style
+  # in pyproject.toml -- only bumps the lower bound when the new version
+  # actually conflicts with the current constraint. Without this, Dependabot
+  # tries to widen "^8.0.0" into ">=8,<10" (multi-major span) which we don't
+  # want -- major version bumps should be manual decisions, not auto-PRs.
+  #
+  # The ignore block below stops Dependabot from opening *major* version
+  # bump PRs at all (major bumps need human evaluation -- breaking changes,
+  # API surface, etc.). Minor + patch updates still flow through normally.
   - package-ecosystem: "pip"
     directory: "/"
+    versioning-strategy: "increase"
     schedule:
       interval: "weekly"
       day: "monday"
@@ -15,9 +26,13 @@ updates:
     labels:
       - "dependencies"
       - "python"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
 
-  # Keep GitHub Actions pinned + current. Dependabot updates SHAs while
-  # preserving the SHA-pinning pattern (with version-tag comments).
+  # GitHub Actions: same posture. Dependabot updates SHAs to current
+  # latest of the pinned major version. Major-version bumps are ignored
+  # so we don't get noisy v4-to-v6/v7 PRs that need human review.
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
@@ -32,3 +47,6 @@ updates:
     labels:
       - "dependencies"
       - "github-actions"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
