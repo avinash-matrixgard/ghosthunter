@@ -78,7 +78,9 @@ aws = ["boto3"]
 all = ["google-cloud-bigquery", "google-cloud-logging", "boto3"]
 
 [tool.poetry.group.dev.dependencies]
-pytest = "^8.0.0"
+# pytest >= 9.0.3 fixes GHSA-6w46-j5rx-g56g (tmpdir handling vuln,
+# medium severity, dev-only). Pre-9.0.3 versions fail pip-audit CI.
+pytest = "^9.0.3"
 pytest-asyncio = "^0.23.0"
 ruff = "^0.4.0"
 
