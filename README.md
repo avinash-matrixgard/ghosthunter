@@ -14,6 +14,30 @@ investigation over your cloud billing data. **Supports GCP and AWS.**
 Security is enforced in code through a 7-layer validator — the LLM
 cannot run anything the allowlist does not permit.
 
+<!-- DEMO_GIF_HERE — Asciinema or animated GIF of `ghosthunter advisor` running on a redacted billing CSV. Reserved slot, populate before launch. -->
+
+---
+
+## Why Ghosthunter? Comparison vs FinOps tools
+
+Most FinOps tools want admin access and auto-optimize.
+Ghosthunter does neither. It's an **investigator**, not an optimizer.
+
+| | Ghosthunter | Vantage / CloudHealth / ProsperOps |
+|---|---|---|
+| **Access required** | None (paranoid mode reads a CSV) | Cross-account IAM role with broad read |
+| **Acts on your cloud** | Never (read-only by default) | Auto-applies "savings recommendations" |
+| **Source code** | Open (MIT) — you can audit every command | Closed SaaS |
+| **AI model** | Claude Opus (reasoning) + Sonnet (execution) | Rules + heuristics, mostly |
+| **What it answers** | *"Why did the bill spike?"* (root cause) | *"How can you cut 5%?"* (optimization) |
+| **Pricing** | Free CLI; first manual audit free; paid retainer | $X/mo SaaS, often % of cloud spend |
+| **Self-hostable** | Yes — runs locally, your billing data never leaves your machine in advisor mode | No |
+| **Multi-cloud** | GCP + AWS (Azure planned) | Multi-cloud, varies by tool |
+
+If you want auto-optimization and trust your vendor with admin keys,
+Vantage and CloudHealth are mature options. If you want to **understand
+your bill** without giving anyone admin access, Ghosthunter is the tool.
+
 ---
 
 ## Modes at a glance
@@ -36,20 +60,28 @@ output back — Ghosthunter reasons, you keep control.
 Requires Python 3.12+.
 
 ```bash
+# Core (paranoid/advisor mode — no cloud SDK needed)
+pip install ghosthunter
+
+# Optional active-mode extras
+pip install 'ghosthunter[gcp]'   # GCP active mode (BigQuery + gcloud)
+pip install 'ghosthunter[aws]'   # AWS active mode (Cost Explorer via boto3)
+pip install 'ghosthunter[all]'   # both providers
+```
+
+After install, the `ghosthunter` command is on your PATH.
+
+<details>
+<summary>Build from source (contributors)</summary>
+
+```bash
 git clone https://github.com/avinash-matrixgard/ghosthunter
 cd ghosthunter
-
 python3.12 -m venv .venv
-.venv/bin/pip install -U pip
-
-# Core install (paranoid/advisor mode works without any cloud SDK)
-.venv/bin/pip install rich typer tomli tomli_w anthropic \
-    prompt_toolkit pytest
-
-# OPTIONAL: active-mode extras
-.venv/bin/pip install 'google-cloud-bigquery>=3.25'   # GCP active mode
-.venv/bin/pip install 'boto3>=1.34'                    # AWS active mode
+.venv/bin/pip install -e '.[all]'
 ```
+
+</details>
 
 Set your API key:
 
@@ -57,26 +89,19 @@ Set your API key:
 export ANTHROPIC_API_KEY=sk-ant-...
 ```
 
-All commands below assume you use the venv Python. If you prefer a real
-`ghosthunter` command on your PATH, run `.venv/bin/pip install -e .`
-once and drop the `PYTHONPATH=src .venv/bin/python -m ghosthunter.cli`
-prefix everywhere.
-
----
-
 ## 2. Try the demo (no setup)
 
 ```bash
 # Random scenario across all providers
-PYTHONPATH=src .venv/bin/python -m ghosthunter.cli demo
+ghosthunter demo
 
 # Specific scenario
-PYTHONPATH=src .venv/bin/python -m ghosthunter.cli demo --scenario=aws_nat_gateway_runaway
-PYTHONPATH=src .venv/bin/python -m ghosthunter.cli demo --scenario=dns_cache_bypass
+ghosthunter demo --scenario=aws_nat_gateway_runaway
+ghosthunter demo --scenario=dns_cache_bypass
 
 # Filter by provider
-PYTHONPATH=src .venv/bin/python -m ghosthunter.cli demo --provider=aws
-PYTHONPATH=src .venv/bin/python -m ghosthunter.cli demo --provider=gcp
+ghosthunter demo --provider=aws
+ghosthunter demo --provider=gcp
 ```
 
 Replays a bundled investigation end-to-end with no API calls and no
@@ -120,15 +145,15 @@ Pick one of:
 
 ```bash
 # Auto-detects AWS from CUR/CE column headers
-PYTHONPATH=src .venv/bin/python -m ghosthunter.cli investigate \
+ghosthunter investigate \
     -f by-service.csv -f by-usage-type.csv
 
 # Or pick the provider explicitly
-PYTHONPATH=src .venv/bin/python -m ghosthunter.cli investigate \
+ghosthunter investigate \
     --provider=aws -f ce-export.csv
 
 # Or start the chat REPL (mode picker appears unless files are passed)
-PYTHONPATH=src .venv/bin/python -m ghosthunter.cli chat billing*.csv
+ghosthunter chat billing*.csv
 ```
 
 ### 3c. Drive the investigation
@@ -173,10 +198,10 @@ Only safe on a personal/scoped account/project. Requires read-only
 cloud credentials.
 
 ```bash
-PYTHONPATH=src .venv/bin/python -m ghosthunter.cli init
+ghosthunter init
 # → prompts for provider (gcp/aws), then provider-specific fields
 
-PYTHONPATH=src .venv/bin/python -m ghosthunter.cli investigate --active
+ghosthunter investigate --active
 ```
 
 **GCP:** Ghosthunter queries BigQuery billing export directly, detects
@@ -196,7 +221,7 @@ investigation's CE call count lands in the audit log.
 ```bash
 # AWS active-mode example
 export AWS_PROFILE=dev-sandbox
-PYTHONPATH=src .venv/bin/python -m ghosthunter.cli investigate \
+ghosthunter investigate \
     --active --provider=aws
 ```
 
@@ -297,7 +322,7 @@ sample_data/
 
 ## Troubleshooting
 
-- **`ghosthunter: command not found`** — you haven't installed editable mode. Use the full `PYTHONPATH=src .venv/bin/python -m ghosthunter.cli ...` prefix, or run `.venv/bin/pip install -e .`.
+- **`ghosthunter: command not found`** — `pip install ghosthunter` hasn't run, or your shell PATH doesn't include the install location (`pip show ghosthunter` to find it). For contributor builds, run `pip install -e '.[all]'` from the repo root.
 - **`ANTHROPIC_API_KEY not set`** — export the env var (see install step).
 - **Opus re-proposes a blocked command** — type `/skip` or `/note try a different angle` to force a pivot.
 - **Long JSON output is painful to paste** — save to `/tmp/out.json` and paste the path instead; Ghosthunter reads it directly.
@@ -371,6 +396,72 @@ for the full threat model.
 
 ---
 
+## FAQ
+
+**Will Ghosthunter touch my cloud?**
+Not in paranoid mode (the default). It prints proposed read-only commands,
+you run them in your own terminal, you paste the output back. Active mode
+is opt-in, sandbox-only, and still passes every command through the
+7-layer validator before execution.
+
+**How is this different from a FinOps SaaS like Vantage or CloudHealth?**
+Those tools auto-optimize. Ghosthunter investigates. They want admin
+keys; Ghosthunter wants a CSV. They're closed-source SaaS; Ghosthunter
+is MIT-licensed CLI you can audit line-by-line. Use both if you have
+budget. Use Ghosthunter if you don't, or if you can't give your vendor
+admin access.
+
+**Why open source?**
+We're a security practice (MatrixGard). Black-box "AI" tools that touch
+production cloud aren't a fit for that worldview. Verifiability matters.
+
+**Do you store my billing data?**
+Advisor mode keeps everything on your machine. No telemetry, no upload,
+no analytics. Active mode also runs locally — it queries your cloud
+directly with credentials you control. Audit logs land in
+`~/.ghosthunter/audit.log` for your own review.
+
+**What clouds are supported?**
+GCP and AWS today. Azure provider is planned for v1.2. The provider
+abstraction (`src/ghosthunter/providers/base.py`) accepts community PRs.
+
+**Can I use my own Anthropic API key?**
+Yes — Ghosthunter reads `ANTHROPIC_API_KEY` from your env. Per-investigation
+budget caps (15 commands / $1 / 10 min) keep blast radius small.
+
+**How fast can I run my first investigation?**
+With `pip install ghosthunter` + `ghosthunter demo` — about 30 seconds.
+With your own GCP / AWS billing export — about 5 minutes including
+the export download.
+
+**Is there a paid version?**
+The CLI is free forever, MIT-licensed. If you want a manual audit
+walked-through by a human (the team that built Ghosthunter), see
+[matrixgard.com](https://matrixgard.com) — first 60-minute audit is
+free under NDA.
+
+**How do I report a security issue?**
+See [SECURITY.md](SECURITY.md). Private vuln reporting via GitHub
+Security Advisories.
+
+**What's the roadmap?**
+See the [Roadmap](#roadmap) section. AWS provider, Azure provider,
+streaming Opus responses, multi-account AWS Organizations, autonomous
+mode with strict guardrails.
+
+---
+
 ## License
 
 See [LICENSE](LICENSE).
+
+---
+
+## Built by MatrixGard
+
+Ghosthunter is built and maintained by [MatrixGard](https://matrixgard.com)
+— a fractional DevSecOps practice for pre-seed and seed startups.
+
+If you'd rather hire a human to investigate your cloud bill alongside
+the tool, the first 60-minute audit is free under NDA. Get in touch at
+[matrixgard.com](https://matrixgard.com).

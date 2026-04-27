@@ -2,13 +2,13 @@
 name = "ghosthunter"
 version = "1.0.6"
 description = "Investigate WHY your cloud costs spiked — dual-model (Claude Opus + Sonnet) root-cause analysis for GCP and AWS."
-authors = ["matrixgard-Ghosthunter"]
-maintainers = ["matrixgard-Ghosthunter"]
+authors = ["MatrixGard <avinash@matrixgard.com>"]
+maintainers = ["MatrixGard <avinash@matrixgard.com>"]
 license = "MIT"
 readme = "README.md"
-homepage = "https://github.com/matrixgard/ghosthunter"
-repository = "https://github.com/matrixgard/ghosthunter"
-documentation = "https://github.com/matrixgard/ghosthunter#readme"
+homepage = "https://github.com/avinash-matrixgard/ghosthunter"
+repository = "https://github.com/avinash-matrixgard/ghosthunter"
+documentation = "https://github.com/avinash-matrixgard/ghosthunter#readme"
 keywords = [
     "finops",
     "cloud-cost",
@@ -40,9 +40,9 @@ classifiers = [
 packages = [{include = "ghosthunter", from = "src"}]
 
 [tool.poetry.urls]
-"Bug Tracker" = "https://github.com/matrixgard/ghosthunter/issues"
-"Changelog" = "https://github.com/matrixgard/ghosthunter/blob/main/CHANGELOG.md"
-"Security Policy" = "https://github.com/matrixgard/ghosthunter/blob/main/SECURITY.md"
+"Bug Tracker" = "https://github.com/avinash-matrixgard/ghosthunter/issues"
+"Changelog" = "https://github.com/avinash-matrixgard/ghosthunter/blob/main/CHANGELOG.md"
+"Security Policy" = "https://github.com/avinash-matrixgard/ghosthunter/blob/main/SECURITY.md"
 
 [tool.poetry.dependencies]
 python = "^3.12"
