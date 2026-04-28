@@ -14,7 +14,9 @@ investigation over your cloud billing data. **Supports GCP and AWS.**
 Security is enforced in code through a 7-layer validator — the LLM
 cannot run anything the allowlist does not permit.
 
-<!-- DEMO_GIF_HERE — Asciinema or animated GIF of `ghosthunter advisor` running on a redacted billing CSV. Reserved slot, populate before launch. -->
+[![Watch Ghosthunter investigate a 875% GCP cost spike — paranoid mode, no cloud credentials](https://asciinema.org/a/ziTmoXZDGeDAcd4h.svg)](https://asciinema.org/a/ziTmoXZDGeDAcd4h)
+
+> *Paranoid mode in 30 seconds — no cloud access, just a billing CSV. Click the image to watch.*
 
 ---
 
@@ -106,6 +108,10 @@ ghosthunter demo --provider=gcp
 
 Replays a bundled investigation end-to-end with no API calls and no
 cloud access. Takes ~30 seconds.
+
+[![Watch the AWS NAT-gateway runaway scenario](https://asciinema.org/a/koGFlHif2scPD3rP.svg)](https://asciinema.org/a/koGFlHif2scPD3rP)
+
+> *Same paranoid mode, AWS Cost Explorer CSV. Click to watch.*
 
 **Bundled scenarios:**
 - **GCP**: `dns_cache_bypass`, `nat_egress_runaway`, `bigquery_full_scan`,
