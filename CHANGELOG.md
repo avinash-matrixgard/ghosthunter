@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.7] - 2026-04-28
+
+### Changed
+- **License: MIT → AGPL-3.0-or-later.** Going forward, Ghost-hunter is licensed under the GNU Affero General Public License v3.0 or later. This protects against the open-source SaaS arbitrage pattern (a third party hosting a fork as a paid service without contributing back) while keeping the project fully OSI-approved open source. Internal use, individual use, and modifications that are not hosted publicly are unaffected. Versions at or before v1.0.6 remain available under MIT terms. See `LICENSE_HISTORY.md` for the full rationale.
+- **Trademark declaration.** "Ghost-hunter" is now declared as a trademark of MatrixGard via common-law usage. See `TRADEMARK.md` and `NOTICE`. Forks must rebrand. The AGPL license grants no trademark rights — this is consistent with how Linux®, Mozilla®, Kubernetes®, MongoDB®, Sentry®, Plausible®, Grafana® handle their respective marks.
+
+### Added
+- `NOTICE` file at repository root declaring copyright + trademark + license.
+- `TRADEMARK.md` documenting the trademark policy, what's permitted, and what requires permission.
+- `LICENSE_HISTORY.md` documenting the MIT → AGPL-3.0 transition and rationale.
+- `PRIOR_ART.md` documenting the original architectural decisions (dual-model split, 7-layer validator, paranoid mode, demo scenarios) with public timestamps.
+- `LICENSE.MIT.original` preserves the original MIT license text for reference.
+
+### PyPI metadata
+- License classifier updated from `MIT License` to `GNU Affero General Public License v3 or later (AGPLv3+)`.
+- Project license field updated to `AGPL-3.0-or-later` (SPDX identifier).
+
 ## [1.0.6] - 2026-04-17
 
 ### Added

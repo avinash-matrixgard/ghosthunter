@@ -1,10 +1,10 @@
 [tool.poetry]
 name = "ghosthunter"
-version = "1.0.6"
+version = "1.0.7"
 description = "Investigate WHY your cloud costs spiked — dual-model (Claude Opus + Sonnet) root-cause analysis for GCP and AWS."
 authors = ["MatrixGard <avinash@matrixgard.com>"]
 maintainers = ["MatrixGard <avinash@matrixgard.com>"]
-license = "MIT"
+license = "AGPL-3.0-or-later"
 readme = "README.md"
 homepage = "https://github.com/avinash-matrixgard/ghosthunter"
 repository = "https://github.com/avinash-matrixgard/ghosthunter"
@@ -27,7 +27,7 @@ classifiers = [
     "Environment :: Console",
     "Intended Audience :: System Administrators",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
+    "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
     "Operating System :: POSIX :: Linux",
     "Operating System :: MacOS :: MacOS X",
     "Programming Language :: Python :: 3",

@@ -1,7 +1,7 @@
-# Ghosthunter
+# Ghost-hunter™
 
 [![Python](https://img.shields.io/badge/python-3.12%2B-blue?logo=python&logoColor=white)](https://www.python.org/)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![License](https://img.shields.io/badge/license-AGPL--3.0--or--later-blue.svg)](LICENSE)
 [![Tests](https://img.shields.io/badge/tests-1000%2B-brightgreen.svg)](tests/)
 [![Providers](https://img.shields.io/badge/providers-GCP%20%7C%20AWS-orange.svg)](README.md#-providers)
 [![FOCUS 1.0](https://img.shields.io/badge/FOCUS-1.0-blueviolet.svg)](https://focus.finops.org/)
