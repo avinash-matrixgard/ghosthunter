@@ -5,6 +5,7 @@
 [![Tests](https://img.shields.io/badge/tests-1000%2B-brightgreen.svg)](tests/)
 [![Providers](https://img.shields.io/badge/providers-GCP%20%7C%20AWS-orange.svg)](README.md#-providers)
 [![FOCUS 1.0](https://img.shields.io/badge/FOCUS-1.0-blueviolet.svg)](https://focus.finops.org/)
+[![Status: looking for adopters](https://img.shields.io/badge/status-looking_for_adopters-ff9500.svg)](#-early-adopter-mode--be-the-first-10)
 
 Investigate **why** your cloud costs spiked, not just what changed.
 
@@ -17,6 +18,29 @@ cannot run anything the allowlist does not permit.
 ![Ghosthunter investigating a 875% GCP cost spike in paranoid mode — no cloud credentials, just a billing CSV](https://raw.githubusercontent.com/avinash-matrixgard/ghosthunter/main/docs/demo-paranoid-gcp.gif)
 
 > *Paranoid mode — no cloud access, just a billing CSV. Hypotheses with confidence bars, proposed read-only commands, you stay in control.*
+
+---
+
+## 🧪 Early adopter mode — be the first 10
+
+> [!IMPORTANT]
+> Ghosthunter shipped **v1.0.6 to PyPI on April 27, 2026.**
+>
+> It's been hammered against bundled demo scenarios, synthetic billing data, and a 1,000+ test suite. **It has not yet been run against production cloud accounts at scale** — and we're not going to pretend otherwise.
+>
+> **Paranoid mode is risk-free** by construction (it never touches your cloud — just reads a billing CSV and prints commands you run yourself). Run it on a real billing export and tell us what worked, what broke, what surprised you.
+>
+> **What we'll do for the first 10 reporters:**
+> - 🚀 Reply within 24 hours
+> - 🤝 Walk through your investigation alongside you (free, NDA on request)
+> - 🐛 Fix any reproducible bug you hit, fast
+> - 🏆 Credit you in CHANGELOG and on [matrixgard.com](https://matrixgard.com)
+>
+> **How to reach us:**
+> - 📬 [Open an issue](https://github.com/avinash-matrixgard/ghosthunter/issues/new)
+> - 💌 Email Nash directly — `avinash@matrixgard.com`
+>
+> *Built in the open. Imperfect on purpose. Looking for the first 10.*
 
 ---
 
