@@ -1,0 +1,94 @@
+{
+  "$schema": "https://mintlify.com/schema.json",
+  "name": "Ghost-hunter",
+  "logo": {
+    "light": "/logo/light.svg",
+    "dark": "/logo/dark.svg",
+    "href": "https://matrixgard.com"
+  },
+  "favicon": "/favicon.png",
+  "colors": {
+    "primary": "#FF7A1A",
+    "light": "#FFA15C",
+    "dark": "#262726",
+    "background": {
+      "light": "#FFFFFF",
+      "dark": "#1A1A1A"
+    }
+  },
+  "topbarLinks": [
+    {
+      "name": "GitHub",
+      "url": "https://github.com/avinash-matrixgard/ghosthunter"
+    }
+  ],
+  "topbarCtaButton": {
+    "name": "Free audit",
+    "url": "https://matrixgard.com/?checklist=open"
+  },
+  "anchors": [
+    {
+      "name": "PyPI",
+      "icon": "python",
+      "url": "https://pypi.org/project/ghosthunter/"
+    },
+    {
+      "name": "Issues",
+      "icon": "bug",
+      "url": "https://github.com/avinash-matrixgard/ghosthunter/issues"
+    },
+    {
+      "name": "MatrixGard",
+      "icon": "shield-halved",
+      "url": "https://matrixgard.com"
+    }
+  ],
+  "navigation": [
+    {
+      "group": "Get Started",
+      "pages": [
+        "introduction",
+        "quickstart",
+        "installation"
+      ]
+    },
+    {
+      "group": "Modes",
+      "pages": [
+        "modes/paranoid",
+        "modes/active",
+        "modes/demo",
+        "modes/audit"
+      ]
+    },
+    {
+      "group": "Providers",
+      "pages": [
+        "providers/gcp",
+        "providers/aws"
+      ]
+    },
+    {
+      "group": "Concepts",
+      "pages": [
+        "concepts/dual-model",
+        "concepts/validator",
+        "concepts/severity",
+        "concepts/focus"
+      ]
+    },
+    {
+      "group": "Legal",
+      "pages": [
+        "legal/license",
+        "legal/trademark",
+        "legal/disclaimer"
+      ]
+    }
+  ],
+  "footerSocials": {
+    "github": "https://github.com/avinash-matrixgard/ghosthunter",
+    "linkedin": "https://www.linkedin.com/company/matrixgard",
+    "website": "https://matrixgard.com"
+  }
+}

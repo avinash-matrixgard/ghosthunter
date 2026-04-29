@@ -1,0 +1,58 @@
+---
+title: "Installation"
+description: "Pick the install flavor that matches the mode you'll run."
+---
+
+Ghost-hunter is a Python 3.12+ CLI distributed via PyPI. The core install is paranoid-mode only — no cloud SDKs, no credentials, nothing to misconfigure. Active mode pulls provider SDKs as optional extras.
+
+## Core (paranoid mode)
+
+```bash
+pip install ghosthunter
+```
+
+This is the default install. It can read billing CSVs and reason over them — it cannot reach any cloud.
+
+## Active-mode extras
+
+<CodeGroup>
+```bash GCP
+pip install 'ghosthunter[gcp]'
+```
+
+```bash AWS
+pip install 'ghosthunter[aws]'
+```
+
+```bash Both
+pip install 'ghosthunter[all]'
+```
+</CodeGroup>
+
+GCP extras pull `google-cloud-bigquery` and shell out to `gcloud`. AWS extras pull `boto3` for Cost Explorer.
+
+## Verify
+
+```bash
+ghosthunter --version
+ghosthunter doctor
+```
+
+`doctor` checks Python version, Anthropic key presence, and (if installed) cloud SDK reachability.
+
+## Upgrade
+
+```bash
+pip install --upgrade ghosthunter
+```
+
+Ghost-hunter follows semver. Breaking changes ship in major versions only and are flagged in the [CHANGELOG](https://github.com/avinash-matrixgard/ghosthunter/blob/main/CHANGELOG.md).
+
+## Uninstall
+
+```bash
+pip uninstall ghosthunter
+rm -rf ~/.ghosthunter
+```
+
+The second command removes local audit logs and any saved active-mode config.

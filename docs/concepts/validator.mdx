@@ -1,0 +1,46 @@
+---
+title: "The 7-layer validator"
+description: "Why the LLM cannot run anything the allowlist does not permit."
+---
+
+The single most important property of Ghost-hunter is that **the LLM cannot break out of the allowlist**. Safety is enforced in code, not in prompts. Even if Opus is jailbroken, the validator rejects unsafe commands before they execute.
+
+Every proposed command passes through seven layers in order. Any layer can reject. Rejected commands never run — they are returned to the LLM as a structured error so it can propose a different one.
+
+## The seven layers
+
+<Steps>
+  <Step title="1. Shell parse">
+    Tokenize as a POSIX shell command. Reject anything that does not parse cleanly (no shell metacharacters, no command substitution, no pipelines).
+  </Step>
+  <Step title="2. Binary check">
+    The first token must be `gcloud`, `bq`, `aws`, or another explicitly allowlisted binary.
+  </Step>
+  <Step title="3. Subcommand allowlist">
+    The full `binary subcommand` pair must be in the static allowlist (`gcloud compute instances list`, `aws ec2 describe-instances`, etc).
+  </Step>
+  <Step title="4. Flag whitelist">
+    Every flag must be allowlisted for that subcommand. Unknown flags reject.
+  </Step>
+  <Step title="5. Argument shape">
+    Arguments must match the expected shape (e.g. project IDs, ARNs, regions). Free-form strings reject unless explicitly permitted.
+  </Step>
+  <Step title="6. Mutation check">
+    Reject any verb in the rough class of `create`, `delete`, `update`, `set`, `apply`, `enable`, `disable`. Belt-and-braces — the allowlist already excludes these, but the verb check catches new subcommands.
+  </Step>
+  <Step title="7. Cost check">
+    Reject queries with unbounded cost (e.g. `bq query` without a `WHERE` clause that bounds rows scanned).
+  </Step>
+</Steps>
+
+## What this guarantees
+
+- **No mutating action is possible**, even with admin credentials.
+- **No command substitution, no shell injection.** Commands are executed via `subprocess` with `shell=False`.
+- **The LLM cannot bypass the validator.** It is not a tool the LLM can choose to skip — it is the only path to execution.
+
+## Audit
+
+Every accept/reject decision is logged to `~/.ghosthunter/audit.log` with the input command, the layer that decided, and the timestamp. See [audit mode](/modes/audit).
+
+The validator spec is in the repo at `docs/internal/fast-reject-spec.md` and `docs/internal/gcp-allowlist-spec.md`.
