@@ -1,0 +1,24 @@
+---
+title: "FOCUS 1.0"
+description: "Why Ghost-hunter speaks the FinOps Open Cost & Usage Specification."
+---
+
+Ghost-hunter normalizes both GCP and AWS billing data to [FOCUS 1.0](https://focus.finops.org/), the FinOps Foundation's open billing schema. This is why the same investigation logic works across providers.
+
+## What FOCUS gives us
+
+A common set of column names — `BilledCost`, `EffectiveCost`, `ServiceName`, `ChargeCategory`, `RegionId`, etc — that mean the same thing whether the source is GCP BigQuery export or AWS CUR.
+
+## Mapping
+
+| Provider | Source | Mapping |
+| --- | --- | --- |
+| GCP | BigQuery billing export v1 | Native FOCUS columns where available; computed otherwise. |
+| AWS | Cost & Usage Report (CUR 2.0) | Native FOCUS columns. |
+| AWS | Cost Explorer API | Mapped at runtime from `GetCostAndUsage` response. |
+
+## Why you should care
+
+If you switch clouds (or run multi-cloud), Ghost-hunter's hypotheses transfer. "Egress dominates the bill" reads the same on both. So do the test fixtures — same FOCUS-shaped CSVs, swap the provider flag.
+
+The mapping logic lives in `ghosthunter/billing/focus.py` and is covered by the test suite.
