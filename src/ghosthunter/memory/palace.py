@@ -272,9 +272,20 @@ class PalaceClient:
         hall: str = "facts",
         source: str | None = None,
     ) -> bool:
-        """Store a memory. Returns True on success, False if no-op/failure."""
+        """Store a memory. Returns True on success, False if no-op/failure.
+
+        ``content`` passes through the secrets redactor before storage
+        (per ghosthunter#3, Apr 29 2026 audit). Palace memories are
+        long-lived and replayed across investigations — a leaked token
+        in a stored conclusion would persist indefinitely otherwise.
+        """
         if not is_available() or not content.strip():
             return False
+        # Lazy import keeps the security module out of the palace's
+        # critical-path init.
+        from ghosthunter.security.secrets_redactor import redact_secrets
+
+        content = redact_secrets(content).redacted
         try:
             return asyncio.run(self._remember_once(content, wing, room, hall, source))
         except Exception:
