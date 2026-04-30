@@ -59,6 +59,10 @@ try:
     )
 except ImportError:  # pragma: no cover
     AdvisorAborted = AdvisorNote = AdvisorSkipped = None  # type: ignore
+from ghosthunter.security.prompt_sanitizer import (
+    sanitize_for_prompt,
+    wrap_as_untrusted_output,
+)
 from ghosthunter.security.validator import SecurityValidator, ValidationResult
 
 
@@ -628,16 +632,37 @@ def _build_initial_prompt(spike: CostSpike, additional_context: str | None = Non
 
 
 def _format_for_compression(result: CommandResult) -> str:
+    """Format a CommandResult for the compression LLM with prompt-injection defense.
+
+    Pasted command output is untrusted (per ghosthunter#5, Apr 29 2026 audit).
+    Two layers of defense before the text reaches Sonnet:
+
+      1. ``sanitize_for_prompt`` strips known prompt-injection markers
+         ("ignore previous instructions", role-redefinition phrases, etc).
+      2. ``wrap_as_untrusted_output`` wraps the result in a defensive
+         ``<command_output>`` frame telling the LLM not to follow embedded
+         instructions.
+
+    Both layers are best-effort. The deterministic command validator
+    (Layers 1–4) still holds regardless — pasted output cannot be tricked
+    into executing dangerous commands. This defense exists to prevent
+    misdirected investigations (wasted budget on bad hypotheses).
+    """
+    sanitized_stdout = sanitize_for_prompt(result.stdout).sanitized
+    sanitized_stderr = sanitize_for_prompt(result.stderr).sanitized
+
     parts = [
         f"exit_code: {result.exit_code}",
         f"duration_seconds: {result.duration_seconds:.2f}",
     ]
     if result.truncated:
         parts.append("note: stdout was truncated by the sandbox")
-    if result.stderr.strip():
-        parts.append(f"stderr:\n{result.stderr}")
-    parts.append(f"stdout:\n{result.stdout}")
-    return "\n\n".join(parts)
+    if sanitized_stderr.strip():
+        parts.append(f"stderr:\n{sanitized_stderr}")
+    parts.append(f"stdout:\n{sanitized_stdout}")
+
+    inner = "\n\n".join(parts)
+    return wrap_as_untrusted_output(inner)
 
 
 async def _default_auto_reject(_: PendingCommand) -> ApprovalDecision:

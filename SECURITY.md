@@ -111,6 +111,18 @@ please report it.
    waste your time and budget. Don't paste output from untrusted
    sources.
 
+   **Mitigation in v1.0.7:** the most common injection markers
+   ("ignore previous instructions", role-overrides, `<system>` /
+   `<admin>` tags, "new instructions:", etc) are stripped from
+   command output before the prompt is built (see
+   `ghosthunter/security/prompt_sanitizer.py`). The output is also
+   wrapped in a `<command_output>` defensive frame instructing the
+   LLM to treat the contents as untrusted data, not instructions.
+   This is best-effort, not absolute — a novel injection shape we
+   haven't seen will still get through. Treat investigation
+   conclusions as advisory, not authoritative, especially when
+   working from logs you don't fully control.
+
 2. **Secrets in pasted output persist to disk.** If you paste command
    output that contains secrets (an env dump, a config file with
    credentials, a log line with a session token), those secrets are
