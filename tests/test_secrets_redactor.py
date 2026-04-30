@@ -23,13 +23,13 @@ from ghosthunter.security.secrets_redactor import (
 # ---------------------------------------------------------------------------
 class TestAWSKeys:
     def test_redacts_aws_access_key(self):
-        out = redact_secrets("found AKIAIOSFODNN7EXAMPLE in the env dump")
+        out = redact_secrets("found AKIATESTFIXTUREXYZ12 in the env dump")
         assert "AKIA" not in out.redacted
         assert "[REDACTED:aws_access_key]" in out.redacted
         assert out.redactions_by_pattern.get("aws_access_key") == 1
 
     def test_redacts_aws_temp_access_key(self):
-        out = redact_secrets("session token: ASIAY34FZKBOKMUTVV7A")
+        out = redact_secrets("session token: ASIATESTFIXTUREABC56")
         assert "ASIA" not in out.redacted
         assert "[REDACTED:aws_temp_access_key]" in out.redacted
 
@@ -179,7 +179,7 @@ class TestNoFalsePositives:
 class TestMultipleSecrets:
     def test_redacts_multiple_distinct_credentials(self):
         text = (
-            "AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE\n"
+            "AWS_ACCESS_KEY_ID=AKIATESTFIXTUREXYZ12\n"
             "GH_TOKEN=ghp_" + "Z" * 36 + "\n"
             "Authorization: Bearer abcdefghijklmn1234567890\n"
         )
@@ -197,7 +197,7 @@ class TestRedactDict:
     def test_redacts_string_values(self):
         entry = {
             "timestamp": "2026-04-30T05:00:00",
-            "conclusion": "Found AKIAIOSFODNN7EXAMPLE in env dump",
+            "conclusion": "Found AKIATESTFIXTUREXYZ12 in env dump",
             "succeeded": True,
         }
         out, counts = redact_dict(entry)
@@ -217,13 +217,13 @@ class TestRedactDict:
         assert counts.get("bearer_token") == 1
 
     def test_recursive_into_list(self):
-        entry = {"hypotheses": ["safe one", "AKIAIOSFODNN7EXAMPLE in here"]}
+        entry = {"hypotheses": ["safe one", "AKIATESTFIXTUREXYZ12 in here"]}
         out, counts = redact_dict(entry)
         assert "AKIA" not in out["hypotheses"][1]
         assert out["hypotheses"][0] == "safe one"
 
     def test_does_not_mutate_input(self):
-        entry = {"conclusion": "AKIAIOSFODNN7EXAMPLE leaked"}
+        entry = {"conclusion": "AKIATESTFIXTUREXYZ12 leaked"}
         original_value = entry["conclusion"]
         out, _ = redact_dict(entry)
         assert entry["conclusion"] == original_value  # unchanged
