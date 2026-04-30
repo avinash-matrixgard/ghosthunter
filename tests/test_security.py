@@ -291,6 +291,39 @@ class TestPipeValidation:
     def test_blocks_python_pipe(self, validator):
         assert not validator.is_allowed("gcloud compute instances list | python").allowed
 
+    # awk family — added in v1.0.7 per ghosthunter#4 (Apr 29 2026 audit).
+    # Previously `^awk(\s+.+)?$` accepted awk with any args, which left
+    # awk's `system()` / `getline` / `exec()` builtins reachable in theory.
+    # Since v1.0.7 awk is in BLOCKED_PIPE_TARGETS — closes the entire
+    # surface in one move.
+    def test_blocks_plain_awk_pipe(self, validator):
+        assert not validator.is_allowed(
+            "gcloud compute instances list | awk '{print $1}'"
+        ).allowed
+
+    def test_blocks_awk_system_call(self, validator):
+        # The audit-flagged shape: awk shelling out via system().
+        assert not validator.is_allowed(
+            "gcloud logging read 'x' | awk 'BEGIN{system(\"env\")}'"
+        ).allowed
+
+    def test_blocks_awk_getline_command(self, validator):
+        # awk's `getline` can read from external commands — also blocked.
+        assert not validator.is_allowed(
+            "gcloud compute instances list | awk '{cmd=\"ls\"; cmd | getline line}'"
+        ).allowed
+
+    def test_blocks_awk_exec_call(self, validator):
+        assert not validator.is_allowed(
+            "gcloud compute instances list | awk 'BEGIN{exec(\"cat\")}'"
+        ).allowed
+
+    def test_blocks_bare_awk(self, validator):
+        # Even bare `awk` — no exception for the simplest form.
+        assert not validator.is_allowed(
+            "gcloud compute instances list | awk"
+        ).allowed
+
 
 # ---------------------------------------------------------------------------
 # Layer 4: bq query SELECT-only enforcement

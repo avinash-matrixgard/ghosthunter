@@ -14,7 +14,11 @@ SAFE_PIPE_TARGETS: list[str] = [
     r"^tail(\s+-?\d+)?$",
     r"^grep(\s+-[ivEclnH]+)?(\s+.+)?$",
     r"^cut(\s+.+)?$",
-    r"^awk(\s+.+)?$",
+    # awk REMOVED in v1.0.7 — the previous pattern `^awk(\s+.+)?$` accepted
+    # any awk arguments, which left awk's `system()`, `getline`, and `exec()`
+    # builtins reachable in theory. The Apr 29 2026 audit flagged this as a
+    # theoretical-severity gap. Nothing in our investigator paths needs awk;
+    # grep/cut/jq cover the legitimate use cases. See ghosthunter#4.
     r"^tr(\s+.+)?$",
     r"^jq(\s+-[rsc]+)?(\s+.+)?$",
 ]
@@ -23,6 +27,10 @@ _COMPILED = [re.compile(p) for p in SAFE_PIPE_TARGETS]
 
 # Explicitly forbidden pipe targets — listed for clarity even though
 # anything not in SAFE_PIPE_TARGETS is rejected by default.
+#
+# `awk` is in this set as of v1.0.7. Belt-and-braces: even if a future
+# contributor re-adds an awk pattern to SAFE_PIPE_TARGETS, the blocklist
+# check in validate_pipes() runs first and catches it.
 BLOCKED_PIPE_TARGETS = {
     "curl",
     "wget",
@@ -42,6 +50,7 @@ BLOCKED_PIPE_TARGETS = {
     "ssh",
     "scp",
     "eval",
+    "awk",
 }
 
 

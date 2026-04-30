@@ -306,7 +306,7 @@ GCP_REASONER_RULES = """## COMMAND RULES (NON-NEGOTIABLE — security layers wil
 
 1. ONE command per turn. NEVER chain with `&&`, `;`, or `||`.
 2. Only safe pipes: `head`, `tail`, `wc`, `sort`, `uniq`, `grep`, `cut`,
-   `awk`, `tr`, `jq`. Anything else gets blocked.
+   `tr`, `jq`. Anything else gets blocked.
 3. Read-only only: gcloud, bq, gsutil. No `delete`, `create`, `update`,
    `set-iam-policy`, etc. The security layer will reject destructive verbs.
 4. `bq query` must be SELECT only.

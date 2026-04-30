@@ -493,7 +493,7 @@ AWS_REASONER_RULES = """## COMMAND RULES (AWS — NON-NEGOTIABLE — security la
 
 1. ONE command per turn. NEVER chain with `&&`, `;`, or `||`.
 2. Only safe pipes: `head`, `tail`, `wc`, `sort`, `uniq`, `grep`, `cut`,
-   `awk`, `tr`, `jq`. Anything else gets blocked.
+   `tr`, `jq`. Anything else gets blocked.
 3. CLI is `aws` only. Read-only verbs: `describe-*`, `list-*`, `get-*`.
    FORBIDDEN verbs (blocked by security layer):
      create-, delete-, update-, modify-, put-, start-, run-, terminate-,
