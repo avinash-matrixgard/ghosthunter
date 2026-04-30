@@ -297,9 +297,7 @@ class TestPipeValidation:
     # Since v1.0.7 awk is in BLOCKED_PIPE_TARGETS — closes the entire
     # surface in one move.
     def test_blocks_plain_awk_pipe(self, validator):
-        assert not validator.is_allowed(
-            "gcloud compute instances list | awk '{print $1}'"
-        ).allowed
+        assert not validator.is_allowed("gcloud compute instances list | awk '{print $1}'").allowed
 
     def test_blocks_awk_system_call(self, validator):
         # The audit-flagged shape: awk shelling out via system().
@@ -320,9 +318,7 @@ class TestPipeValidation:
 
     def test_blocks_bare_awk(self, validator):
         # Even bare `awk` — no exception for the simplest form.
-        assert not validator.is_allowed(
-            "gcloud compute instances list | awk"
-        ).allowed
+        assert not validator.is_allowed("gcloud compute instances list | awk").allowed
 
 
 # ---------------------------------------------------------------------------
