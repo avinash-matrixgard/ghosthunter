@@ -1,4 +1,4 @@
-"""Tests for the pre-prompt injection sanitizer (ghosthunter#5, v1.0.7).
+"""Tests for the pre-prompt injection sanitizer (ghosthunter#5, v1.0.8).
 
 Pasted command output is untrusted. The sanitizer strips the most common
 prompt-injection shapes before the text reaches Claude. These tests are
