@@ -955,7 +955,7 @@ def purge_history(
 
     Use this if you ran v1.0.6 or earlier, pasted command output that may
     have contained secrets, and want to remove that history from disk. The
-    on-disk redaction layer was added in v1.0.7 (ghosthunter#3) — older
+    on-disk redaction layer was added in v1.0.8 (ghosthunter#3) — older
     history was written without redaction and may contain plaintext
     credentials.
 

@@ -7,6 +7,95 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.8] - 2026-04-30
+
+### Security
+
+This release closes all four findings from an external security audit
+on 2026-04-29 (the day after v1.0.6 went public). Three landed as
+deterministic fixes; one was confirmed as by-design and documented.
+The full audit and gap ledger live at
+<https://matrixgard.com/docs/ghosthunter/security-review>.
+
+- **Secrets redacted before any disk write** ([#3]). Pasted command
+  output may contain credentials. Without redaction those secrets
+  persisted in `~/.ghosthunter/audit.log` and the memory palace
+  forever (and replicated via Time Machine, Dropbox, iCloud sync).
+  New module `ghosthunter.security.secrets_redactor` runs a 9-pattern
+  redaction over all on-disk writes — AWS access keys (AKIA / ASIA),
+  GitHub tokens (gh[psru]_), Anthropic / OpenAI API keys, JWTs (with
+  intentional ordering before bearer tokens), bearer tokens, generic
+  auth headers in shell / JSON / YAML forms, GCP service-account
+  `private_key` JSON fields, and standalone PEM-armored private keys.
+  Each match becomes `[REDACTED:<type>]`, preserving log structure.
+- **`ghosthunter purge-history` CLI command** ([#3]). Wipes
+  `~/.ghosthunter/chat_history`, `audit.log`, and `palace/` after a
+  y/N confirmation. `--yes` / `-y` skips the prompt. Migration path
+  for anyone who pasted sensitive output during v1.0.6 (no redaction
+  available then). Configuration files are preserved.
+- **Pre-prompt injection sanitizer + defensive prompt frame** ([#5]).
+  New module `ghosthunter.security.prompt_sanitizer` strips seven
+  known prompt-injection shapes ("ignore previous instructions",
+  role-redefinition phrases, `<system>` / `<admin>` / `<override>`
+  tags, "new instructions:" markers) from command output before the
+  prompt is built. Output is also wrapped in a `<command_output>`
+  defensive frame instructing Claude to treat the contents as
+  untrusted data, not instructions. Best-effort, not absolute — the
+  deterministic Layer 1–4 validator still holds regardless. This
+  defense exists to prevent misdirected investigations, not
+  security-boundary breaches.
+- **`awk` blocked in pipes** ([#4]). The previous safe-pipe regex
+  `^awk(\s+.+)?$` accepted any awk arguments, leaving awk's
+  `system()`, `getline`, and `exec()` builtins reachable in theory.
+  Removed awk from `SAFE_PIPE_TARGETS` and added it to
+  `BLOCKED_PIPE_TARGETS` (belt-and-braces — the blocklist check runs
+  before the safe-list check in `validate_pipes()`). GCP and AWS
+  reasoner prompts updated to drop `awk` from the listed safe pipes
+  so Claude doesn't propose awk pipes the validator then rejects.
+  No legitimate Ghost-hunter use case requires awk; `grep` / `cut` /
+  `jq` cover the same ground.
+- **Layer 6 approval-bias documented** (audit gap 4, by design).
+  Sonnet's semantic check defaults toward approval. The audit
+  confirmed this is intentional — Layer 2's static allowlist is the
+  deterministic gate; Layer 6 explains and double-checks.
+  `SECURITY.md` item 4 already covered this; no code change required.
+
+### Tests
+
+- **+158 security tests** (1097 → 1255 total). Five new awk-blocking
+  tests exercise the audit-flagged shapes (`system()`, `getline`,
+  `exec()` plus plain and bare awk). Twenty-six new tests for the
+  prompt sanitizer cover pattern hits, false-positive guards,
+  multi-pattern counting, the defensive wrapper, registry invariants,
+  and end-to-end integration with `_format_for_compression`.
+  Twenty-nine new tests for the secrets redactor cover all nine
+  credential classes, false-positive guards (resource IDs, IAM
+  emails, UUIDs, normal CSV rows), `redact_dict()` recursion, and
+  pattern-registry invariants.
+- **AWS test fixture strings replaced.** `AKIAIOSFODNN7EXAMPLE` and
+  `ASIAY34FZKBOKMUTVV7A` were AWS's published example keys — they
+  appeared in dozens of public repos' leak-fingerprint databases and
+  triggered GitHub Secret Scanning alerts on every fixture commit.
+  Replaced with synthetic strings (`AKIATESTFIXTUREXYZ12`,
+  `ASIATESTFIXTUREABC56`) that match the redactor regex shape but
+  aren't in any leak database.
+
+### Documentation
+
+- `SECURITY.md` items 1 ("Prompt injection via pasted output") and 2
+  ("Secrets in pasted output persist to disk") updated with v1.0.8
+  mitigation notes — honest about scope. The `chat_history` file is
+  prompt_toolkit-owned and remains outside our redaction path; this
+  is now explicit.
+- New website page <https://matrixgard.com/docs/ghosthunter/security-review>
+  publishes the audit verdict, the four documented gaps, and per-gap
+  fix tracking. Standing rule: every external review of Ghost-hunter
+  is published there in full, with auditor permission.
+
+[#3]: https://github.com/avinash-matrixgard/ghosthunter/issues/3
+[#4]: https://github.com/avinash-matrixgard/ghosthunter/issues/4
+[#5]: https://github.com/avinash-matrixgard/ghosthunter/issues/5
+
 ## [1.0.7] - 2026-04-28
 
 ### Changed

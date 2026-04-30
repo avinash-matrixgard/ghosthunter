@@ -111,7 +111,7 @@ please report it.
    waste your time and budget. Don't paste output from untrusted
    sources.
 
-   **Mitigation in v1.0.7:** the most common injection markers
+   **Mitigation in v1.0.8:** the most common injection markers
    ("ignore previous instructions", role-overrides, `<system>` /
    `<admin>` tags, "new instructions:", etc) are stripped from
    command output before the prompt is built (see
@@ -135,7 +135,7 @@ please report it.
    - `~/.ghosthunter/palace/` — if memory palace is enabled,
      conclusions are indexed.
 
-   **Mitigation in v1.0.7:** automatic redaction now runs on the
+   **Mitigation in v1.0.8:** automatic redaction now runs on the
    audit-log writer and the memory palace's `remember()` path before
    any disk write. Pattern-matched credential shapes (AWS access
    keys, GitHub tokens, Anthropic / OpenAI keys, JWTs, Bearer tokens,

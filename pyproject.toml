@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "ghosthunter"
-version = "1.0.7"
+version = "1.0.8"
 description = "Investigate WHY your cloud costs spiked — dual-model (Claude Opus + Sonnet) root-cause analysis for GCP and AWS."
 authors = ["MatrixGard <avinash@matrixgard.com>"]
 maintainers = ["MatrixGard <avinash@matrixgard.com>"]

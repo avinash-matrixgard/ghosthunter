@@ -1,4 +1,4 @@
-"""Tests for the secrets redactor (ghosthunter#3, v1.0.7).
+"""Tests for the secrets redactor (ghosthunter#3, v1.0.8).
 
 Covers all 8 credential pattern classes with positive (must redact)
 and negative (must NOT redact) cases. False negatives are unacceptable —

@@ -15,7 +15,7 @@ This module is best-effort, not absolute. The patterns below cover the
 most common injection shapes; we wrap the output in a defensive
 ``<command_output>`` frame as a second layer.
 
-Added in v1.0.7 per ghosthunter#5 (Apr 29 2026 audit).
+Added in v1.0.8 per ghosthunter#5 (Apr 29 2026 audit).
 """
 
 from __future__ import annotations

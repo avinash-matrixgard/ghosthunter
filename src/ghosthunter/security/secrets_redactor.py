@@ -14,7 +14,7 @@ The user's mental model in paranoid mode is "Ghost-hunter is read-only and
 safe — I can paste freely" — so we have to make that assumption true at
 the disk-write layer.
 
-Added in v1.0.7 per ghosthunter#3 (Apr 29 2026 audit, the only release-
+Added in v1.0.8 per ghosthunter#3 (Apr 29 2026 audit, the only release-
 blocking finding among four documented gaps).
 
 Patterns target high-confidence credential shapes only. False positives

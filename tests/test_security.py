@@ -291,10 +291,10 @@ class TestPipeValidation:
     def test_blocks_python_pipe(self, validator):
         assert not validator.is_allowed("gcloud compute instances list | python").allowed
 
-    # awk family — added in v1.0.7 per ghosthunter#4 (Apr 29 2026 audit).
+    # awk family — added in v1.0.8 per ghosthunter#4 (Apr 29 2026 audit).
     # Previously `^awk(\s+.+)?$` accepted awk with any args, which left
     # awk's `system()` / `getline` / `exec()` builtins reachable in theory.
-    # Since v1.0.7 awk is in BLOCKED_PIPE_TARGETS — closes the entire
+    # Since v1.0.8 awk is in BLOCKED_PIPE_TARGETS — closes the entire
     # surface in one move.
     def test_blocks_plain_awk_pipe(self, validator):
         assert not validator.is_allowed("gcloud compute instances list | awk '{print $1}'").allowed
