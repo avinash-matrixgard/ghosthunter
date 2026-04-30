@@ -135,9 +135,26 @@ please report it.
    - `~/.ghosthunter/palace/` — if memory palace is enabled,
      conclusions are indexed.
 
-   No automatic redaction is performed. Delete these files (or the
-   relevant entries) if you're concerned. Redacting your pastes
-   before handing them to Ghosthunter is the current mitigation.
+   **Mitigation in v1.0.7:** automatic redaction now runs on the
+   audit-log writer and the memory palace's `remember()` path before
+   any disk write. Pattern-matched credential shapes (AWS access
+   keys, GitHub tokens, Anthropic / OpenAI keys, JWTs, Bearer tokens,
+   generic auth headers, PEM private key blocks, GCP service account
+   private_key fields) are replaced with `[REDACTED:<type>]`
+   placeholders. See `ghosthunter/security/secrets_redactor.py` for
+   the full pattern set.
+
+   Pattern-based redaction is **best-effort, not exhaustive** — a
+   credential format we haven't seen will pass through. The chat
+   history file (`~/.ghosthunter/chat_history`) is currently NOT
+   redacted on write — prompt_toolkit owns that file and our hook
+   doesn't sit on its write path. Backups, Time Machine, and cloud
+   sync still propagate whatever lands on disk.
+
+   **For history written by v1.0.6 or earlier**, run
+   `ghosthunter purge-history` to wipe the chat_history file, the
+   audit log, and the palace storage. Configuration files are
+   preserved. The `--yes` / `-y` flag skips the confirmation prompt.
 
 3. **Social engineering.** A malicious party convincing you to paste
    specific output or install a specific billing file is outside the

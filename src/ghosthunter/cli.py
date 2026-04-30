@@ -47,6 +47,7 @@ from ghosthunter.providers.billing_file import (
     load_spikes_from_files,
 )
 from ghosthunter.providers.gcp import GCPProvider
+from ghosthunter.security.secrets_redactor import redact_dict
 from ghosthunter.security.validator import SecurityValidator
 from ghosthunter.ui import render_command_blocked
 
@@ -946,6 +947,65 @@ def audit(
     console.print(_build_audit_table(lines[-limit:]))
 
 
+@app.command(name="purge-history")
+def purge_history(
+    yes: bool = typer.Option(False, "--yes", "-y", help="Skip confirmation prompt."),
+) -> None:
+    """Wipe local Ghost-hunter history (chat history, audit log, palace).
+
+    Use this if you ran v1.0.6 or earlier, pasted command output that may
+    have contained secrets, and want to remove that history from disk. The
+    on-disk redaction layer was added in v1.0.7 (ghosthunter#3) — older
+    history was written without redaction and may contain plaintext
+    credentials.
+
+    Removes:
+      - ~/.ghosthunter/chat_history       (prompt_toolkit line history)
+      - ~/.ghosthunter/audit.log          (investigation outcome ledger)
+      - ~/.ghosthunter/palace/            (memory palace storage, if present)
+
+    Configuration files (config.toml) are NOT removed.
+    """
+    from pathlib import Path
+
+    home = Path.home() / ".ghosthunter"
+    targets: list[tuple[str, Path]] = [
+        ("chat_history", home / "chat_history"),
+        ("audit.log", home / "audit.log"),
+        ("palace/", home / "palace"),
+    ]
+    existing = [(label, path) for label, path in targets if path.exists()]
+
+    if not existing:
+        console.print("[green]Nothing to purge.[/green] No history files found.")
+        raise typer.Exit(0)
+
+    console.print("[yellow]The following will be permanently deleted:[/yellow]")
+    for label, path in existing:
+        console.print(f"  • {path}  ({label})")
+
+    if not yes:
+        confirm = typer.confirm("\nProceed with deletion?", default=False)
+        if not confirm:
+            console.print("[dim]Aborted.[/dim]")
+            raise typer.Exit(0)
+
+    import shutil
+
+    for label, path in existing:
+        try:
+            if path.is_dir():
+                shutil.rmtree(path)
+            else:
+                path.unlink()
+            console.print(f"  [green]✓[/green] removed {label}")
+        except Exception as exc:
+            console.print(f"  [red]✗[/red] failed to remove {label}: {exc}")
+            raise typer.Exit(1) from exc
+
+    console.print("\n[green]Purge complete.[/green]")
+
+
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
@@ -1387,6 +1447,14 @@ def _render_recommendations(items: list) -> None:
 
 
 def _append_audit_log(result, extra: dict | None = None) -> None:
+    """Append an investigation outcome to ~/.ghosthunter/audit.log.
+
+    All string values pass through ``redact_secrets`` before disk write
+    (per ghosthunter#3, Apr 29 2026 audit). Conclusion text from Opus may
+    quote command-output snippets; if a user pasted billing-related output
+    that included a Bearer token or AWS access key, the audit log would
+    otherwise persist it forever.
+    """
     AUDIT_LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
     entry = {
         "timestamp": datetime.now().isoformat(timespec="seconds"),
@@ -1398,8 +1466,11 @@ def _append_audit_log(result, extra: dict | None = None) -> None:
     }
     if extra:
         entry.update(extra)
+
+    redacted_entry, _redaction_counts = redact_dict(entry)
+
     with AUDIT_LOG_PATH.open("a") as f:
-        f.write(json.dumps(entry) + "\n")
+        f.write(json.dumps(redacted_entry) + "\n")
 
 
 if __name__ == "__main__":
