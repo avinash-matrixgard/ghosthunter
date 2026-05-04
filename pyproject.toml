@@ -53,7 +53,7 @@ python = "^3.12"
 # Typer 0.12 still assumed) — pin typer >=0.15 to pick up the fix.
 anthropic = ">=0.40.0"
 typer = {extras = ["all"], version = ">=0.15.0"}
-rich = ">=13.7.0"
+rich = ">=13.9.4"
 # GCP is the default active-mode provider. Optional in practice — advisor
 # mode (the default) doesn't import google-cloud-* so installs without
 # them work for paranoid-mode users.
