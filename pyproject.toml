@@ -84,7 +84,7 @@ pytest = "^9.0.3"
 # pytest-asyncio < 1.0 has incompatible collector hooks for pytest 9
 # (`'Package' object has no attribute 'obj'`). 1.0+ adds proper support.
 pytest-asyncio = "^1.0.0"
-ruff = "^0.4.0"
+ruff = "^0.15.12"
 
 [tool.poetry.scripts]
 ghosthunter = "ghosthunter.cli:app"
