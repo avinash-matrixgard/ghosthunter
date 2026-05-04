@@ -51,7 +51,7 @@ python = "^3.12"
 # in the venv. Typer <0.15 + Click >=8.3 is a broken pairing (Click 8.3
 # dropped the positional `ctx` arg from Parameter.make_metavar which
 # Typer 0.12 still assumed) — pin typer >=0.15 to pick up the fix.
-anthropic = ">=0.40.0"
+anthropic = ">=0.97.0"
 typer = {extras = ["all"], version = ">=0.15.0"}
 rich = ">=13.7.0"
 # GCP is the default active-mode provider. Optional in practice — advisor
