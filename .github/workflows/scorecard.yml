@@ -4,6 +4,11 @@ on:
   branch_protection_rule:
   schedule:
     - cron: "0 4 * * 1" # weekly Monday 04:00 UTC
+  # On demand. Added 2026-09-23: GitHub had switched this workflow off
+  # (state disabled_inactivity, last run 7 Sep) because the repo saw no
+  # commits for 60 days, and with only a schedule trigger there was no way
+  # to prove it worked again short of waiting for the next Monday.
+  workflow_dispatch:
 
 permissions: read-all
 
